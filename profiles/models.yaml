@@ -1,0 +1,118 @@
+# Perfil de Modelos — agent-foundry
+# ÚNICO lugar donde se declaran modelos concretos por proveedor.
+# Los agentes viven en core/ agnósticos; este archivo los une a un modelo real.
+# Cambiar de modelo/proveedor = editar aquí + tooling/build.sh.
+schema: foundry/profiles/models/v1
+updated: 2026-08-22
+
+# ── 1. Tiers abstractos (capacidad requerida, sin marcas) ──────────────────
+tiers:
+  orchestration:        {desc: Orquestación superior y contexto global}
+  macro_architecture:   {desc: Arquitectura enterprise, System Landscape}
+  patterns_logic:       {desc: Patrones GoF, razonamiento denso}
+  planning_governance:  {desc: Planificación, gobernanza OpenAPI, descomposición}
+  sdd_validation:       {desc: Validación SDD, remediación, curación, QA final}
+  code_volume:          {desc: Ejecución de volumen (implementación, tests, git)}
+  code_heavy:           {desc: Código pesado, refactor, DB, RCA}
+  ui_e2e:               {desc: Pruebas funcionales UI/E2E}
+
+# ── 2. Agente → tier ───────────────────────────────────────────────────────
+# (temperature y permisos viven en permissions.yaml)
+agent_tiers:
+  master-orchestrator:    {tier: orchestration}
+  hyprmind-orchestrator:  {tier: orchestration}
+  hyprmind-deep-thinker:  {tier: patterns_logic}
+  hyprmind-vision-analyst: {tier: orchestration, requires: vision}
+  enterprise-architect:   {tier: macro_architecture}
+  solution-architect:     {tier: patterns_logic}
+  planner:                {tier: planning_governance}
+  api-governance-agent:   {tier: planning_governance}
+  task-decomposer:        {tier: planning_governance}
+  spec-validator:         {tier: sdd_validation, locked: true}
+  enterprise-spec-validator: {tier: sdd_validation}
+  spec-remediator:        {tier: sdd_validation}
+  context-curator:        {tier: sdd_validation}
+  reviewer:               {tier: sdd_validation}
+  security-reviewer:      {tier: sdd_validation}
+  requirements-analyst:   {tier: sdd_validation}
+  final-validation:       {tier: sdd_validation}
+  documentation:          {tier: sdd_validation}
+  executor:               {tier: code_volume}
+  test-architect:         {tier: code_volume}
+  devops-architect:       {tier: code_volume}
+  git-executor:           {tier: code_volume}
+  refactor:               {tier: code_heavy}
+  database-architect:     {tier: code_heavy}
+  bug-diagnostician:      {tier: code_heavy}
+  architect-executor:     {tier: code_heavy}
+  functional-tester-agent: {tier: ui_e2e}
+
+# ── 3. Bindings por proveedor/herramienta ──────────────────────────────────
+providers:
+  opencode:
+    active: true
+    models:
+      luna:
+        id: opencode-go/gpt-5.6-luna
+        status: active
+        context: 1M
+        vision: true
+        notes: Plan Go. Orquestación macro. Latencia LatAm vía US.
+      muse_spark_free:
+        id: opencode/muse-spark-1.2-contributor-free
+        status: active
+        context: 1M
+        cost: free
+        notes: Zen Free. Validación, patrones, curación, docs, review, seguridad.
+      mimo_free:
+        id: opencode/mimo-v2.5-free
+        status: active
+        context: 200k
+        cost: free
+        notes: Zen Free. Ejecución de volumen. Verificar acceso (#40343 en algunas regiones).
+      deepseek_pro:
+        id: opencode-go/deepseek-v4-pro
+        status: active
+        notes: Servidores China (opt-in). Estable. Código pesado.
+      minimax_m3:
+        id: opencode-go/minimax-m3
+        status: active
+        notes: Planning y gobernanza.
+      hy3:
+        id: opencode-go/hy3
+        status: active
+        notes: UI/E2E.
+    tier_bindings:
+      orchestration:       [luna]
+      macro_architecture:  [luna]
+      patterns_logic:      [muse_spark_free, deepseek_pro]
+      planning_governance: [minimax_m3]
+      sdd_validation:      [muse_spark_free]
+      code_volume:         [mimo_free]
+      code_heavy:          [deepseek_pro]
+      ui_e2e:              [hy3]
+    fallbacks:
+      mimo_free:       [minimax_m3]
+      muse_spark_free: [luna]
+      minimax_m3:      [muse_spark_free, hy3]
+      hy3:             [muse_spark_free]
+      luna:            []   # sin degradación; escalar al usuario
+
+  chatgpt:
+    active: false
+    models: {}          # poblar al construir el adapter (Fase 5)
+    tier_bindings: {}
+    fallbacks: {}
+
+  kiro:
+    active: false
+    models: {}          # poblar al construir el adapter (Fase 5)
+    tier_bindings: {}
+    fallbacks: {}
+
+# ── 4. Bloqueados (nunca asignar) ──────────────────────────────────────────
+blocked:
+  - {id: opencode-go/deepseek-v4-flash, reason: ROTO (TCP drop, 403, 400). Rollback 2026-08-17.}
+  - {id: opencode/deepseek-v4-flash-free, reason: 503, respuestas vacías, bucles de compactación.}
+  - {id: opencode-go/qwen3.7-plus, reason: Inestabilidad ~70%, timeouts Cloudflare 524.}
+  - {id: opencode-go/qwen3.6-plus, reason: Legacy. Usar Luna o MiniMax M3.}

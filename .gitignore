@@ -1,0 +1,21 @@
+# Salidas generadas por adapters (se reconstruyen con tooling/build.sh)
+adapters/opencode/out/
+adapters/chatgpt/out/
+adapters/kiro/out/
+
+# Node / Python locales
+node_modules/
+__pycache__/
+*.pyc
+.venv/
+
+# Grafos y caches
+graphify-out/
+.cache/
+
+# Logs
+logs/
+*.log
+
+# Sistema
+.DS_Store

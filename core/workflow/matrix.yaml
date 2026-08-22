@@ -1,0 +1,180 @@
+# Matriz Agente × Fase × Skill — v1 (draft, validar en Fase 7)
+# Fases: 1=requirements 2=planning 3=validation-ia G1=gate-plan 4=decomposition
+#        5=execution 6=quality G2=gate-qa 7=git-ops
+schema: foundry/workflow/matrix/v1
+
+agents:
+  requirements-analyst:
+    role: consultant
+    phases: [1]
+    writes_states: [requirements-discovery]
+    skills: [requirements-gathering, context-pinning]
+
+  planner:
+    role: consultant
+    phases: [2]
+    writes_states: [planning]
+    skills: [spec-driven-development, openapi-first, openapi-standard, restful-standard,
+             hexagonal-architecture, enterprise-architecture-standard, design-patterns-standard]
+
+  solution-architect:
+    role: consultant
+    phases: [2]
+    consults_for: [planner]
+    skills: [design-patterns-standard, hexagonal-architecture, refactor-hexagonal-bridge]
+
+  enterprise-architect:
+    role: consultant
+    phases: [0-init, 2]
+    consults_for: [planner]
+    skills: [enterprise-architecture-standard, workspace-coordination]
+
+  spec-validator:
+    role: validator
+    phases: [3]
+    writes_states: [validator-review, validated-not-executed, revision-needed]
+    skills: [spec-driven-development, code-review-checklist]
+
+  enterprise-spec-validator:
+    role: validator
+    phases: [3]
+    writes_states: [validator-review]
+    skills: [enterprise-architecture-standard, workspace-coordination]
+
+  api-governance-agent:
+    role: validator
+    phases: [3]
+    skills: [api-governance-linter, openapi-standard, restful-standard]
+
+  task-decomposer:
+    role: consultant
+    phases: [4]
+    gate_required: G1
+    writes_states: [decomposition-completed]
+    skills: [spec-driven-development, context-pinning]
+
+  executor:
+    role: worker
+    phases: [5]
+    gate_required: G1
+    reads_states: [awaiting-human-plan-approval, validated-not-executed]
+    writes_states: [in_progress]
+    skills: [springboot-stack, java-stack, kotlin-stack, fastapi-stack, nodejs-stack,
+             golang-stack, react-stack, angular-stack, hexagonal-architecture,
+             repository-dto-patterns, jpa-stack, flyway-migrations, security-standards,
+             keycloak-standard, testing-strategy, pre-flight-check, context-pinning]
+
+  architect-executor:
+    role: worker
+    phases: [5-alt-sin-spec]
+    skills: [hexagonal-architecture, springboot-stack, fastapi-stack, nodejs-stack,
+             react-stack, angular-stack, golang-stack, repository-dto-patterns,
+             testing-strategy, pre-flight-check]
+
+  test-architect:
+    role: consultant
+    phases: [5]
+    skills: [testing-strategy]
+
+  database-architect:
+    role: worker
+    phases: [5]
+    skills: [flyway-migrations, zero-downtime-migrations, postgresql-standard,
+             mysql-standard, oracle-standard, sqlserver-standard, repository-dto-patterns]
+
+  devops-architect:
+    role: worker
+    phases: [5, 7]
+    skills: [docker-standard, observability-standard, code-quality-and-sonarqube]
+
+  refactor:
+    role: worker
+    phases: [5]
+    skills: [refactor-patterns, refactor-hexagonal-bridge, hexagonal-architecture,
+             code-review-checklist]
+
+  documentation:
+    role: worker
+    phases: [5, 7]
+    skills: [documentation-lifecycle, documentation-standards]
+
+  functional-tester-agent:
+    role: worker
+    phases: [6, post-G2-regression]
+    skills: [functional-testing-standard, performance-testing-k6]
+
+  bug-diagnostician:
+    role: validator
+    phases: [cualquier-fase-con-fallo]
+    skills: [root-cause-analysis, bug-fixing-workflow]
+
+  spec-remediator:
+    role: worker
+    phases: [3]
+    writes_results: [fixed-and-awaiting-validation, superseded-finding,
+                     blocked-planner-decision, blocked-user-decision,
+                     blocked-validator-process-bug, blocked-retry-limit]
+    skills: [spec-remediation, spec-driven-development]
+
+  reviewer:
+    role: validator
+    phases: [6]
+    skills: [code-review-checklist, hexagonal-architecture, refactor-patterns]
+
+  security-reviewer:
+    role: validator
+    phases: [6]
+    skills: [security-standards, keycloak-standard]
+
+  final-validation:
+    role: validator
+    phases: [6]
+    gate_produces: G2-input
+    skills: [pre-flight-check, testing-strategy, code-quality-and-sonarqube]
+
+  git-executor:
+    role: worker
+    phases: [1, 7]
+    gate_required: G2-para-promocion
+    exclusive: git
+    skills: [git-ops]
+
+  context-curator:
+    role: consultant
+    phases: [transversal]
+    skills: [context-curation, context-pinning]
+
+  master-orchestrator:
+    role: consultant
+    phases: [transversal]
+    delegates_to: [requirements-analyst, planner, task-decomposer, executor,
+                   test-architect, spec-validator, final-validation, git-executor]
+    skills: [context-curation, context-pinning, eval-ops-agent-benchmarks]
+
+  general:
+    role: guardrail
+    phases: []
+    purpose: bloquear rutas accidentales al subagente general integrado
+
+  hyprmind-orchestrator:
+    role: personal
+    phases: []
+    skills: [hyprmind-delegation-protocol, hyprmind-memory-manager, hyprmind-workspace-manager]
+
+  hyprmind-deep-thinker:
+    role: personal
+    phases: []
+
+  hyprmind-vision-analyst:
+    role: personal
+    phases: []
+
+gates:
+  G1:
+    name: awaiting-human-plan-approval
+    signature: "## Human Plan Approval: approved_by_user"
+    blocks: [task-decomposer, executor, architect-executor]
+  G2:
+    name: awaiting-human-qa-approval
+    signature: "## Human QA Approval: approved_by_user"
+    blocks: [git-executor]

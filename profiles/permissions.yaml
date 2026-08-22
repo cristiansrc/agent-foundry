@@ -1,0 +1,46 @@
+# Permisos y parámetros de ejecución por agente
+# Valores abstractos; cada adapter los mapea a su formato nativo.
+# extraido fielmente de config-ai el 2026-08-22.
+schema: foundry/profiles/permissions/v1
+
+defaults:
+  mode: all
+  edit: deny
+  bash: deny
+
+agents:
+  # ── Workers ──────────────────────────────────────────────────────────────
+  executor:               {edit: allow, bash: allow, temp: 0.15}
+  architect-executor:     {edit: allow, bash: allow, temp: 0.15}
+  database-architect:     {edit: allow, bash: allow, temp: 0.10}
+  devops-architect:       {edit: allow, bash: allow, temp: 0.20}
+  refactor:               {edit: allow, bash: allow, temp: 0.20}
+  documentation:          {edit: allow, bash: deny, temp: 0.25}
+  spec-remediator:        {edit: allow, bash: deny, temp: 0.10}
+  functional-tester-agent: {edit: allow, bash: allow, temp: 0.20}
+  git-executor:           {edit: allow, bash: allow, temp: 0.10}
+
+  # ── Consultants ──────────────────────────────────────────────────────────
+  requirements-analyst:   {edit: allow, bash: deny, temp: 0.30}
+  planner:                {edit: allow, bash: deny, temp: 0.20}
+  solution-architect:     {edit: allow, bash: deny, temp: 0.20}
+  enterprise-architect:   {edit: allow, bash: deny, temp: 0.20}
+  test-architect:         {edit: allow, bash: allow, temp: 0.20}
+  task-decomposer:        {edit: allow, bash: deny, temp: 0.20}
+  context-curator:        {edit: deny, bash: deny, temp: 0.10}
+  master-orchestrator:    {edit: deny, bash: deny, execute: allow, temp: 0.15}
+
+  # ── Validators ───────────────────────────────────────────────────────────
+  spec-validator:         {edit: allow, bash: deny, temp: 0.10}
+  enterprise-spec-validator: {edit: allow, bash: deny, temp: 0.10}
+  api-governance-agent:   {edit: deny, bash: allow, temp: 0.10}
+  bug-diagnostician:      {edit: deny, bash: allow, temp: 0.10}
+  reviewer:               {edit: deny, bash: allow, temp: 0.10}
+  security-reviewer:      {edit: deny, bash: allow, temp: 0.10}
+  final-validation:       {edit: deny, bash: allow, temp: 0.10}
+
+  # ── Guardrails / Personal ────────────────────────────────────────────────
+  general:                {mode: subagent, edit: deny, bash: deny, temp: 0.10}
+  hyprmind-orchestrator:  {temp: 0.80}
+  hyprmind-deep-thinker:  {temp: 0.50}
+  hyprmind-vision-analyst: {temp: 0.20}

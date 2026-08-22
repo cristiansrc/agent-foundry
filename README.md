@@ -49,3 +49,266 @@ tooling/sync.sh           # instala las salidas generadas (~/.config/opencode, e
 ```
 
 *Estado del plan: ver [PLAN.md](PLAN.md).*
+
+<!-- BEGIN:GENERATED-TABLES -->
+
+## Agentes (29)
+
+| Agente | Rol | Descripción |
+|--------|-----|-------------|
+| `hyprmind-deep-thinker` | Personal | Eres el analista profundo de HyprMind. |
+| `hyprmind-orchestrator` | Personal | Eres V.I.E.R.N.E.S., la inteligencia artificial de interfaz táctica y asistencia avanzada para Cris. |
+| `hyprmind-vision-analyst` | Personal | Eres el analista de visión de HyprMind. |
+| `api-governance-agent` | Validator (validador) | Audita contratos OpenAPI para detectar Breaking Changes, verificar compatibilidad hacia atrás (backward compatibility), auditar semver y aplicar linters de API. |
+| `architect-executor` | Worker (obrero) | Implementa tareas complejas y código de arquitectura local cuando NO existe una especificación SDD completa o formal. |
+| `bug-diagnostician` | Validator (validador) | Analiza fallos de QA y producción, examina logs, stack traces e inspecciona el grafo de Graphify para generar un Root Cause Analysis (RCA) detallado antes de implementar arreglos. |
+| `context-curator` | Consultant (consultor) | Filtra y prepara el contexto de alta señal para evitar ruido a los Obreros y gestionar el ciclo de vida del SDD context. |
+| `database-architect` | Worker (obrero) | Diseña y valida esquemas de bases de datos relacionales, migraciones Flyway/Liquibase, índices, modelos DTO/Entidad y estrategias de migración sin inactividad (Zero-Downtime DB Migrations). |
+| `devops-architect` | Worker (obrero) | Especialista en Infraestructura como Codigo, Docker, CI/CD y Observabilidad. |
+| `documentation` | Worker (obrero) | Creates project documentation, README content, API docs, deployment notes, diagrams, and functional documentation. |
+| `enterprise-architect` | Consultant (consultor) | Define el System Landscape, fronteras de microservicios y flujos globales siguiendo `enterprise-architecture-standard`. |
+| `enterprise-spec-validator` | Validator (validador) | Valida la consistencia global del Solution Workspace, contratos inter-servicios, System Landscape y la deuda técnica global. |
+| `executor` | Worker (obrero) | Implementa código a partir de especificaciones SDD aprobadas y descomposiciones de tareas. |
+| `final-validation` | Validator (validador) | Performs final production-readiness validation across specs, implementation, tests, security, documentation, and maintainability. |
+| `functional-tester-agent` | Worker (obrero) | Disena, ejecuta y valida pruebas funcionales y de interfaz de usuario (UI/E2E) en frontends. Automatiza la deteccion, reporte y correccion mecanica de errores. |
+| `general` | Guardrail | Guardrail para llamadas accidentales al subagente general integrado de la herramienta anfitriona. Bloquea validaciones SDD ejecutadas por el agente equivocado. |
+| `git-executor` | Worker (obrero) | Agente exclusivo para operaciones de control de versiones con Git (ramas, commits, checkout, merges, push). |
+| `master-orchestrator` | Consultant (consultor) | Agente Maestro y Orquestador Contextual. Mantiene el contexto de todo el proyecto y delega tareas específicas a subagentes especializados. No realiza modificaciones ni ejecuciones de código directas. |
+| `planner` | Consultant (consultor) | Planifica proyectos web con Spec Driven Development, decisiones de arquitectura, contratos API, restricciones tecnicas y documentacion base del proyecto. |
+| `refactor` | Worker (obrero) | Refactors implemented code for maintainability, readability, modularity, and consistency without changing behavior. |
+| `requirements-analyst` | Consultant (consultor) | Realiza el levantamiento de requerimientos funcionales siguiendo `requirements-gathering`. |
+| `reviewer` | Validator (validador) | Revisa codigo generado para detectar bugs logicos, drift arquitectonico, mantenibilidad, tests faltantes y cumplimiento de specs. |
+| `security-reviewer` | Validator (validador) | Reviews web projects for security risks, OWASP issues, auth/authz flaws, sensitive data handling, and secure architecture. |
+| `solution-architect` | Consultant (consultor) | Elige patrones de diseno siguiendo `design-patterns-standard`. Colabora con `enterprise-architect` para alinear el diseno local con el global. |
+| `spec-remediator` | Worker (obrero) | Corrige hallazgos de validación de forma iterativa siguiendo `spec-remediation`. |
+| `spec-validator` | Validator (validador) | Valida specs SDD contra ambiguedad, inconsistencia, riesgo arquitectonico, restricciones faltantes y readiness de implementacion. |
+| `task-decomposer` | Consultant (consultor) | Breaks validated specs into small, ordered, executable engineering tasks with dependencies and verification steps. |
+| `test-architect` | Consultant (consultor) | Diseña y genera pruebas automatizadas, edge cases, checks de integracion y estrategia de validacion para proyectos web. |
+| `ui-designer` | Consultant (consultor) | Diseña direcciones visuales de UI como artefactos HTML comparables antes de implementar código — clarifica alcance, genera 3-4 direcciones distintas respetando el design system del repo y espera la decisión humana. |
+
+## Skills (73)
+
+### Arquitectura y Metodología
+
+| Skill | Descripción |
+|-------|-------------|
+| `api-governance-linter` | Reglas de auditoría de contratos OpenAPI 3.0/3.1, detección de Breaking Changes y políticas de versión semántica (SemVer) para el agente api-governance-agent. |
+| `design-patterns-standard` | Criterios pragmaticos para aplicar patrones de diseno sin sobreingenieria y respetando boundaries de arquitectura hexagonal. |
+| `enterprise-architecture-standard` | Criterios para macro-arquitectura, system landscape, bounded contexts, integraciones, ownership y workspace multi-repos. |
+| `hexagonal-architecture` | Implementación de Puertos y Adaptadores (Clean Architecture) con dominio puro, boundaries explícitos, estructura de directorios por tecnología y desacoplamiento total de frameworks. |
+| `openapi-first` | Flujo API Design First para mantener specs, OpenAPI, implementación, clientes, tests y copias runtime sincronizados antes de escribir código. |
+| `project-context-files` | Patrón de archivos de contexto jerárquicos (.md) heredado de Claude Code/AGENTS.md — cómo estructurar memoria por capas en repositorios activos para que los agentes hereden contexto correcto sin inflar prompts. |
+| `refactor-hexagonal-bridge` | Skill especializada para la transición de sistemas monolíticos o con lógica dispersa hacia Arquitectura Hexagonal de forma segura. |
+| `refactor-patterns` | Patrones de refactorización segura. |
+| `repository-dto-patterns` | Patrones para separar modelos de dominio, DTOs de transporte, entidades de persistencia, repositories/adapters y mappings entre capas. |
+| `requirements-gathering` | Estándares y estructura para el levantamiento de requerimientos funcionales antes de planificación SDD. |
+| `spec-driven-development` | Ciclo de vida de desarrollo basado en especificaciones (Master Specs e Incrementos). Asegura que el código siempre esté alineado con la documentación, ya sea en proyectos nuevos, nuevas funcionalidades o modificaciones. |
+| `spec-remediation` | Procedimiento para la corrección iterativa de hallazgos en especificaciones SDD. |
+
+### Backend y Lenguajes
+
+| Skill | Descripción |
+|-------|-------------|
+| `fastapi-rest-error-response-standards` | Estandariza respuestas HTTP de error en FastAPI con exception handlers globales, Pydantic v2, codigos estables, seguridad, OpenAPI y tests. |
+| `fastapi-stack` | Estandares y mejores practicas para FastAPI alineados con Arquitectura Hexagonal, OpenAPI, Pydantic v2 y separation of concerns. |
+| `golang-stack` | Estándares de calidad, estructura del proyecto y mejores prácticas de diseño para aplicaciones de Backend en Go / Golang. |
+| `java-stack` |  |
+| `jpa-stack` | Convenciones para Jakarta Persistence/Hibernate en Spring Boot: entidades, repositories, auditoria, soft delete, transacciones, locking y performance. |
+| `kotlin-stack` |  |
+| `nodejs-stack` |  |
+| `openapi-standard` | Convenciones concretas para escribir contratos OpenAPI: version, estructura, schemas, parametros, seguridad, errores, ejemplos y validacion. |
+| `python-stack` | Estándares y mejores prácticas para el desarrollo con Python 2026. |
+| `restful-standard` | Convenciones REST para recursos, metodos HTTP, status codes, paginacion, filtros, versionado, compatibilidad, seguridad e idempotencia. |
+| `spring-cloud-gateway` | Estándares y mejores prácticas para la implementación de API Gateways con Spring Cloud Gateway. |
+| `springboot-java-rest-error-response-standards` | Estandariza respuestas HTTP de error en APIs Spring Boot Java con RestControllerAdvice, ApiErrorResponse, codigos estables, seguridad, OpenAPI y tests. |
+| `springboot-kotlin-rest-error-response-standards` | Estandariza respuestas HTTP de error en APIs Spring Boot Kotlin con RestControllerAdvice, data classes, codigos estables, seguridad, OpenAPI y tests. |
+| `springboot-stack` | Convenciones de Spring Boot 2026 (Virtual Threads, Records, Pattern Matching) y estándares de pruebas JaCoCo. |
+
+### Datos y Mensajería
+
+| Skill | Descripción |
+|-------|-------------|
+| `amazon-sqs-standard` | Mejores prácticas para Amazon SQS (Visibility Timeout, DLQ, Batching, FIFO). |
+| `flyway-migrations` | Gestión de esquemas de base de datos mediante migraciones incrementales con Flyway. Compatible con PostgreSQL, MySQL, Oracle y SQL Server. |
+| `kafka-standard` | Mejores prácticas para Apache Kafka (Particiones, Idempotencia, Schema Registry, EOS). |
+| `mysql-standard` | Estándares y mejores prácticas para el diseño y gestión de bases de datos MySQL. |
+| `oracle-standard` | Estándares y mejores prácticas para el diseño y gestión de bases de datos Oracle. |
+| `postgresql-standard` | Estándares y mejores prácticas para el diseño y gestión de bases de datos PostgreSQL. |
+| `rabbitmq-standard` | Mejores prácticas para RabbitMQ en Arquitectura Hexagonal (Direct/Topic Exchanges, DLQ, Outbox, Idempotencia). |
+| `sqlserver-standard` | Estándares y mejores prácticas para el diseño y gestión de bases de datos SQL Server. |
+| `zero-downtime-migrations` | Patrones de evolución de esquemas relacionales sin tiempo de inactividad utilizando el patrón Expand/Contract, índices en segundo plano y migraciones seguras en Flyway. |
+
+### Frontend y Diseño UI/UX
+
+| Skill | Descripción |
+|-------|-------------|
+| `accessibility-standard` | Auditoría y diseño accesible WCAG 2.2 AA — criterios completos con verificación práctica (teclado, contraste, ARIA, targets táctiles, formularios), herramientas automatizadas y clasificación de severidad para bloquear releases. |
+| `angular-stack` |  |
+| `design-systems` | Descubrimiento, uso y validación de design systems en el código — extraer tokens y componentes existentes para que los diseños nuevos nazcan consistentes con la UI real del producto. |
+| `design-to-code` | Traducción fiel de un artefacto de diseño aprobado (HTML en docs/designs/) a componentes reales del stack destino, con verificación visual automatizada — el puente entre la dirección elegida y el executor. |
+| `frontend-architecture` | Arquitectura limpia para React y Angular. |
+| `minimalist-ui` | Clean editorial-style interfaces. Warm monochrome palette, typographic contrast, flat bento grids, muted pastels. No gradients, no heavy shadows. |
+| `react-stack` |  |
+| `ui-design-exploration` | Protocolo de exploración visual estilo canvas — genera 3-4 direcciones de diseño realmente distintas como artefactos HTML autocontenidos antes de escribir código de producción, con preguntas de clarificación, índice comparativo y decisión humana obligatoria. |
+| `ux-heuristics` | Heurísticas de usabilidad aplicadas — Nielsen accionable, estados de interacción obligatorios, UX writing, formularios y accesibilidad rápida para revisar o diseñar cualquier interfaz. |
+
+### Seguridad y Calidad
+
+| Skill | Descripción |
+|-------|-------------|
+| `bug-fixing-workflow` | Protocolo riguroso para la resolución de errores. Prioriza la reproducción empírica y la integridad arquitectónica sobre los parches rápidos. |
+| `code-quality-and-sonarqube` | Estándares de análisis estático de código, SonarQube, linters (Ruff, SpotBugs, golangci-lint, ESLint) y pruebas de mutación (PITest) con el bucle de auto-verificación ./verify-code.sh. |
+| `code-review-checklist` | Lista de verificación para revisión de código orientada a bugs, regresiones, drift arquitectónico, seguridad, performance, tests y cumplimiento de specs. |
+| `docker-standard` |  |
+| `functional-testing-standard` | Estándares y flujo de trabajo para el diseño, ejecución y corrección de pruebas funcionales en Frontends usando Puppeteer MCP o frameworks locales del workspace. |
+| `keycloak-standard` | Estándares y mejores prácticas para la configuración y gestión de identidad con Keycloak. |
+| `observability-standard` |  |
+| `performance-testing-k6` | Estándares de pruebas de carga, estrés y latencia de APIs con k6, verificación de SLAs de rendimiento (p95 < 200ms) y reportes de degradación. |
+| `pre-flight-check` | Validación técnica obligatoria antes de cerrar tareas, aprobar incrementos o realizar commits. Exige evidencia real de filesystem, build, tests, cobertura, migraciones y servicios cuando aplique. |
+| `root-cause-analysis` | Protocolo de investigación no destructiva, triage de logs, análisis de causa raíz (RCA) y formulación de hipótesis para el agente bug-diagnostician. |
+| `security-standards` | Estándares de seguridad para aplicaciones Spring Boot y Frontend. Usar para JWT, OAuth2/OIDC, Keycloak, RBAC, prevención de vulnerabilidades y gestión de identidad. |
+| `testing-strategy` | Estrategia unificada de pruebas, metodología TDD (Red-Green-Refactor), pruebas de concurrencia, tests de arquitectura y cobertura mínima para múltiples stacks. |
+
+### Orquestación y Documentación
+
+| Skill | Descripción |
+|-------|-------------|
+| `context-curation` | Estrategia de selección de contexto relevante para cada agente. |
+| `context-pinning` | Gestión de archivos críticos para mantener la integridad arquitectónica y el diseño del sistema. Asegura que los agentes siempre lean la Master Spec y los contratos vigentes. |
+| `documentation-lifecycle` | Gestión del ciclo de vida de la documentación técnica. Automatiza la consolidación de incrementos en la Master Spec para mantener una fuente de verdad única. |
+| `documentation-standards` | Estándares de documentación técnica y READMEs. |
+| `eval-ops-agent-benchmarks` | Protocolo de evaluación automatizada y pruebas de regresión para agentes de IA cuando se actualizan sus prompts, modelos o reglas en config-ai. |
+| `git-ops` | Gestión profesional del ciclo de vida de Git y GitHub. Automatiza la creación de ramas, commits semánticos y Pull Requests siguiendo estándares de la industria y el flujo SDD. |
+| `graphify` | "Use for any question about a codebase, its architecture, file relationships, or project content — especially when graphify-out/ exists, where the question should be treated as a graphify query first. Turns any input (code, docs, papers, images, videos) into a persistent knowledge graph with god nodes, community detection, and query/path/explain tools." |
+| `workspace-coordination` | Coordinación técnica ascendente y descendente entre el Solution Workspace y proyectos locales, incluyendo la gestión y visibilidad de la deuda técnica. |
+
+### Asistentes Personales
+
+| Skill | Descripción |
+|-------|-------------|
+| `hyprmind-delegation-protocol` | Protocolo estructurado de delegación del orquestador personal hacia agentes SDLC. |
+| `hyprmind-memory-manager` | Gestión de memoria conversacional del orquestador personal con caducidad por inactividad. |
+| `hyprmind-workspace-manager` | Procedimientos para abrir documentos e IDEs en el escritorio del usuario. |
+
+### Sistema Local (ambxst / Linux)
+
+| Skill | Descripción |
+|-------|-------------|
+| `ambxst-packaging` | Empaquetado e instalación de ambxst — install.sh multi-distro (Arch/Fedora/NixOS), flake.nix, dependencias Quickshell/Hyprland y flujo de release del fork personal. |
+| `ambxst-plugins` | Cómo extender ambxst con nuevas features/plugin-modules end-to-end (clave de config, servicio, UI, integración en notch/bar/dashboard) siguiendo el patrón de módulos existentes. |
+| `ambxst-shell-dev` | Desarrollo de módulos y features en el shell ambxst (Quickshell/QML sobre Wayland). Arquitectura, convenciones, anti-patrones y flujo de trabajo para modificar el fork personal. |
+| `ambxst-theming` | Sistema de theming de ambxst — generación de paleta con matugen desde wallpaper, colores reactivos del shell y sincronización en vivo con GTK (adw-gtk3), Qt/KDE (kdeglobals + D-Bus) y Kitty. |
+| `linux-dev` | Estándares de programación sobre Linux — bash estricto, servicios systemd, D-Bus, jerarquía de archivos, permisos y empaquetado básico. Para scripts, daemons de usuario e integraciones de escritorio Wayland/X11. |
+
+### Otras
+
+| Skill | Descripción |
+|-------|-------------|
+| `n8n-stack` |  |
+
+
+## Modelos por herramienta
+
+### OpenCode — bindings activos
+
+| Agente | Modelo de ejecución |
+|--------|--------------------|
+| `api-governance-agent` | opencode-go/minimax-m3 |
+| `architect-executor` | opencode-go/deepseek-v4-pro |
+| `bug-diagnostician` | opencode-go/deepseek-v4-pro |
+| `context-curator` | opencode/muse-spark-1.2-contributor-free |
+| `database-architect` | opencode-go/deepseek-v4-pro |
+| `devops-architect` | opencode/mimo-v2.5-free |
+| `documentation` | opencode/muse-spark-1.2-contributor-free |
+| `enterprise-architect` | opencode-go/gpt-5.6-luna |
+| `enterprise-spec-validator` | opencode/muse-spark-1.2-contributor-free |
+| `executor` | opencode/mimo-v2.5-free |
+| `final-validation` | opencode/muse-spark-1.2-contributor-free |
+| `functional-tester-agent` | opencode-go/hy3 |
+| `general` | opencode-go/gpt-5.6-luna |
+| `git-executor` | opencode/mimo-v2.5-free |
+| `hyprmind-deep-thinker` | opencode-go/gpt-5.6-luna |
+| `hyprmind-orchestrator` | opencode-go/gpt-5.6-luna |
+| `hyprmind-vision-analyst` | opencode-go/gpt-5.6-luna |
+| `master-orchestrator` | opencode-go/gpt-5.6-luna |
+| `planner` | opencode-go/minimax-m3 |
+| `refactor` | opencode-go/deepseek-v4-pro |
+| `requirements-analyst` | opencode/muse-spark-1.2-contributor-free |
+| `reviewer` | opencode/muse-spark-1.2-contributor-free |
+| `security-reviewer` | opencode/muse-spark-1.2-contributor-free |
+| `solution-architect` | opencode/muse-spark-1.2-contributor-free |
+| `spec-remediator` | opencode/muse-spark-1.2-contributor-free |
+| `spec-validator` | opencode/muse-spark-1.2-contributor-free |
+| `task-decomposer` | opencode-go/minimax-m3 |
+| `test-architect` | opencode/mimo-v2.5-free |
+| `ui-designer` | opencode/muse-spark-1.2-contributor-free |
+
+### ChatGPT (Codex CLI) — **sin bindings** (usa default del proveedor)
+
+| Agente | Modelo de ejecución |
+|--------|--------------------|
+| `api-governance-agent` | — |
+| `architect-executor` | — |
+| `bug-diagnostician` | — |
+| `context-curator` | — |
+| `database-architect` | — |
+| `devops-architect` | — |
+| `documentation` | — |
+| `enterprise-architect` | — |
+| `enterprise-spec-validator` | — |
+| `executor` | — |
+| `final-validation` | — |
+| `functional-tester-agent` | — |
+| `general` | — |
+| `git-executor` | — |
+| `hyprmind-deep-thinker` | — |
+| `hyprmind-orchestrator` | — |
+| `hyprmind-vision-analyst` | — |
+| `master-orchestrator` | — |
+| `planner` | — |
+| `refactor` | — |
+| `requirements-analyst` | — |
+| `reviewer` | — |
+| `security-reviewer` | — |
+| `solution-architect` | — |
+| `spec-remediator` | — |
+| `spec-validator` | — |
+| `task-decomposer` | — |
+| `test-architect` | — |
+| `ui-designer` | — |
+
+### Kiro — **sin bindings** (usa default del proveedor)
+
+| Agente | Modelo de ejecución |
+|--------|--------------------|
+| `api-governance-agent` | — |
+| `architect-executor` | — |
+| `bug-diagnostician` | — |
+| `context-curator` | — |
+| `database-architect` | — |
+| `devops-architect` | — |
+| `documentation` | — |
+| `enterprise-architect` | — |
+| `enterprise-spec-validator` | — |
+| `executor` | — |
+| `final-validation` | — |
+| `functional-tester-agent` | — |
+| `general` | — |
+| `git-executor` | — |
+| `hyprmind-deep-thinker` | — |
+| `hyprmind-orchestrator` | — |
+| `hyprmind-vision-analyst` | — |
+| `master-orchestrator` | — |
+| `planner` | — |
+| `refactor` | — |
+| `requirements-analyst` | — |
+| `reviewer` | — |
+| `security-reviewer` | — |
+| `solution-architect` | — |
+| `spec-remediator` | — |
+| `spec-validator` | — |
+| `task-decomposer` | — |
+| `test-architect` | — |
+| `ui-designer` | — |
+
+<!-- END:GENERATED-TABLES -->

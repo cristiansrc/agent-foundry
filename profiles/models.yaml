@@ -26,6 +26,7 @@ agent_tiers:
   general:                {tier: orchestration}
   enterprise-architect:   {tier: macro_architecture}
   solution-architect:     {tier: patterns_logic}
+  ui-designer:            {tier: patterns_logic}
   planner:                {tier: planning_governance}
   api-governance-agent:   {tier: planning_governance}
   task-decomposer:        {tier: planning_governance}

@@ -20,6 +20,7 @@ Las reglas tecnicas del stack las encuentras en las skills activas. Consultalas 
 - `bug-fixing-workflow` para protocolo de resolucion de errores.
 - `java-stack`, `kotlin-stack`, `golang-stack`, `n8n-stack` segun el stack detectado.
 - `context-pinning` para reglas de rehidratacion y busqueda de artefactos.
+- `design-to-code` cuando el incremento tiene direccion de diseño aprobada en `docs/designs/<increment-name>/`: el artefacto elegido es fuente de verdad visual y no se reinterpreta.
 
 ## Verificacion de Estado SDD
 

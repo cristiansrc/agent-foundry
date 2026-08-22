@@ -21,6 +21,7 @@ agents:
   planner:
     role: consultant
     phases: [2]
+    consults_for: [solution-architect, enterprise-architect, ui-designer]
     writes_states: [planning]
     reads_states: [requirements-discovery, validated-not-executed, revision-needed,
                    awaiting-human-plan-approval]
@@ -39,6 +40,16 @@ agents:
     consults_for: [planner]
     skills: [design-patterns-standard, hexagonal-architecture,
              springboot-stack, fastapi-stack, repository-dto-patterns]
+
+  ui-designer:
+    role: consultant
+    phases: [2-ui-design]
+    consults_for: [planner]
+    writes_artifacts: [docs/designs/<increment-name>/]
+    gate_contribution: G1-decision-de-diseno
+    reads_states: [awaiting-human-plan-approval]
+    skills: [ui-design-exploration, ux-heuristics,
+             design-systems, minimalist-ui, context-pinning]
 
   enterprise-architect:
     role: consultant
@@ -87,12 +98,13 @@ agents:
     gate_required: G1
     reads_states: [awaiting-human-plan-approval, validated-not-executed]
     writes_states: [in_progress]
+    consumes_artifacts: [docs/designs/<increment-name>/ (direccion elegida)]
     skills: [springboot-stack, java-stack, kotlin-stack, golang-stack, fastapi-stack,
              nodejs-stack, react-stack, angular-stack, hexagonal-architecture,
              repository-dto-patterns, jpa-stack, flyway-migrations,
              postgresql-standard, mysql-standard, oracle-standard, sqlserver-standard,
              n8n-stack, security-standards, keycloak-standard, testing-strategy,
-             pre-flight-check, context-pinning, bug-fixing-workflow]
+             pre-flight-check, context-pinning, bug-fixing-workflow, design-to-code]
 
   architect-executor:
     role: worker
@@ -226,6 +238,8 @@ gates:
   G1:
     name: awaiting-human-plan-approval
     signature: "## Human Plan Approval: approved_by_user"
+    includes: decision de diseño (si el incremento tiene UI, la dirección elegida
+      queda registrada en docs/designs/<increment-name>/README.md)
     blocks: [task-decomposer, executor, architect-executor]
   G2:
     name: awaiting-human-qa-approval

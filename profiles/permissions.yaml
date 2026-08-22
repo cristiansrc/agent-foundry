@@ -24,6 +24,7 @@ agents:
   requirements-analyst:   {edit: allow, bash: deny, temp: "0.3"}
   planner:                {edit: allow, bash: deny, temp: "0.2"}
   solution-architect:     {edit: allow, bash: deny, temp: "0.2"}
+  ui-designer:            {edit: allow, bash: deny, temp: "0.4"}
   enterprise-architect:   {edit: allow, bash: deny, temp: "0.2"}
   test-architect:         {edit: allow, bash: allow, temp: "0.2"}
   task-decomposer:        {edit: allow, bash: deny, temp: "0.2"}

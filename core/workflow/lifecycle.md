@@ -55,10 +55,20 @@ Fase 4 Descomposición ─► Fase 5 Ejecución ─► Fase 6 Calidad
 - Git: se crea `feature/<increment-name>` desde `develop`.
 
 ### Fase 2 — Planificación y Contratos
-- Agentes: `planner` (consulta a `solution-architect` y `enterprise-architect`).
+- Agentes: `planner` (consulta a `solution-architect`, `enterprise-architect` y,
+  si el incremento tiene superficie UI, a `ui-designer`).
 - Estado: `planning`.
 - Entregable: Delta Spec `docs/specs/increments/<increment-name>.md` +
   actualización de `openapi.yaml`.
+
+#### Fase 2.5 — Exploración de Diseño UI (solo incrementos con UI)
+- Agente: `ui-designer`. Protocolo: skill `ui-design-exploration`.
+- Clarificación → 3-4 direcciones como HTML autocontenidos en
+  `docs/designs/<increment-name>/` (estático o clickeable) + README comparativo.
+- El humano elige dirección (puede mezclar elementos); la elección queda
+  registrada en el README y se firma junto al Gate 1.
+- La dirección elegida es fuente de verdad para el executor vía skill
+  `design-to-code`: prohibido reinterpretar la UI durante implementación.
 
 ### Fase 3 — Validación IA
 - Agentes: `spec-validator` (+ `enterprise-spec-validator` si hay workspace,

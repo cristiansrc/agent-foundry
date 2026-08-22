@@ -29,11 +29,17 @@ docs/             Documentación nueva del proyecto
 | 2  | workflow/: lifecycle.md, states.md, matrix.yaml (agente × fase × skill) | ✅ v1 inicial (matrix por validar) |
 | 3  | profiles/models.yaml con tiers y fallbacks por proveedor | ✅ Datos opencode; chatgpt/kiro vacíos |
 | 4  | Adapter opencode con paridad 1:1 respecto a config-ai | ⬜ |
-| 5  | Adapters chatgpt (Codex CLI) y kiro | ⬜ |
-| 6  | Suite ambxst: shell-dev, plugins, theming, packaging + linux-dev | ⬜ |
+| 5  | Adapters chatgpt (Codex CLI) y kiro | ✅ Hecho (bindings de modelos pendientes de activar en profiles) |
+| 6  | Suite ambxst: shell-dev, plugins, theming, packaging + linux-dev | ✅ Hecho (5 skills nuevas en core/skills) |
 | 7  | Auditoría de coordinación agente-fase-skill (altas/bajas) | ⬜ |
-| 8  | Tooling + evals + CI (lint anti-drift, validador de estados) | 🔨 lint.sh creado; falta build/sync/evals |
+| 8  | Tooling + evals + CI (lint anti-drift, validador de estados) | 🔨 lint/build/sync listos; falta validador de estados y evals runner |
 | 9  | Cutover final e archivo de config-ai | ⬜ |
+
+Notas:
+- Fase 6: se eliminó el concepto de staging `docs/skills-src` — las skills
+  nuevas viven directamente en `core/skills/` (fuente única).
+- Fase 9 (cutover): ejecutar `tooling/sync.sh` para instalar la salida
+  generada y congelar config-ai después.
 
 Ver `docs/migration-notes.md` para decisiones detalladas de migración.
 

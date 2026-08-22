@@ -84,18 +84,28 @@ def clean_desc(desc: str) -> str:
 
 
 def agents_tables() -> str:
-    lines = ["## Agentes (29)", "",
-             "| Agente | Rol | Descripción |", "|--------|-----|-------------|"]
-    order = {"workers": 0, "consultants": 1, "validators": 2,
-             "guardrails": 3, "personal": 4}
-    rows = []
+    order = {"worker": 0, "consultant": 1, "validator": 2, "guardrail": 3}
+    sdlc, personal = [], []
     for src in sorted(CORE.glob("agents/**/*.md")):
         fm, _ = parse_fm(src)
         role = fm.get("role", "?")
-        rows.append((order.get(role, 9), src.stem, ROLE_LABEL.get(role, role),
-                     clean_desc(fm.get("description", ""))))
-    for _, name, role_label, desc in sorted(rows):
+        row = (src.stem, ROLE_LABEL.get(role, role),
+               clean_desc(fm.get("description", "")))
+        if role == "personal":
+            personal.append(row)
+        else:
+            sdlc.append((order.get(role, 9), *row))
+
+    lines = ["## Agentes", ""]
+    lines += [f"### Ciclo de desarrollo de software ({len(sdlc)})", "",
+              "| Agente | Rol | Descripción |", "|--------|-----|-------------|"]
+    for _, name, role_label, desc in sorted(sdlc):
         lines.append(f"| `{name}` | {role_label} | {desc} |")
+    lines += ["", f"### Asistentes personales — HyprMind ({len(personal)})", "",
+              "*Fuera del SDLC; interactúan contigo y delegan al flujo de desarrollo.*",
+              "", "| Agente | Descripción |", "|--------|-------------|"]
+    for name, _, desc in sorted(personal):
+        lines.append(f"| `{name}` | {desc} |")
     return "\n".join(lines)
 
 

@@ -52,39 +52,48 @@ tooling/sync.sh           # instala las salidas generadas (~/.config/opencode, e
 
 <!-- BEGIN:GENERATED-TABLES -->
 
-## Agentes (29)
+## Agentes
+
+### Ciclo de desarrollo de software (26)
 
 | Agente | Rol | Descripción |
 |--------|-----|-------------|
-| `hyprmind-deep-thinker` | Personal | Eres el analista profundo de HyprMind. |
-| `hyprmind-orchestrator` | Personal | Eres V.I.E.R.N.E.S., la inteligencia artificial de interfaz táctica y asistencia avanzada para Cris. |
-| `hyprmind-vision-analyst` | Personal | Eres el analista de visión de HyprMind. |
-| `api-governance-agent` | Validator (validador) | Audita contratos OpenAPI para detectar Breaking Changes, verificar compatibilidad hacia atrás (backward compatibility), auditar semver y aplicar linters de API. |
 | `architect-executor` | Worker (obrero) | Implementa tareas complejas y código de arquitectura local cuando NO existe una especificación SDD completa o formal. |
-| `bug-diagnostician` | Validator (validador) | Analiza fallos de QA y producción, examina logs, stack traces e inspecciona el grafo de Graphify para generar un Root Cause Analysis (RCA) detallado antes de implementar arreglos. |
-| `context-curator` | Consultant (consultor) | Filtra y prepara el contexto de alta señal para evitar ruido a los Obreros y gestionar el ciclo de vida del SDD context. |
 | `database-architect` | Worker (obrero) | Diseña y valida esquemas de bases de datos relacionales, migraciones Flyway/Liquibase, índices, modelos DTO/Entidad y estrategias de migración sin inactividad (Zero-Downtime DB Migrations). |
 | `devops-architect` | Worker (obrero) | Especialista en Infraestructura como Codigo, Docker, CI/CD y Observabilidad. |
 | `documentation` | Worker (obrero) | Creates project documentation, README content, API docs, deployment notes, diagrams, and functional documentation. |
-| `enterprise-architect` | Consultant (consultor) | Define el System Landscape, fronteras de microservicios y flujos globales siguiendo `enterprise-architecture-standard`. |
-| `enterprise-spec-validator` | Validator (validador) | Valida la consistencia global del Solution Workspace, contratos inter-servicios, System Landscape y la deuda técnica global. |
 | `executor` | Worker (obrero) | Implementa código a partir de especificaciones SDD aprobadas y descomposiciones de tareas. |
-| `final-validation` | Validator (validador) | Performs final production-readiness validation across specs, implementation, tests, security, documentation, and maintainability. |
 | `functional-tester-agent` | Worker (obrero) | Disena, ejecuta y valida pruebas funcionales y de interfaz de usuario (UI/E2E) en frontends. Automatiza la deteccion, reporte y correccion mecanica de errores. |
-| `general` | Guardrail | Guardrail para llamadas accidentales al subagente general integrado de la herramienta anfitriona. Bloquea validaciones SDD ejecutadas por el agente equivocado. |
 | `git-executor` | Worker (obrero) | Agente exclusivo para operaciones de control de versiones con Git (ramas, commits, checkout, merges, push). |
+| `refactor` | Worker (obrero) | Refactors implemented code for maintainability, readability, modularity, and consistency without changing behavior. |
+| `spec-remediator` | Worker (obrero) | Corrige hallazgos de validación de forma iterativa siguiendo `spec-remediation`. |
+| `context-curator` | Consultant (consultor) | Filtra y prepara el contexto de alta señal para evitar ruido a los Obreros y gestionar el ciclo de vida del SDD context. |
+| `enterprise-architect` | Consultant (consultor) | Define el System Landscape, fronteras de microservicios y flujos globales siguiendo `enterprise-architecture-standard`. |
 | `master-orchestrator` | Consultant (consultor) | Agente Maestro y Orquestador Contextual. Mantiene el contexto de todo el proyecto y delega tareas específicas a subagentes especializados. No realiza modificaciones ni ejecuciones de código directas. |
 | `planner` | Consultant (consultor) | Planifica proyectos web con Spec Driven Development, decisiones de arquitectura, contratos API, restricciones tecnicas y documentacion base del proyecto. |
-| `refactor` | Worker (obrero) | Refactors implemented code for maintainability, readability, modularity, and consistency without changing behavior. |
 | `requirements-analyst` | Consultant (consultor) | Realiza el levantamiento de requerimientos funcionales siguiendo `requirements-gathering`. |
-| `reviewer` | Validator (validador) | Revisa codigo generado para detectar bugs logicos, drift arquitectonico, mantenibilidad, tests faltantes y cumplimiento de specs. |
-| `security-reviewer` | Validator (validador) | Reviews web projects for security risks, OWASP issues, auth/authz flaws, sensitive data handling, and secure architecture. |
 | `solution-architect` | Consultant (consultor) | Elige patrones de diseno siguiendo `design-patterns-standard`. Colabora con `enterprise-architect` para alinear el diseno local con el global. |
-| `spec-remediator` | Worker (obrero) | Corrige hallazgos de validación de forma iterativa siguiendo `spec-remediation`. |
-| `spec-validator` | Validator (validador) | Valida specs SDD contra ambiguedad, inconsistencia, riesgo arquitectonico, restricciones faltantes y readiness de implementacion. |
 | `task-decomposer` | Consultant (consultor) | Breaks validated specs into small, ordered, executable engineering tasks with dependencies and verification steps. |
 | `test-architect` | Consultant (consultor) | Diseña y genera pruebas automatizadas, edge cases, checks de integracion y estrategia de validacion para proyectos web. |
 | `ui-designer` | Consultant (consultor) | Diseña direcciones visuales de UI como artefactos HTML comparables antes de implementar código — clarifica alcance, genera 3-4 direcciones distintas respetando el design system del repo y espera la decisión humana. |
+| `api-governance-agent` | Validator (validador) | Audita contratos OpenAPI para detectar Breaking Changes, verificar compatibilidad hacia atrás (backward compatibility), auditar semver y aplicar linters de API. |
+| `bug-diagnostician` | Validator (validador) | Analiza fallos de QA y producción, examina logs, stack traces e inspecciona el grafo de Graphify para generar un Root Cause Analysis (RCA) detallado antes de implementar arreglos. |
+| `enterprise-spec-validator` | Validator (validador) | Valida la consistencia global del Solution Workspace, contratos inter-servicios, System Landscape y la deuda técnica global. |
+| `final-validation` | Validator (validador) | Performs final production-readiness validation across specs, implementation, tests, security, documentation, and maintainability. |
+| `reviewer` | Validator (validador) | Revisa codigo generado para detectar bugs logicos, drift arquitectonico, mantenibilidad, tests faltantes y cumplimiento de specs. |
+| `security-reviewer` | Validator (validador) | Reviews web projects for security risks, OWASP issues, auth/authz flaws, sensitive data handling, and secure architecture. |
+| `spec-validator` | Validator (validador) | Valida specs SDD contra ambiguedad, inconsistencia, riesgo arquitectonico, restricciones faltantes y readiness de implementacion. |
+| `general` | Guardrail | Guardrail para llamadas accidentales al subagente general integrado de la herramienta anfitriona. Bloquea validaciones SDD ejecutadas por el agente equivocado. |
+
+### Asistentes personales — HyprMind (3)
+
+*Fuera del SDLC; interactúan contigo y delegan al flujo de desarrollo.*
+
+| Agente | Descripción |
+|--------|-------------|
+| `hyprmind-deep-thinker` | Eres el analista profundo de HyprMind. |
+| `hyprmind-orchestrator` | Eres V.I.E.R.N.E.S., la inteligencia artificial de interfaz táctica y asistencia avanzada para Cris. |
+| `hyprmind-vision-analyst` | Eres el analista de visión de HyprMind. |
 
 ## Skills (73)
 

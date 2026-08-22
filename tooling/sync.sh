@@ -18,6 +18,15 @@ read -rp "¿Continuar? [y/N] " answer
 [ "${answer:-n}" = "y" ] || exit 1
 
 mkdir -p "$TARGET"
+# Backup previo: permite rollback instantaneo
+BACKUP_DIR="$HOME/.local/share/agent-foundry/backups"
+mkdir -p "$BACKUP_DIR"
+STAMP="$(date +%Y%m%d-%H%M%S)"
+tar -czf "$BACKUP_DIR/opencode-pre-sync-$STAMP.tar.gz" -C "$TARGET" agents skills
+echo "Backup: $BACKUP_DIR/opencode-pre-sync-$STAMP.tar.gz"
+
 rsync -av --delete "$OUT/agents/" "$TARGET/agents/"
 rsync -av --delete "$OUT/skills/" "$TARGET/skills/"
 echo "SYNC OK"
+echo "Rollback si hace falta:"
+echo "  tar -xzf $BACKUP_DIR/opencode-pre-sync-$STAMP.tar.gz -C $TARGET"

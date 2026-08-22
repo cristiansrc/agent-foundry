@@ -33,7 +33,7 @@ docs/             Documentación nueva del proyecto
 | 6  | Suite ambxst: shell-dev, plugins, theming, packaging + linux-dev | ✅ Hecho (5 skills nuevas en core/skills) |
 | 7  | Auditoría de coordinación agente-fase-skill (altas/bajas) | ✅ Hecho (matrix v2; hallazgos 61→10 excepciones documentadas) |
 | 8  | Tooling + evals + CI (lint anti-drift, validador de estados) | ✅ lint/build/sync + validate-states.py + evals runner con 4 casos semilla |
-| 9  | Cutover final e archivo de config-ai | ⬜ requiere ejecutar sync.sh en vivo |
+| 9  | Cutover final e archivo de config-ai | ✅ Hecho (2026-08-22): sync instalado y verificado byte-a-byte; config-ai congelado |
 
 Comandos nuevos:
 ```bash

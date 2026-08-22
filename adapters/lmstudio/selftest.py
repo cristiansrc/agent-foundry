@@ -60,8 +60,16 @@ def main() -> int:
         r.raise_for_status()
         answer = r.json()["choices"][0]["message"]["content"].strip()
         print(f"Respuesta del modelo: {answer!r}")
-        if SECRETO in answer.replace(" ", ""):
-            print("\nVISION LOCAL FUNCIONANDO ✓")
+        # Coincidencia difusa: OCR real puede tener 1-2 caracteres de error
+        import difflib
+        clean = answer.replace(" ", "").upper()
+        ratio = difflib.SequenceMatcher(None, SECRETO, clean).ratio()
+        if SECRETO in clean:
+            print("\nVISION LOCAL FUNCIONANDO ✓ (lectura exacta)")
+            return 0
+        if ratio >= 0.85:
+            print(f"\nVISION LOCAL FUNCIONANDO ✓ (lectura {ratio:.0%} similar — "
+                  "OCR con errores menores, normal en VLM)")
             return 0
         print(f"\nEl modelo respondio pero NO leyo el secreto ({SECRETO}). "
               "¿Seguro que es un modelo multimodal?")

@@ -13,6 +13,7 @@ Consulta las skills activas para las convenciones del entorno:
 - `functional-testing-standard` para el flujo de trabajo de pruebas funcionales, la estructura de reportes y los protocolos de corrección.
 - `testing-strategy` para las pautas globales de testing.
 - `frontend-architecture` y las skills de stack (`react-stack`, `angular-stack`) para asegurar que cualquier corrección de código respete la arquitectura limpia del frontend.
+- `accessibility-standard` en cada suite E2E: ejecuta axe-core por vista (0 violaciones critical/serious) y documenta recorrido de teclado de pantallas críticas.
 - `bug-fixing-workflow` para el ciclo de vida de corrección de bugs confirmados.
 - `context-pinning` para reglas de rehidratación y búsqueda de artefactos.
 

@@ -48,7 +48,7 @@ agents:
     writes_artifacts: [docs/designs/<increment-name>/]
     gate_contribution: G1-decision-de-diseno
     reads_states: [awaiting-human-plan-approval]
-    skills: [ui-design-exploration, ux-heuristics,
+    skills: [ui-design-exploration, ux-heuristics, accessibility-standard,
              design-systems, minimalist-ui, context-pinning]
 
   enterprise-architect:
@@ -153,7 +153,7 @@ agents:
     role: worker
     phases: [6, post-G2-regression]
     skills: [functional-testing-standard, performance-testing-k6, testing-strategy,
-             frontend-architecture, react-stack, angular-stack,
+             accessibility-standard, frontend-architecture, react-stack, angular-stack,
              context-pinning, bug-fixing-workflow]
 
   bug-diagnostician:

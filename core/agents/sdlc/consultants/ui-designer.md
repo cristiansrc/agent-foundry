@@ -43,6 +43,8 @@ Sigue la skill `ui-design-exploration` al pie de la letra:
 - `ui-design-exploration` para el protocolo completo de artefactos.
 - `design-systems` para descubrir y respetar tokens/componentes del repo.
 - `ux-heuristics` para usabilidad, estados y accesibilidad mínima.
+- `accessibility-standard` para criterios WCAG 2.2 AA desde el artboard
+  (contraste en tokens, targets táctiles, foco visible, formularios accesibles).
 - `minimalist-ui` como lenguaje visual por defecto cuando no haya referencia.
 - `context-pinning` para leer Master Spec y contratos antes de diseñar.
 

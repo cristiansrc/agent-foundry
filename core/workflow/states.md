@@ -88,7 +88,34 @@ Cualquier otra edición humana sobre bloques `## Current status`,
 veredictos o auditorías = `corrupted-state`. Los agentes se detienen con
 `Blocked: State corruption detected`.
 
-## 4. Reglas de Transición
+## 4. Enum de Fases y Triggers
+
+Fases canónicas (usadas por matrix.yaml):
+
+| Fase | Nombre | Equivale a |
+|------|--------|-----------|
+| `init` | Inicialización del proyecto/workspace | §2 del lifecycle |
+| `requirements` | Levantamiento | Fase 1 |
+| `planning` | Planificación y contratos | Fase 2 |
+| `design` | Exploración de diseño UI | Fase 2.5 (solo UI) |
+| `validation` | Validación IA de specs | Fase 3 |
+| `decomposition` | Descomposición en tareas | Fase 4 |
+| `execution` | Implementación con spec SDD | Fase 5 |
+| `execution-no-spec` | Implementación sin spec formal | Fase 5-alt |
+| `quality` | Validación de calidad | Fase 6 |
+| `gitops` | Integración y promoción | Fase 7 |
+| `transversal` | Actúa en cualquier fase | — |
+
+Triggers (no son fases; activan al agente puntualmente):
+
+| Trigger | Significado |
+|---------|-------------|
+| `post-gate2-regression` | Pruebas E2E de regresión tras aprobar QA |
+| `any-failure` | RCA ante fallo en cualquier fase |
+
+Los gates G1/G2 NO son fases: son estados de espera definidos arriba.
+
+## 5. Reglas de Transición
 
 1. Los gates solo se liberan con la firma exacta (sin aliases).
 2. `task-decomposer` no inicia si falta el Gate 1; `git-executor` no promociona ramas si falta el Gate 2.

@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# Pre-commit hook del propio repositorio agent-foundry.
+# Evita commitear core roto: lint anti-drift + auditoria de matriz deben pasar.
+set -euo pipefail
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." >/dev/null 2>&1 || cd "$(git rev-parse --show-toplevel)" && pwd)"
+cd "$ROOT"
+
+echo "== pre-commit foundry: lint =="
+./tooling/lint.sh
+
+echo ""
+echo "== pre-commit foundry: auditoria de matriz =="
+python3 tooling/audit_matrix.py > /tmp/foundry-audit.log 2>&1 || {
+  cat /tmp/foundry-audit.log
+  exit 1
+}
+grep -E '^Total hallazgos' /tmp/foundry-audit.log
+
+echo ""
+echo "PRE-COMMIT OK"

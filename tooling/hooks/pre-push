@@ -1,0 +1,77 @@
+#!/usr/bin/env bash
+# Git hook pre-push: protege ramas estables con los gates del SDLC-IA.
+# Mejora sobre config-ai/pre-push-hook-template.sh: delega la validación de
+# estados a tooling/validate-states.py y exige Gate 2 firmado.
+#
+# Instalar en el repo activo:
+#   bash <foundry>/tooling/hooks/install-pre-push.sh
+
+FOUNDRY="${AGENT_FOUNDRY_HOME:-$HOME/Documentos/Proyectos/agent-foundry}"
+VALIDATOR="$FOUNDRY/tooling/validate-states.py"
+
+remote="$1"
+PROTECTED="^(develop|qa|master|main)$"
+
+while read -r local_ref local_sha remote_ref remote_sha; do
+    remote_branch="${remote_ref#refs/heads/}"
+
+    if ! echo "$remote_branch" | grep -qE "$PROTECTED"; then
+        continue
+    fi
+
+    echo "=========================================="
+    echo "[Git Guard] Push a rama protegida: $remote_branch"
+
+    branch=$(git symbolic-ref --short HEAD 2>/dev/null || echo "")
+    increment=""
+    if [[ "$branch" =~ ^feature/(.+) ]]; then
+        increment="${BASH_REMATCH[1]}"
+    else
+        # Permitir hotfix directo a develop/master solo si el humano ya firmó en algún contexto activo
+        echo "[Git Guard] Rama no-feature ($branch): se exige al menos un contexto con Gate 2 firmado."
+        increment=""
+    fi
+
+    context_file=""
+    if [ -n "$increment" ]; then
+        for candidate in \
+            "docs/specs/.working/${increment}-sdd-context.md" \
+            "docs/specs/${increment}-sdd-context.md"; do
+            [ -f "$candidate" ] && { context_file="$candidate"; break; }
+        done
+        if [ -z "$context_file" ]; then
+            echo "PUSH ABORTADO: sin shared context para '$increment'."
+            echo "  Esperado: docs/specs/.working/${increment}-sdd-context.md"
+            exit 1
+        fi
+    else
+        # Buscar cualquier contexto con Gate 2 firmado
+        context_file=$(grep -rl "## Human QA Approval: approved_by_user" \
+            docs/specs/.working/ docs/specs/ 2>/dev/null | head -1)
+        if [ -z "$context_file" ]; then
+            echo "PUSH ABORTADO: ningún incremento tiene firma del Gate 2 (QA humana)."
+            exit 1
+        fi
+        echo "[Git Guard] Usando contexto aprobado más reciente: $context_file"
+    fi
+
+    # Validación integral de estados (enum, gates, firmas exactas)
+    if command -v python3 >/dev/null && [ -f "$VALIDATOR" ]; then
+        if ! python3 "$VALIDATOR" "$(git rev-parse --show-toplevel)"; then
+            echo "PUSH ABORTADO: validador de estados detectó inconsistencias (ver arriba)."
+            exit 1
+        fi
+    else
+        echo "AVISO: validate-states.py no encontrado; validando solo firma Gate 2."
+    fi
+
+    if ! grep -q "## Human QA Approval: approved_by_user" "$context_file"; then
+        echo "PUSH ABORTADO: falta '## Human QA Approval: approved_by_user' en $context_file"
+        exit 1
+    fi
+
+    echo "[Git Guard] OK: gates y firmas válidas. Permitiendo push a $remote_branch."
+    echo "=========================================="
+done
+
+exit 0

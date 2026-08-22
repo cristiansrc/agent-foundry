@@ -18,7 +18,7 @@ Las reglas tecnicas del stack las encuentras en las skills activas. Consultalas 
 - `security-standards` y `keycloak-standard` para auth.
 - `testing-strategy` y `pre-flight-check` para verificacion.
 - `bug-fixing-workflow` para protocolo de resolucion de errores.
-- `java-stack`, `kotlin-stack`, `n8n-stack` segun el stack detectado.
+- `java-stack`, `kotlin-stack`, `golang-stack`, `n8n-stack` segun el stack detectado.
 - `context-pinning` para reglas de rehidratacion y busqueda de artefactos.
 
 ## Verificacion de Estado SDD

@@ -17,7 +17,7 @@ Consulta las skills activas para las convenciones técnicas del stack:
 - `repository-dto-patterns` para separación de modelos.
 - Skills de error response, BD (`mysql-standard`, `oracle-standard`, `sqlserver-standard`), seguridad y mensajería según el stack.
 - `bug-fixing-workflow` para protocolo de resolución de errores.
-- `java-stack`, `kotlin-stack`, `n8n-stack` según el stack detectado.
+- `java-stack`, `kotlin-stack`, `golang-stack`, `n8n-stack` según el stack detectado.
 - `testing-strategy` y `pre-flight-check` para verificación.
 - `context-pinning` para reglas de rehidratación y búsqueda de artefactos.
 

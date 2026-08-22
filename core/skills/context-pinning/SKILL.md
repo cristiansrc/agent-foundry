@@ -14,6 +14,9 @@ El agente debe priorizar la lectura de:
 - **Contratos OpenAPI:** ruta canonica declarada por el proyecto en shared context o spec. Para Spring Boot, ubicaciones validas por defecto: `docs/api/openapi.yaml`, `docs/api/openapi.yml`, `src/main/resources/openapi.yaml` o `src/main/resources/openapi.yml`.
 - **Reporte de Dependencias Graphify:** `graphify-out/GRAPH_REPORT.md` (si el proyecto tiene Graphify configurado).
 - **Memoria del Proyecto/Workspace:** `MEMORY.md` (registro histórico de lecciones aprendidas y decisiones de diseño complejas que no deben reincidir).
+  - **Formato canónico de entrada:** `[Fecha] [Módulo] - Error/Desafío: <descripción> -> Solución Aplicada: <solución> -> Regla para el Agente: <instrucción preventiva>`.
+  - **Lectura obligatoria:** `planner` (al diseñar incrementos) y `executor`/`architect-executor` (antes de implementar) deben revisarlo para evitar reincidir en errores ya resueltos.
+  - **Escritura:** al cerrar un bug o decisión compleja, el agente responsable propone la entrada; el humano la aprueba en el gate correspondiente.
 
 
 - **Incrementos Activos:** Cualquier spec en `docs/specs/increments/` que aún no haya sido consolidada.

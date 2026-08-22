@@ -1,57 +1,85 @@
-# Matriz Agente × Fase × Skill — v1 (draft, validar en Fase 7)
-# Fases: 1=requirements 2=planning 3=validation-ia G1=gate-plan 4=decomposition
-#        5=execution 6=quality G2=gate-qa 7=git-ops
-schema: foundry/workflow/matrix/v1
+# Matriz Agente × Fase × Skill — v2 (sincronizada con auditoría tooling/audit_matrix.py)
+# Fases: 0-init 1=requirements 2=planning 3=validation-ia G1=gate-plan 4=decomposition
+#        5=execution 5-alt=sin-spec 6=quality G2=gate-qa 7=git-ops transversal
+#
+# POLÍTICA DE SKILLS:
+# - skills = las que el prompt del agente referencia + excepciones core-purpose
+#   marcadas con (#core).
+# - Skills on-demand sin agente asignado (usadas según contexto de tarea):
+#   ambxst-shell-dev, ambxst-plugins, ambxst-theming, ambxst-packaging,
+#   linux-dev, minimalist-ui, eval-ops-agent-benchmarks.
+schema: foundry/workflow/matrix/v2
 
 agents:
   requirements-analyst:
     role: consultant
     phases: [1]
     writes_states: [requirements-discovery]
+    reads_states: [validated-not-executed]
     skills: [requirements-gathering, context-pinning]
 
   planner:
     role: consultant
     phases: [2]
     writes_states: [planning]
+    reads_states: [requirements-discovery, validated-not-executed, revision-needed,
+                   awaiting-human-plan-approval]
     skills: [spec-driven-development, openapi-first, openapi-standard, restful-standard,
-             hexagonal-architecture, enterprise-architecture-standard, design-patterns-standard]
+             hexagonal-architecture, enterprise-architecture-standard, design-patterns-standard,
+             frontend-architecture, context-pinning, workspace-coordination, documentation-lifecycle, graphify,
+             springboot-stack, python-stack, fastapi-stack, react-stack, angular-stack,
+             jpa-stack, flyway-migrations, security-standards, keycloak-standard,
+             springboot-java-rest-error-response-standards, springboot-kotlin-rest-error-response-standards,
+             fastapi-rest-error-response-standards, spring-cloud-gateway,
+             kafka-standard, rabbitmq-standard, amazon-sqs-standard]
 
   solution-architect:
     role: consultant
     phases: [2]
     consults_for: [planner]
-    skills: [design-patterns-standard, hexagonal-architecture, refactor-hexagonal-bridge]
+    skills: [design-patterns-standard, hexagonal-architecture,
+             springboot-stack, fastapi-stack, repository-dto-patterns]
 
   enterprise-architect:
     role: consultant
     phases: [0-init, 2]
     consults_for: [planner]
-    skills: [enterprise-architecture-standard, workspace-coordination]
+    skills: [enterprise-architecture-standard, workspace-coordination, hexagonal-architecture,
+             graphify, security-standards, keycloak-standard, observability-standard,
+             spring-cloud-gateway, kafka-standard, rabbitmq-standard, amazon-sqs-standard]
 
   spec-validator:
     role: validator
     phases: [3]
-    writes_states: [validator-review, validated-not-executed, revision-needed]
-    skills: [spec-driven-development, code-review-checklist]
+    writes_states: [validator-review, validated-not-executed, revision-needed, corrupted-state]
+    reads_states: [planning, awaiting-human-plan-approval]
+    skills: [spec-driven-development, openapi-standard, restful-standard, context-pinning,
+             workspace-coordination, graphify, springboot-stack, fastapi-stack,
+             keycloak-standard, security-standards, postgresql-standard]
 
   enterprise-spec-validator:
     role: validator
     phases: [3]
     writes_states: [validator-review]
-    skills: [enterprise-architecture-standard, workspace-coordination]
+    skills: [enterprise-architecture-standard, workspace-coordination, spec-driven-development,
+             context-pinning, graphify]
 
   api-governance-agent:
     role: validator
     phases: [3]
-    skills: [api-governance-linter, openapi-standard, restful-standard]
+    skills: [api-governance-linter, openapi-standard, openapi-first, restful-standard,
+             springboot-java-rest-error-response-standards,
+             springboot-kotlin-rest-error-response-standards,
+             fastapi-rest-error-response-standards]
 
   task-decomposer:
     role: consultant
     phases: [4]
     gate_required: G1
     writes_states: [decomposition-completed]
-    skills: [spec-driven-development, context-pinning]
+    reads_states: [awaiting-human-plan-approval, validated-not-executed]
+    skills: [spec-driven-development, context-pinning, testing-strategy,
+             flyway-migrations, security-standards, keycloak-standard]
 
   executor:
     role: worker
@@ -59,54 +87,68 @@ agents:
     gate_required: G1
     reads_states: [awaiting-human-plan-approval, validated-not-executed]
     writes_states: [in_progress]
-    skills: [springboot-stack, java-stack, kotlin-stack, fastapi-stack, nodejs-stack,
-             golang-stack, react-stack, angular-stack, hexagonal-architecture,
-             repository-dto-patterns, jpa-stack, flyway-migrations, security-standards,
-             keycloak-standard, testing-strategy, pre-flight-check, context-pinning]
+    skills: [springboot-stack, java-stack, kotlin-stack, golang-stack, fastapi-stack,
+             nodejs-stack, react-stack, angular-stack, hexagonal-architecture,
+             repository-dto-patterns, jpa-stack, flyway-migrations,
+             postgresql-standard, mysql-standard, oracle-standard, sqlserver-standard,
+             n8n-stack, security-standards, keycloak-standard, testing-strategy,
+             pre-flight-check, context-pinning, bug-fixing-workflow]
 
   architect-executor:
     role: worker
     phases: [5-alt-sin-spec]
     skills: [hexagonal-architecture, springboot-stack, fastapi-stack, nodejs-stack,
-             react-stack, angular-stack, golang-stack, repository-dto-patterns,
-             testing-strategy, pre-flight-check]
+             react-stack, angular-stack, golang-stack, java-stack, kotlin-stack,
+             repository-dto-patterns, testing-strategy, pre-flight-check,
+             mysql-standard, oracle-standard, sqlserver-standard, n8n-stack,
+             bug-fixing-workflow, context-pinning]
 
   test-architect:
     role: consultant
     phases: [5]
-    skills: [testing-strategy]
+    reads_states: [validated-not-executed]
+    skills: [testing-strategy, performance-testing-k6, pre-flight-check, context-pinning,
+             springboot-stack, python-stack, fastapi-stack, nodejs-stack, jpa-stack]
 
   database-architect:
     role: worker
     phases: [5]
     skills: [flyway-migrations, zero-downtime-migrations, postgresql-standard,
-             mysql-standard, oracle-standard, sqlserver-standard, repository-dto-patterns]
+             mysql-standard, oracle-standard, sqlserver-standard, repository-dto-patterns,
+             jpa-stack, hexagonal-architecture, graphify]
 
   devops-architect:
     role: worker
     phases: [5, 7]
-    skills: [docker-standard, observability-standard, code-quality-and-sonarqube]
+    skills: [docker-standard, observability-standard, code-quality-and-sonarqube,
+             git-ops, security-standards]
 
   refactor:
     role: worker
     phases: [5]
+    reads_states: [validated-not-executed]
     skills: [refactor-patterns, refactor-hexagonal-bridge, hexagonal-architecture,
-             code-review-checklist]
+             design-patterns-standard, context-pinning, springboot-stack, fastapi-stack]
 
   documentation:
     role: worker
     phases: [5, 7]
-    skills: [documentation-lifecycle, documentation-standards]
+    reads_states: [validated-not-executed]
+    skills: [documentation-lifecycle, documentation-standards, context-pinning,
+             openapi-standard]
 
   functional-tester-agent:
     role: worker
     phases: [6, post-G2-regression]
-    skills: [functional-testing-standard, performance-testing-k6]
+    skills: [functional-testing-standard, performance-testing-k6, testing-strategy,
+             frontend-architecture, react-stack, angular-stack,
+             context-pinning, bug-fixing-workflow]
 
   bug-diagnostician:
     role: validator
     phases: [cualquier-fase-con-fallo]
-    skills: [root-cause-analysis, bug-fixing-workflow]
+    skills: [root-cause-analysis, bug-fixing-workflow, observability-standard,
+             context-pinning, graphify]
 
   spec-remediator:
     role: worker
@@ -119,18 +161,25 @@ agents:
   reviewer:
     role: validator
     phases: [6]
-    skills: [code-review-checklist, hexagonal-architecture, refactor-patterns]
+    skills: [code-review-checklist, hexagonal-architecture, testing-strategy,
+             security-standards, keycloak-standard,
+             springboot-stack, java-stack, kotlin-stack, python-stack, fastapi-stack,
+             jpa-stack, mysql-standard, oracle-standard, sqlserver-standard]
 
   security-reviewer:
     role: validator
     phases: [6]
-    skills: [security-standards, keycloak-standard]
+    skills: [security-standards, keycloak-standard, docker-standard,
+             observability-standard, spring-cloud-gateway, springboot-stack, fastapi-stack]
 
   final-validation:
     role: validator
     phases: [6]
     gate_produces: G2-input
-    skills: [pre-flight-check, testing-strategy, code-quality-and-sonarqube]
+    skills: [pre-flight-check, testing-strategy, code-quality-and-sonarqube,
+             security-standards, keycloak-standard, docker-standard,
+             observability-standard, documentation-lifecycle, documentation-standards,
+             context-pinning]
 
   git-executor:
     role: worker
@@ -142,14 +191,18 @@ agents:
   context-curator:
     role: consultant
     phases: [transversal]
-    skills: [context-curation, context-pinning]
+    reads_states: [awaiting-human-plan-approval, awaiting-human-qa-approval]
+    skills: [context-curation, context-pinning, spec-driven-development,
+             workspace-coordination, graphify]
 
   master-orchestrator:
     role: consultant
     phases: [transversal]
     delegates_to: [requirements-analyst, planner, task-decomposer, executor,
-                   test-architect, spec-validator, final-validation, git-executor]
-    skills: [context-curation, context-pinning, eval-ops-agent-benchmarks]
+                   architect-executor, test-architect, spec-validator, final-validation,
+                   git-executor, database-architect, devops-architect,
+                   functional-tester-agent, bug-diagnostician]
+    skills: []   # orquesta por delegación; consume workflow, no skills técnicas
 
   general:
     role: guardrail

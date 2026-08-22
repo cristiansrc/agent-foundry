@@ -10,6 +10,13 @@ echo ""
 echo "== Build: opencode =="
 python3 "$ROOT/adapters/shared/render.py"
 
-# Fase 5: chatgpt y kiro se agregan aqui cuando sus adapters existan.
+echo ""
+echo "== Build: chatgpt (Codex) =="
+python3 "$ROOT/adapters/chatgpt/render.py"
+
+echo ""
+echo "== Build: kiro =="
+python3 "$ROOT/adapters/kiro/render.py"
+
 echo ""
 echo "BUILD OK"

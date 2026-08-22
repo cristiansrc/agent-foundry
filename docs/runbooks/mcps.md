@@ -26,18 +26,13 @@ registra el qué y el por qué).
 ## Pendientes de decisión (no instalados)
 
 ### Visión para modelos sin visión (local, gratis)
-Requiere Ollama + un VLM:
-```bash
-ollama pull qwen3-vl:8b     # ~6GB, mejor balance
-```
-Opciones de servidor (elegir UNO):
-- **vision-sidecar-mcp** (xronocode): `analyze_ui_screenshot` con viewport hints,
-  OCR endurecido, detección de clipping — hecho para agentes + Playwright.
-- **mh-vision-mcp** (mohamedhusseinios): multi-provider (Ollama/OpenAI/Anthropic),
-  tools: describe_image, extract_ui, ocr, analyze_diagram.
+**RESUELTO 2026-08-22**: implementado como MCP propio `foundry-vision` contra
+LM Studio (ver sección siguiente). Alternativas descartadas: vision-sidecar
+(solo API nativa Ollama) y repos de terceros (riesgo de procedencia).
 
-Útil para: hyprmind-vision-analyst (fallback local), ui-designer (revisar
-artboards renderizados), cualquier agente texto-only que reciba screenshots.
+Requiere en LM Studio un modelo multimodal (qwen3-vl recomendado). Los Gemma
+E2B/E4B/12b-qat del catálogo actual NO exponen visión según LM Studio
+(`vision: false` en /api/v0/models).
 
 ### Por proyecto (activar cuando aplique)
 - **Postgres MCP Pro** (Crystal DBA): EXPLAIN + índices hipotéticos, modo

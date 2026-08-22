@@ -21,8 +21,9 @@ tiers:
 agent_tiers:
   master-orchestrator:    {tier: orchestration}
   hyprmind-orchestrator:  {tier: orchestration}
-  hyprmind-deep-thinker:  {tier: patterns_logic}
+  hyprmind-deep-thinker:  {tier: orchestration}
   hyprmind-vision-analyst: {tier: orchestration, requires: vision}
+  general:                {tier: orchestration}
   enterprise-architect:   {tier: macro_architecture}
   solution-architect:     {tier: patterns_logic}
   planner:                {tier: planning_governance}

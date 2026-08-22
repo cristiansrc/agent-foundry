@@ -1,0 +1,159 @@
+#!/usr/bin/env python3
+"""Renderizador del adapter OpenCode para agent-foundry.
+
+Lee core/agents/** (agnóstico) + profiles/*.yaml (bindings) y produce en
+adapters/opencode/out/ la configuración nativa de OpenCode con paridad 1:1:
+
+    out/agents/<nombre>.md   frontmatter final: description, mode, model,
+                             temperature, permission (orden idéntico al legacy)
+    out/skills/<skill>/...   copia directa de core/skills
+
+Reglas de binding:
+- modelo  = tier del agente -> primer modelo de tier_bindings del proveedor activo
+- temp    = permissions.yaml (fuente única)
+- perms   = permissions.yaml (edit/bash/execute); se omiten si no hay ninguno
+- vision  = si el agente exige vision, el modelo elegido debe soportarla
+"""
+import shutil
+import sys
+from pathlib import Path
+
+import yaml
+
+ROOT = Path(__file__).resolve().parents[2]
+CORE = ROOT / "core"
+PROFILES = ROOT / "profiles"
+OUT = ROOT / "adapters" / "opencode" / "out"
+INSTALLED_AGENTS = Path.home() / ".config" / "opencode" / "agents"
+
+PROVIDER = "opencode"
+
+
+def parse_frontmatter(text: str) -> tuple[dict, str]:
+    if not text.startswith("---"):
+        return {}, text
+    end = text.find("\n---", 3)
+    if end == -1:
+        return {}, text
+    fm = {}
+    for line in text[4:end].split("\n"):
+        if ":" in line:
+            k, v = line.split(":", 1)
+            fm[k.strip()] = v.strip()
+    body = text[end + 4:].lstrip("\n")
+    return fm, body
+
+
+def load_profiles() -> dict:
+    models = yaml.safe_load((PROFILES / "models.yaml").read_text(encoding="utf-8"))
+    perms = yaml.safe_load((PROFILES / "permissions.yaml").read_text(encoding="utf-8"))
+    return {"models": models, "perms": perms}
+
+
+def resolve_binding(agent: str, profiles: dict) -> dict:
+    mcfg, pcfg = profiles["models"], profiles["perms"]
+    provider = mcfg["providers"][PROVIDER]
+    if not provider.get("active"):
+        sys.exit(f"FAIL: proveedor {PROVIDER} inactivo en models.yaml")
+    info = mcfg["agent_tiers"].get(agent)
+    if not info:
+        sys.exit(f"FAIL: agente {agent} sin tier en models.yaml")
+    tier = info["tier"]
+    candidates = provider["tier_bindings"][tier]
+    primary_id = None
+    for slot in candidates:
+        model = provider["models"][slot]
+        if model.get("status") != "active":
+            continue
+        if info.get("requires") == "vision" and not model.get("vision"):
+            continue
+        primary_id = model["id"]
+        break
+    if primary_id is None:
+        sys.exit(f"FAIL: sin modelo activo para {agent} (tier {tier})")
+    p = pcfg["agents"].get(agent, {})
+    perm_keys = [k for k in ("edit", "bash", "execute") if k in p]
+    return {
+        "model": primary_id,
+        "temperature": p.get("temp"),
+        "permission": {k: p[k] for k in perm_keys},
+        "mode": p.get("mode"),
+        "tier": tier,
+    }
+
+
+def render_agent(src: Path, binding: dict) -> str:
+    fm, body = parse_frontmatter(src.read_text(encoding="utf-8"))
+    lines = ["---"]
+    desc = fm.get("description", "")
+    lines.append(f"description: {desc}")
+    lines.append(f"mode: {binding['mode'] or fm.get('mode', 'all')}")
+    lines.append(f"model: {binding['model']}")
+    lines.append(f"temperature: {binding['temperature']}")
+    if binding["permission"]:
+        lines.append("permission:")
+        for k, v in binding["permission"].items():
+            lines.append(f"  {k}: {v}")
+    lines.append("---")
+    return "\n".join(lines) + "\n\n" + body
+
+
+def parity_report(outdir: Path) -> list[str]:
+    diffs = []
+    if not INSTALLED_AGENTS.exists():
+        return ["(sin instalación previa en ~/.config/opencode/agents; se omite paridad)"]
+    for gen in sorted(outdir.glob("*.md")):
+        inst = INSTALLED_AGENTS / gen.name
+        if not inst.exists():
+            diffs.append(f"NUEVO: {gen.name}")
+            continue
+        if gen.read_text() != inst.read_text():
+            diffs.append(f"DIFIERE: {gen.name}")
+    for inst in sorted(INSTALLED_AGENTS.glob("*.md")):
+        if not (outdir / inst.name).exists():
+            diffs.append(f"SIN GENERAR (existe instalado): {inst.name}")
+    return diffs
+
+
+def main() -> int:
+    profiles = load_profiles()
+    if OUT.exists():
+        shutil.rmtree(OUT)
+    agents_out = OUT / "agents"
+    skills_out = OUT / "skills"
+    agents_out.mkdir(parents=True)
+
+    print(f"== Adapter {PROVIDER}: agentes ==")
+    count = 0
+    manifest = []
+    for src in sorted(CORE.glob("agents/**/*.md")):
+        name = src.stem
+        b = resolve_binding(name, profiles)
+        content = render_agent(src, b)
+        (agents_out / f"{name}.md").write_text(content, encoding="utf-8")
+        manifest.append({"agent": name, "tier": b["tier"], "model": b["model"]})
+        print(f"  {name:28s} [{b['tier']:20s}] -> {b['model']}")
+        count += 1
+
+    print(f"== Skills: copiando {CORE / 'skills'} ==")
+    shutil.copytree(CORE / "skills", skills_out)
+    n_skills = len(list(skills_out.glob("*/SKILL.md")))
+    print(f"  {n_skills} skills")
+
+    # Manifest + paridad
+    (OUT / "manifest.yaml").write_text(
+        yaml.safe_dump({"provider": PROVIDER, "agents": manifest}, sort_keys=False,
+                       allow_unicode=True), encoding="utf-8")
+    print("== Paridad contra ~/.config/opencode/agents ==")
+    diffs = parity_report(agents_out)
+    identical = count - len([d for d in diffs if not d.startswith("(sin")])
+    for d in diffs:
+        print(f"  {d}")
+    print(f"\nGenerados: {count} agentes, {n_skills} skills")
+    print(f"Iguales a lo instalado: {count - len(diffs)} | Diferencias: {len(diffs)}"
+          if diffs and not diffs[0].startswith("(") else f"Generados: {count}")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

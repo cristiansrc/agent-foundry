@@ -39,7 +39,19 @@ Origen: `/home/cristiansrc/Documentos/Proyectos/config-ai` (se congela como hist
 
 ## Pendientes declarados
 
-1. Adapter opencode con paridad 1:1 y build.sh (Fase 4).
-2. Adapters chatgpt + kiro: poblar bindings vacíos en profiles (Fase 5).
-3. Suite ambxst + linux-dev skills en docs/skills-src/ambxst (Fase 6).
-4. Validar matrix.yaml contra los prompts reales (Fase 7).
+1. Adapters chatgpt + kiro: poblar bindings vacíos en profiles (Fase 5).
+2. Suite ambxst + linux-dev skills en docs/skills-src/ambxst (Fase 6).
+3. Validar matrix.yaml contra los prompts reales (Fase 7).
+4. sync.sh de instalación y validador de estados (Fases 8-9).
+
+## Paridad del adapter opencode (verificada 2026-08-22)
+
+Build `adapters/opencode/out` vs instalación viva `~/.config/opencode/agents`:
+
+- **19/28 agentes idénticos byte-a-byte** (frontmatter + cuerpo).
+- **9/28 difieren solo por mejoras intencionales**: enlaces file:// rotos
+  eliminados, referencias a modelos neutralizadas en cuerpos, guardrail
+  `general` reescrito agnóstico, Validation Guard de spec-remediator basado
+  en identidad de agente y no en modelo.
+- Skills: 62 copiadas; las 3 canónicas ahora tienen SKILL.md en la raíz de su
+  carpeta (antes anidadas, p.ej. `python-stack/python-stack/SKILL.md`).

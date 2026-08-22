@@ -10,37 +10,37 @@ defaults:
 
 agents:
   # ── Workers ──────────────────────────────────────────────────────────────
-  executor:               {edit: allow, bash: allow, temp: 0.15}
-  architect-executor:     {edit: allow, bash: allow, temp: 0.15}
-  database-architect:     {edit: allow, bash: allow, temp: 0.10}
-  devops-architect:       {edit: allow, bash: allow, temp: 0.20}
-  refactor:               {edit: allow, bash: allow, temp: 0.20}
-  documentation:          {edit: allow, bash: deny, temp: 0.25}
-  spec-remediator:        {edit: allow, bash: deny, temp: 0.10}
-  functional-tester-agent: {edit: allow, bash: allow, temp: 0.20}
-  git-executor:           {edit: allow, bash: allow, temp: 0.10}
+  executor:               {edit: allow, bash: allow, temp: "0.15"}
+  architect-executor:     {edit: allow, bash: allow, temp: "0.15"}
+  database-architect:     {edit: allow, bash: allow, temp: "0.10"}
+  devops-architect:       {edit: allow, bash: allow, temp: "0.2"}
+  refactor:               {edit: allow, bash: allow, temp: "0.2"}
+  documentation:          {edit: allow, bash: deny, temp: "0.25"}
+  spec-remediator:        {edit: allow, bash: deny, temp: "0.1"}
+  functional-tester-agent: {edit: allow, bash: allow, temp: "0.2"}
+  git-executor:           {edit: allow, bash: allow, temp: "0.1"}
 
   # ── Consultants ──────────────────────────────────────────────────────────
-  requirements-analyst:   {edit: allow, bash: deny, temp: 0.30}
-  planner:                {edit: allow, bash: deny, temp: 0.20}
-  solution-architect:     {edit: allow, bash: deny, temp: 0.20}
-  enterprise-architect:   {edit: allow, bash: deny, temp: 0.20}
-  test-architect:         {edit: allow, bash: allow, temp: 0.20}
-  task-decomposer:        {edit: allow, bash: deny, temp: 0.20}
-  context-curator:        {edit: deny, bash: deny, temp: 0.10}
-  master-orchestrator:    {edit: deny, bash: deny, execute: allow, temp: 0.15}
+  requirements-analyst:   {edit: allow, bash: deny, temp: "0.3"}
+  planner:                {edit: allow, bash: deny, temp: "0.2"}
+  solution-architect:     {edit: allow, bash: deny, temp: "0.2"}
+  enterprise-architect:   {edit: allow, bash: deny, temp: "0.2"}
+  test-architect:         {edit: allow, bash: allow, temp: "0.2"}
+  task-decomposer:        {edit: allow, bash: deny, temp: "0.2"}
+  context-curator:        {edit: deny, bash: deny, temp: "0.10"}
+  master-orchestrator:    {edit: deny, bash: deny, execute: allow, temp: "0.15"}
 
   # ── Validators ───────────────────────────────────────────────────────────
-  spec-validator:         {edit: allow, bash: deny, temp: 0.10}
-  enterprise-spec-validator: {edit: allow, bash: deny, temp: 0.10}
-  api-governance-agent:   {edit: deny, bash: allow, temp: 0.10}
-  bug-diagnostician:      {edit: deny, bash: allow, temp: 0.10}
-  reviewer:               {edit: deny, bash: allow, temp: 0.10}
-  security-reviewer:      {edit: deny, bash: allow, temp: 0.10}
-  final-validation:       {edit: deny, bash: allow, temp: 0.10}
+  spec-validator:         {edit: allow, bash: deny, temp: "0.1"}
+  enterprise-spec-validator: {edit: allow, bash: deny, temp: "0.1"}
+  api-governance-agent:   {edit: deny, bash: allow, temp: "0.10"}
+  bug-diagnostician:      {edit: deny, bash: allow, temp: "0.10"}
+  reviewer:               {edit: deny, bash: allow, temp: "0.1"}
+  security-reviewer:      {edit: deny, bash: allow, temp: "0.1"}
+  final-validation:       {edit: deny, bash: allow, temp: "0.1"}
 
   # ── Guardrails / Personal ────────────────────────────────────────────────
-  general:                {mode: subagent, edit: deny, bash: deny, temp: 0.10}
-  hyprmind-orchestrator:  {temp: 0.80}
-  hyprmind-deep-thinker:  {temp: 0.50}
-  hyprmind-vision-analyst: {temp: 0.20}
+  general:                {mode: subagent, edit: deny, bash: deny, temp: "0.1"}
+  hyprmind-orchestrator:  {temp: "0.8"}
+  hyprmind-deep-thinker:  {temp: "0.5"}
+  hyprmind-vision-analyst: {temp: "0.2"}

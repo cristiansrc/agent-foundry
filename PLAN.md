@@ -31,9 +31,16 @@ docs/             Documentación nueva del proyecto
 | 4  | Adapter opencode con paridad 1:1 respecto a config-ai | ⬜ |
 | 5  | Adapters chatgpt (Codex CLI) y kiro | ✅ Hecho (bindings de modelos pendientes de activar en profiles) |
 | 6  | Suite ambxst: shell-dev, plugins, theming, packaging + linux-dev | ✅ Hecho (5 skills nuevas en core/skills) |
-| 7  | Auditoría de coordinación agente-fase-skill (altas/bajas) | ⬜ |
-| 8  | Tooling + evals + CI (lint anti-drift, validador de estados) | 🔨 lint/build/sync listos; falta validador de estados y evals runner |
-| 9  | Cutover final e archivo de config-ai | ⬜ |
+| 7  | Auditoría de coordinación agente-fase-skill (altas/bajas) | ✅ Hecho (matrix v2; hallazgos 61→10 excepciones documentadas) |
+| 8  | Tooling + evals + CI (lint anti-drift, validador de estados) | ✅ lint/build/sync + validate-states.py + evals runner con 4 casos semilla |
+| 9  | Cutover final e archivo de config-ai | ⬜ requiere ejecutar sync.sh en vivo |
+
+Comandos nuevos:
+```bash
+python3 tooling/audit_matrix.py                    # auditoría de coordinación
+python3 tooling/validate-states.py <repo-activo>   # valida shared contexts SDD
+python3 evals/run.py evals/cases/spec-validator.yaml --executor opencode  # evals reales
+```
 
 Notas:
 - Fase 6: se eliminó el concepto de staging `docs/skills-src` — las skills

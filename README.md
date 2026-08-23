@@ -4,6 +4,33 @@ Fábrica de agentes y skills para entornos de desarrollo asistidos por IA.
 Fuente de verdad agnóstica de modelo y proveedor, con capa de binding por
 herramienta: **opencode**, **chatgpt** (Codex CLI) y **kiro**.
 
+### Índice
+
+- [Cómo funciona](#cómo-funciona)
+- [Roles de agentes](#roles-de-agentes)
+- [Reglas operativas críticas](#reglas-operativas-críticas)
+- [Comandos](#comandos)
+- [MCPs (Model Context Protocol) en OpenCode](#mcps-model-context-protocol-en-opencode)
+  - [Configuración de AWS](#configuración-de-aws)
+  - [¿Por qué visión local (qwen3-vl-8b) en vez de una API cloud?](#por-qué-visión-local-qwen3-vl-8b-en-vez-de-una-api-cloud)
+- [Agentes](#agentes)
+  - [Ciclo de desarrollo de software (26)](#ciclo-de-desarrollo-de-software-26)
+  - [Asistentes personales — HyprMind (3)](#asistentes-personales--hyprmind-3)
+- [Skills](#skills-73)
+  - [Arquitectura y Metodología](#arquitectura-y-metodología)
+  - [Backend y Lenguajes](#backend-y-lenguajes)
+  - [Datos y Mensajería](#datos-y-mensajería)
+  - [Frontend y Diseño UI/UX](#frontend-y-diseño-uiux)
+  - [Seguridad y Calidad](#seguridad-y-calidad)
+  - [Orquestación y Documentación](#orquestación-y-documentación)
+  - [Asistentes Personales](#asistentes-personales)
+  - [Sistema Local (ambxst / Linux)](#sistema-local-ambxst--linux)
+  - [Otras](#otras)
+- [Modelos por herramienta](#modelos-por-herramienta)
+  - [OpenCode](#opencode--bindings-activos)
+  - [ChatGPT (Codex CLI)](#chatgpt-codex-cli--sin-bindings-usa-default-del-proveedor)
+  - [Kiro](#kiro--sin-bindings-usa-default-del-proveedor)
+
 ## Cómo funciona
 
 ```

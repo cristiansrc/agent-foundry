@@ -51,6 +51,52 @@ tooling/lint.sh           # valida anti-drift y consistencia
 tooling/sync.sh           # instala las salidas generadas (~/.config/opencode, etc.)
 ```
 
+## MCPs (Model Context Protocol) en OpenCode
+
+Cinco MCPs extienden las capacidades de los agentes. Se configuran en
+`~/.config/opencode/opencode.json` y se instalan con `tooling/sync.sh`.
+
+| MCP | Tipo | Propósito |
+|-----|------|-----------|
+| **aws-mcp** | Local | Proxy oficial de AWS — expone S3, Lambda, DynamoDB, IAM, CloudWatch, etc. a través de MCP. Usa perfil `merkee` via `AWS_MCP_PROXY_PROFILES`. |
+| **playwright** | Local | Control de navegador headless — testing E2E, scraping web, screenshots para `ui-designer` y `functional-tester-agent`. |
+| **context7** | Remoto | Documentación actualizada de frameworks/librerías en tiempo real (override de conocimiento interno stale). |
+| **github** | Remoto + OAuth | Issues, PRs, repos, search y releases. Requiere autorización OAuth第一次 (un solo splash screen). |
+| **foundry-vision** | Local | Visión sobre imágenes (OCR, descripción de UI, análisis de capturas) corriendo en LM Studio con **qwen3-vl-8b**. Sin costo, sin salida de datos. |
+
+### Configuración de AWS
+
+Para que un agente IA configure `aws-mcp` en un entorno nuevo:
+
+```bash
+# 1. Asegurar que aws-cli esté instalado
+aws --version
+
+# 2. Autenticarse (primera vez, abre browser)
+aws login --profile merkee
+
+# 3. Verificar que el MCP pueda leer credenciales
+aws sts get-caller-identity --profile merkee
+```
+
+Las skills `signing-in-to-aws` y `aws-auth` guían el flujo completo (Cognito
+user pools, identity pools, tokens, Federación SAML/social). El MCP `aws-mcp`
+se encarga del transport y proxy; no necesitas instalar librerías adicionales.
+
+### ¿Por qué visión local (qwen3-vl-8b) en vez de una API cloud?
+
+| Razón | Cloud API | Local (qwen3-vl-8b) |
+|-------|-----------|----------------------|
+| **Privacidad** | Las imágenes viajan a servidores externos | Nunca salen de tu máquina |
+| **Costo** | $0.01-0.10/imagen | $0 — corre en tu RTX 4080 |
+| **Latencia** | 500ms-2s (red + cold start) | ~2-4s primera vez (carga a VRAM), <1s subsiguientes |
+| **Dependencia** | Necesita internet + API key | Funciona 100% offline |
+| **Calidad** | Depende del modelo cloud | qwen3-vl-8b: OCR 98%+ en pruebas internas |
+
+El MCP `foundry-vision` es una capa delgada (~150 líneas, `fastmcp`) que
+traduce el protocolo MCP a la API local de LM Studio. Se puede copiar a
+cualquier repo que use LM Studio — es independiente de agent-foundry.
+
 *Estado del plan: ver [PLAN.md](PLAN.md).*
 
 <!-- BEGIN:GENERATED-TABLES -->

@@ -147,42 +147,58 @@ providers:
         context: 1M
         vision: true
         cost: 2.2x
-        notes: Jul 2026. Orquestación superior, macro-arch, código pesado, vision.
+        notes: Jul 2026. Solo orquestación/vision. El más caro — reservar donde importa.
       sonnet5:
         id: claude-sonnet-5
         status: active
         context: 1M
         vision: true
         cost: 1.3x
-        notes: Jun 2026. Patrones, arquitectura, validación SDD, gobernanza.
-      qwen3_coder:
-        id: qwen3-coder-next
-        status: experimental
-        context: 256K
-        vision: false
-        cost: 0.05x
-        notes: Feb 2026. Ejecución SDD barata. Solo us-east-1. Sigue specs bien definidas.
+        notes: Jun 2026. Sweet spot razonamiento/costo. Arquitectura y patrones.
       haiku45:
         id: claude-haiku-4.5
         status: active
         context: 200K
         vision: false
         cost: 0.4x
-        notes: Review, docs, curación, tareas ligeras.
+        notes: Validación SDD, review, docs, curación. 3x más barato que Sonnet.
+      qwen3_coder:
+        id: qwen3-coder-next
+        status: experimental
+        context: 256K
+        vision: false
+        cost: 0.05x
+        notes: Feb 2026. Solo us-east-1. 26x más barato que Sonnet; ideal con SDD — sigue specs al pie de la letra.
+      gpt56_luna:
+        id: gpt-5.6-luna
+        status: experimental
+        context: 272K
+        vision: true
+        cost: 0.1x
+        notes: Jul 2026. En Kiro vía OpenAI. 13x más barato que Sonnet; planning/gobernanza estructurada y validación ligera.
+      gpt56_terra:
+        id: gpt-5.6-terra
+        status: experimental
+        context: 272K
+        vision: true
+        cost: 1.0x
+        notes: Jul 2026. Balance en Kiro. Alternativa a Sonnet para código pesado si Qwen falla.
     tier_bindings:
       orchestration:       [opus5]
-      macro_architecture:  [opus5]
+      macro_architecture:  [sonnet5]
       patterns_logic:      [sonnet5]
-      planning_governance: [sonnet5]
-      sdd_validation:      [sonnet5]
+      planning_governance: [gpt56_luna]
+      sdd_validation:      [haiku45]
       code_volume:         [qwen3_coder]
-      code_heavy:          [sonnet5]
+      code_heavy:          [gpt56_terra]
       ui_e2e:              [qwen3_coder]
     fallbacks:
-      opus5:      [sonnet5]
-      sonnet5:    [haiku45]
-      qwen3_coder: [haiku45]
-      haiku45:    [sonnet5]
+      opus5:       [sonnet5]
+      sonnet5:     [haiku45, gpt56_terra]
+      gpt56_luna:  [haiku45]
+      haiku45:     [gpt56_luna]
+      qwen3_coder: [haiku45, gpt56_terra]
+      gpt56_terra: [sonnet5]
 
 # ── 4. Bloqueados (nunca asignar) ──────────────────────────────────────────
 blocked:

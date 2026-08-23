@@ -366,17 +366,17 @@ cualquier repo que use LM Studio — es independiente de agent-foundry.
 
 | Agente | Modelo de ejecución |
 |--------|--------------------|
-| `api-governance-agent` | `claude-sonnet-5` |
-| `architect-executor` | `claude-sonnet-5` |
-| `bug-diagnostician` | `claude-sonnet-5` |
-| `context-curator` | `claude-sonnet-5` |
-| `database-architect` | `claude-sonnet-5` |
+| `api-governance-agent` | `gpt-5.6-luna` |
+| `architect-executor` | `gpt-5.6-terra` |
+| `bug-diagnostician` | `gpt-5.6-terra` |
+| `context-curator` | `claude-haiku-4.5` |
+| `database-architect` | `gpt-5.6-terra` |
 | `devops-architect` | `qwen3-coder-next` |
-| `documentation` | `claude-sonnet-5` |
-| `enterprise-architect` | `claude-opus-5` |
-| `enterprise-spec-validator` | `claude-sonnet-5` |
+| `documentation` | `claude-haiku-4.5` |
+| `enterprise-architect` | `claude-sonnet-5` |
+| `enterprise-spec-validator` | `claude-haiku-4.5` |
 | `executor` | `qwen3-coder-next` |
-| `final-validation` | `claude-sonnet-5` |
+| `final-validation` | `claude-haiku-4.5` |
 | `functional-tester-agent` | `qwen3-coder-next` |
 | `general` | `claude-opus-5` |
 | `git-executor` | `qwen3-coder-next` |
@@ -384,15 +384,15 @@ cualquier repo que use LM Studio — es independiente de agent-foundry.
 | `hyprmind-orchestrator` | `claude-opus-5` |
 | `hyprmind-vision-analyst` | `claude-opus-5` |
 | `master-orchestrator` | `claude-opus-5` |
-| `planner` | `claude-sonnet-5` |
-| `refactor` | `claude-sonnet-5` |
-| `requirements-analyst` | `claude-sonnet-5` |
-| `reviewer` | `claude-sonnet-5` |
-| `security-reviewer` | `claude-sonnet-5` |
+| `planner` | `gpt-5.6-luna` |
+| `refactor` | `gpt-5.6-terra` |
+| `requirements-analyst` | `claude-haiku-4.5` |
+| `reviewer` | `claude-haiku-4.5` |
+| `security-reviewer` | `claude-haiku-4.5` |
 | `solution-architect` | `claude-sonnet-5` |
-| `spec-remediator` | `claude-sonnet-5` |
-| `spec-validator` | `claude-sonnet-5` |
-| `task-decomposer` | `claude-sonnet-5` |
+| `spec-remediator` | `claude-haiku-4.5` |
+| `spec-validator` | `claude-haiku-4.5` |
+| `task-decomposer` | `gpt-5.6-luna` |
 | `test-architect` | `qwen3-coder-next` |
 | `ui-designer` | `claude-sonnet-5` |
 

@@ -153,12 +153,14 @@ def models_tables() -> str:
         info = tiers.get(agent)
         if not p.get("active") or not info:
             return "—"
-        for slot in p["tier_bindings"].get(info["tier"], []):
+        bindings = p["tier_bindings"].get(info["tier"], [])
+        for slot in bindings:
             m = p["models"][slot]
-            if m.get("status") == "active":
-                if info.get("requires") == "vision" and not m.get("vision"):
-                    continue
-                return f"`{m['id']}`"
+            if m.get("status") not in ("active", "experimental"):
+                continue
+            if info.get("requires") == "vision" and not m.get("vision"):
+                continue
+            return f"`{m['id']}`"
         return "default del proveedor"
 
     lines = ["## Modelos por herramienta", ""]

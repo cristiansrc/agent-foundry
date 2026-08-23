@@ -28,8 +28,8 @@ herramienta: **opencode**, **chatgpt** (Codex CLI) y **kiro**.
   - [Otras](#otras)
 - [Modelos por herramienta](#modelos-por-herramienta)
   - [OpenCode](#opencode--bindings-activos)
-  - [ChatGPT (Codex CLI)](#chatgpt-codex-cli--sin-bindings-usa-default-del-proveedor)
-  - [Kiro](#kiro--sin-bindings-usa-default-del-proveedor)
+  - [ChatGPT (Codex CLI)](#chatgpt-codex-cli--bindings-activos)
+  - [Kiro](#kiro--bindings-activos)
 
 ## Cómo funciona
 
@@ -328,72 +328,72 @@ cualquier repo que use LM Studio — es independiente de agent-foundry.
 | `test-architect` | opencode/mimo-v2.5-free |
 | `ui-designer` | opencode/muse-spark-1.2-contributor-free |
 
-### ChatGPT (Codex CLI) — **sin bindings** (usa default del proveedor)
+### ChatGPT (Codex CLI) — bindings activos
 
 | Agente | Modelo de ejecución |
 |--------|--------------------|
-| `api-governance-agent` | — |
-| `architect-executor` | — |
-| `bug-diagnostician` | — |
-| `context-curator` | — |
-| `database-architect` | — |
-| `devops-architect` | — |
-| `documentation` | — |
-| `enterprise-architect` | — |
-| `enterprise-spec-validator` | — |
-| `executor` | — |
-| `final-validation` | — |
-| `functional-tester-agent` | — |
-| `general` | — |
-| `git-executor` | — |
-| `hyprmind-deep-thinker` | — |
-| `hyprmind-orchestrator` | — |
-| `hyprmind-vision-analyst` | — |
-| `master-orchestrator` | — |
-| `planner` | — |
-| `refactor` | — |
-| `requirements-analyst` | — |
-| `reviewer` | — |
-| `security-reviewer` | — |
-| `solution-architect` | — |
-| `spec-remediator` | — |
-| `spec-validator` | — |
-| `task-decomposer` | — |
-| `test-architect` | — |
-| `ui-designer` | — |
+| `api-governance-agent` | `gpt-5.6-terra` |
+| `architect-executor` | `gpt-5.6-sol` |
+| `bug-diagnostician` | `gpt-5.6-sol` |
+| `context-curator` | `gpt-5.6-terra` |
+| `database-architect` | `gpt-5.6-sol` |
+| `devops-architect` | `gpt-5.6-terra` |
+| `documentation` | `gpt-5.6-terra` |
+| `enterprise-architect` | `gpt-5.6-sol` |
+| `enterprise-spec-validator` | `gpt-5.6-terra` |
+| `executor` | `gpt-5.6-terra` |
+| `final-validation` | `gpt-5.6-terra` |
+| `functional-tester-agent` | `gpt-5.6-terra` |
+| `general` | `gpt-5.6-sol` |
+| `git-executor` | `gpt-5.6-terra` |
+| `hyprmind-deep-thinker` | `gpt-5.6-sol` |
+| `hyprmind-orchestrator` | `gpt-5.6-sol` |
+| `hyprmind-vision-analyst` | `gpt-5.6-sol` |
+| `master-orchestrator` | `gpt-5.6-sol` |
+| `planner` | `gpt-5.6-terra` |
+| `refactor` | `gpt-5.6-sol` |
+| `requirements-analyst` | `gpt-5.6-terra` |
+| `reviewer` | `gpt-5.6-terra` |
+| `security-reviewer` | `gpt-5.6-terra` |
+| `solution-architect` | `gpt-5.6-sol` |
+| `spec-remediator` | `gpt-5.6-terra` |
+| `spec-validator` | `gpt-5.6-terra` |
+| `task-decomposer` | `gpt-5.6-terra` |
+| `test-architect` | `gpt-5.6-terra` |
+| `ui-designer` | `gpt-5.6-sol` |
 
-### Kiro — **sin bindings** (usa default del proveedor)
+### Kiro — bindings activos
 
 | Agente | Modelo de ejecución |
 |--------|--------------------|
-| `api-governance-agent` | — |
-| `architect-executor` | — |
-| `bug-diagnostician` | — |
-| `context-curator` | — |
-| `database-architect` | — |
-| `devops-architect` | — |
-| `documentation` | — |
-| `enterprise-architect` | — |
-| `enterprise-spec-validator` | — |
-| `executor` | — |
-| `final-validation` | — |
-| `functional-tester-agent` | — |
-| `general` | — |
-| `git-executor` | — |
-| `hyprmind-deep-thinker` | — |
-| `hyprmind-orchestrator` | — |
-| `hyprmind-vision-analyst` | — |
-| `master-orchestrator` | — |
-| `planner` | — |
-| `refactor` | — |
-| `requirements-analyst` | — |
-| `reviewer` | — |
-| `security-reviewer` | — |
-| `solution-architect` | — |
-| `spec-remediator` | — |
-| `spec-validator` | — |
-| `task-decomposer` | — |
-| `test-architect` | — |
-| `ui-designer` | — |
+| `api-governance-agent` | `claude-sonnet-5` |
+| `architect-executor` | `claude-opus-5` |
+| `bug-diagnostician` | `claude-opus-5` |
+| `context-curator` | `claude-sonnet-5` |
+| `database-architect` | `claude-opus-5` |
+| `devops-architect` | `claude-sonnet-5` |
+| `documentation` | `claude-sonnet-5` |
+| `enterprise-architect` | `claude-opus-5` |
+| `enterprise-spec-validator` | `claude-sonnet-5` |
+| `executor` | `claude-sonnet-5` |
+| `final-validation` | `claude-sonnet-5` |
+| `functional-tester-agent` | `claude-sonnet-5` |
+| `general` | `claude-opus-5` |
+| `git-executor` | `claude-sonnet-5` |
+| `hyprmind-deep-thinker` | `claude-opus-5` |
+| `hyprmind-orchestrator` | `claude-opus-5` |
+| `hyprmind-vision-analyst` | `claude-opus-5` |
+| `master-orchestrator` | `claude-opus-5` |
+| `planner` | `claude-sonnet-5` |
+| `refactor` | `claude-opus-5` |
+| `requirements-analyst` | `claude-sonnet-5` |
+| `reviewer` | `claude-sonnet-5` |
+| `security-reviewer` | `claude-sonnet-5` |
+| `solution-architect` | `claude-opus-4.8` |
+| `spec-remediator` | `claude-sonnet-5` |
+| `spec-validator` | `claude-sonnet-5` |
+| `task-decomposer` | `claude-sonnet-5` |
+| `test-architect` | `claude-sonnet-5` |
+| `ui-designer` | `claude-opus-4.8` |
 
 <!-- END:GENERATED-TABLES -->

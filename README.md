@@ -12,7 +12,10 @@ core/  ──►  profiles/  ──►  adapters/  ──►  configs instaladas
 
 1. **`core/`**: agentes (`sdlc/workers|consultants|validators|guardrails`,
    `personal/`), skills y workflow (ciclo de vida SDLC-IA con gates humanos).
-   Ningún archivo aquí nombra modelos, proveedores ni rutas de herramientas.
+   Aquí NO viven bindings: ningún archivo nombra modelos ni proveedores
+   concretos ni rutas de herramientas. Las referencias a modelos son genéricas
+   («el modelo asignado en el perfil de ejecución»); los valores reales
+   (qué modelo, qué temperatura, qué permisos) están únicamente en `profiles/`.
 2. **`profiles/`**: qué modelo usa cada agente por tier/proveedor
    (`models.yaml`) y permisos por rol (`permissions.yaml`). Único lugar a
    tocar cuando cambia un modelo o un plan.

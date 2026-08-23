@@ -109,30 +109,30 @@ providers:
         context: 272K
         vision: true
         cost: 2.4x
-        notes: Flagship. Orquestación, arquitectura macro, código pesado.
+        notes: Flagship. Orquestación superior, vision, tareas que requieren razonamiento denso.
       terra:
         id: gpt-5.6-terra
         status: active
         context: 272K
         vision: true
         cost: 1.0x
-        notes: Equilibrado. Estándar, validación, gobernanza, ejecución.
+        notes: Equilibrado. Arquitectura, código pesado, validación SDD.
       luna:
         id: gpt-5.6-luna
         status: active
         context: 272K
         vision: true
         cost: 0.1x
-        notes: Rápido y barato. Review, docs, curación, tareas ligeras.
+        notes: Rápido y barato. Ejecución SDD, review, docs, curación, gobernanza.
     tier_bindings:
       orchestration:       [sol]
-      macro_architecture:  [sol]
-      patterns_logic:      [sol]
-      planning_governance: [terra]
-      sdd_validation:      [terra]
-      code_volume:         [terra]
-      code_heavy:          [sol]
-      ui_e2e:              [terra]
+      macro_architecture:  [terra]
+      patterns_logic:      [terra]
+      planning_governance: [luna]
+      sdd_validation:      [luna]
+      code_volume:         [luna]
+      code_heavy:          [terra]
+      ui_e2e:              [luna]
     fallbacks:
       sol:  [terra]
       terra: [luna]
@@ -147,21 +147,21 @@ providers:
         context: 1M
         vision: true
         cost: 2.2x
-        notes: Jul 2026. Orquestación, arquitectura macro, código pesado.
-      opus48:
-        id: claude-opus-4.8
-        status: active
-        context: 1M
-        vision: true
-        cost: 2.2x
-        notes: May 2026. Patrones, arquitectura, refactor.
+        notes: Jul 2026. Orquestación superior, macro-arch, código pesado, vision.
       sonnet5:
         id: claude-sonnet-5
         status: active
         context: 1M
         vision: true
         cost: 1.3x
-        notes: Jun 2026. Estándar, validación, ejecución, gobernanza.
+        notes: Jun 2026. Patrones, arquitectura, validación SDD, gobernanza.
+      qwen3_coder:
+        id: qwen3-coder-next
+        status: experimental
+        context: 256K
+        vision: false
+        cost: 0.05x
+        notes: Feb 2026. Ejecución SDD barata. Solo us-east-1. Sigue specs bien definidas.
       haiku45:
         id: claude-haiku-4.5
         status: active
@@ -169,34 +169,20 @@ providers:
         vision: false
         cost: 0.4x
         notes: Review, docs, curación, tareas ligeras.
-      gpt56_sol:
-        id: gpt-5.6-sol
-        status: experimental
-        context: 272K
-        vision: true
-        cost: 2.4x
-        notes: Jul 2026. Alternativa OpenAI para orquestación.
-      gpt56_luna:
-        id: gpt-5.6-luna
-        status: experimental
-        context: 272K
-        vision: true
-        cost: 0.1x
-        notes: Jul 2026. Alternativa OpenAI para tareas ligeras.
     tier_bindings:
-      orchestration:       [opus5, gpt56_sol]
+      orchestration:       [opus5]
       macro_architecture:  [opus5]
-      patterns_logic:      [opus48]
+      patterns_logic:      [sonnet5]
       planning_governance: [sonnet5]
       sdd_validation:      [sonnet5]
-      code_volume:         [sonnet5]
-      code_heavy:          [opus5, opus48]
-      ui_e2e:              [sonnet5]
+      code_volume:         [qwen3_coder]
+      code_heavy:          [sonnet5]
+      ui_e2e:              [qwen3_coder]
     fallbacks:
-      opus5:   [opus48, sonnet5]
-      opus48:  [opus5]
-      sonnet5: [haiku45]
-      haiku45: [sonnet5]
+      opus5:      [sonnet5]
+      sonnet5:    [haiku45]
+      qwen3_coder: [haiku45]
+      haiku45:    [sonnet5]
 
 # ── 4. Bloqueados (nunca asignar) ──────────────────────────────────────────
 blocked:

@@ -69,6 +69,13 @@ Ver `docs/migration-notes.md` para decisiones detalladas de migración.
   Decisión de fondo: revisión de código SE MANTIENE (contrario al "no leer
   código" literal de Uncle Bob); lo que se adopta es su profundidad por riesgo
   y el arbitraje por suites ya escritas.
+- **Templates de documentos SDD, 2026-08-24**: `templates/` pasa de solo
+  MEMORY.md a cubrir todo el ciclo: `sdd-context.md` (pasa validate-states.py
+  con 0 errores; firmas de gates como comentarios para no falsificarlas),
+  `requirements-brief.md`, `delta-spec.md`, `task-board.md`,
+  `design-readme.md`, `technical-debt.md`. `scaffold-project.sh` los instala en
+  `docs/templates/` del repo activo. Fuente de formato: las skills dueñas de
+  cada documento, no invención nueva.
 
 ## Mejoras de coordinación pendientes de discutir (Fase 7)
 

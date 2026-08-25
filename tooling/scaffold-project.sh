@@ -29,6 +29,16 @@ if [ ! -f MEMORY.md ]; then
   echo "  creado: MEMORY.md"
 fi
 
+# 4b. Plantillas de documentos SDD disponibles en el repo activo
+if [ ! -d docs/templates ]; then
+  mkdir -p docs/templates
+  for t in sdd-context requirements-brief delta-spec task-board design-readme technical-debt; do
+    cp "$FOUNDRY/templates/$t.md" "docs/templates/$t.md"
+  done
+  echo "  creado: docs/templates/ (sdd-context, requirements-brief, delta-spec,"
+  echo "          task-board, design-readme, technical-debt)"
+fi
+
 # 5. Pre-push hook (protección de gates)
 bash "$FOUNDRY/tooling/hooks/install-pre-push.sh"
 
@@ -50,6 +60,7 @@ if [ ! -f AGENTS.md ]; then
 
 ## Flujo de trabajo (agent-foundry)
 - Ciclo SDD: docs/specs/ — estados y gates según agent-foundry/core/workflow/states.md
+- Plantillas de documentos por incremento: docs/templates/ (copiar y renombrar con <increment-name> real; nunca guardar placeholders literales)
 - Git exclusivo del agente git-executor
 - Antes de push a ramas estables: pre-push hook exige firma Gate 2
 - Lecciones aprendidas: MEMORY.md (leer antes de diseñar/implementar)

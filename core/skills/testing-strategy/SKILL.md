@@ -1,6 +1,6 @@
 ---
 name: testing-strategy
-description: Estrategia unificada de pruebas, metodología TDD (Red-Green-Refactor), pruebas de concurrencia, tests de arquitectura y cobertura mínima para múltiples stacks.
+description: Estrategia unificada de pruebas, metodología TDD (Red-Green-Refactor), pruebas de concurrencia, tests de arquitectura, cobertura mínima, definición operativa de módulo testable y política de mutación diferencial para múltiples stacks.
 ---
 
 # Estrategia Global de Pruebas, TDD y Cobertura
@@ -130,6 +130,24 @@ graph LR
 | **Transporte & UI** | Controllers, Exception Handlers, State Guards | DTOs pasivos de datos sin lógica |
 | **Código Generado** | NO testear código generado por OpenAPI Generator o MapStruct |
 
+### Definición operativa de módulo testable
+
+La exclusión del cómputo de cobertura NO es un permiso para escribir código no
+testeado: es una frontera arquitectónica obligatoria.
+
+- **Módulo testable**: toda lógica que decide comportamiento (reglas de negocio,
+  transformaciones, cálculos, orquestación). Participa de cobertura, mutación,
+  CRAP y DRY.
+- **Adaptador de entorno** (environmentally unsuitable): código que abre GUIs,
+  toca dispositivos/red real, lanza errores de entorno o cuelga bajo ejecución
+  automatizada. Debe ser un **shell mínimo y tonto** (traduce llamadas, no
+  decide nada); queda EXCLUIDO de las herramientas que ejecutan tests.
+- **Regla de diseño**: maximizar el núcleo testeable y minimizar la superficie
+  del adaptador. Si una regla de negocio vive dentro de un adaptador de entorno,
+  moverla a un módulo testable es refactor obligatorio, no mejora opcional.
+- Al refactorizar, mover comportamiento de adaptadores hacia módulos testeables
+  preserva la cobertura agregada; crear adaptadores gordos nuevos sí la viola.
+
 ---
 
 ## 4. Herramientas por Stack Tecnológico
@@ -148,3 +166,54 @@ graph LR
 - 🚫 **Bloquear**: Si la cobertura por archivo testable queda por debajo del **85%**.
 - 🚫 **Bloquear**: Si las pruebas utilizan bases de datos H2 o mocks que simulan comportamiento de persistencia real en lugar de Testcontainers.
 - 🚫 **Bloquear**: Si las pruebas de arquitectura de ArchUnit detectan que `domain` depende de `infrastructure`.
+- 🚫 **Bloquear**: Si un refactor debilita, borra o salta aserciones existentes para pasar la suite (ver §6).
+
+---
+
+## 6. Política de Endurecimiento: Mutación Diferencial, Streams y Property Tests
+
+Política agnóstica de herramienta (los comandos por stack viven en
+`code-quality-and-sonarqube`). Define QUÉ se exige, no con qué binario.
+
+### A. Dos streams en verde juntos
+
+Al cerrar la ejecución de un incremento (estado `in_progress` → revisión),
+el árbol debe quedar con **ambos streams en verde simultáneamente**:
+
+1. Stream unitario + integración (la suite rápida).
+2. Stream de aceptación/E2E del incremento (si existe suite definida).
+
+Un stream verde con el otro rojo NO es done: es regresión.
+
+### B. Mutación siempre diferencial
+
+- La mutación corre contra el **manifiesto/cache incremental** y acotada a los
+  archivos/funciones del diff; prohibido el barrido full-suite como rutina.
+- El barrido completo solo procede en arranque frío del proyecto o por
+  solicitud explícita del humano (costo O(código total)).
+- Los sobrevivientes se atacan añadiendo tests dirigidos al camino mutado;
+  luego se re-corre la mutación **solo** para confirmar los kills (diferencial).
+
+### C. Reglas para matar mutants (innegociables)
+
+1. **Solo se AÑADEN tests.** Prohibido debilitar aserciones, borrar tests,
+   alterar source o tocar specs para que un mutant muera.
+2. Un survivor que revela un bug REAL de producción no se "testea": se reporta
+   como hallazgo (ruta `bug-diagnostician` / fix), nunca se escribe un test que
+   consagre el comportamiento erróneo.
+3. Mutants equivalentes (sin efecto observable) se DOCUMENTAN en el reporte,
+   no se persiguen.
+4. El refactor jamás corre para "hacer pasar" mutants: la fuente manda sobre el
+   test solo cuando existe bug confirmado y decidido.
+
+### D. Property tests: carril aparte (opt-in)
+
+- Las pruebas de propiedades (invariantes, idempotencia, round-trips, rangos
+  amplios) viven FUERA del gate normal: no cuentan para el 85%, no entran en la
+  mutación estándar ni en el CI obligatorio.
+- Se ejecutan como comando explícito separado cuando el rol lo posee o el
+  humano las pide.
+- Si el proyecto las adopta, su comando se declara junto a la suite principal
+  para que quien verifica pueda invocarlo a demanda.
+
+---

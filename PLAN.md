@@ -58,6 +58,17 @@ Ver `docs/migration-notes.md` para decisiones detalladas de migración.
 - **Skills duplicadas anidadas** (`python-stack/python-stack/`, etc.): la versión
   canónica es la anidada con frontmatter YAML (es la instalada en ~/.config/opencode).
 - **config-ai**: se congela como histórico al completar el cutover.
+- **Herencia DAE/swarm-forge (R.C. Martin), 2026-08-24**: sin agentes ni skills
+  nuevos (anti-solape): política de mutación diferencial + módulos testeables +
+  property tests opt-in en `testing-strategy`; CRAP por diff y ejecución
+  incremental en `code-quality-and-sonarqube`; gauntlet acotado builder/crítico
+  en `design-to-code`; exit criteria por suite existente en `refactor`;
+  priorización CRAP-first de lectura en `reviewer`; handoff compacto en
+  `states.md §6`; verifier≠implementer + packs (duo/incremental/completo) como
+  gate determinista en matrix.yaml + `tooling/check_constraints.py` (lint).
+  Decisión de fondo: revisión de código SE MANTIENE (contrario al "no leer
+  código" literal de Uncle Bob); lo que se adopta es su profundidad por riesgo
+  y el arbitraje por suites ya escritas.
 
 ## Mejoras de coordinación pendientes de discutir (Fase 7)
 

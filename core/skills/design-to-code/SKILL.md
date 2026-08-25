@@ -50,6 +50,35 @@ Tras implementar, antes de reportar done:
 Discrepancias menores (<4px, antialiasing) se toleran; diferencias de
 estructura/jerarquía NO: corrige o bloquea.
 
+### Bucle Gauntlet acotado (para pantallas con barra de referencia)
+
+Cuando la comparación visual requiera iteración (fidelidad al artboard), se
+usa el bucle builder/crítico — acotado para no quemar tokens:
+
+- **Barra tangible**: el artboard elegido (`docs/designs/<increment-name>/`)
+  + screenshot del candidato capturado a la MISMA resolución. Sin barra
+  tangible no hay gauntlet: se aplica solo el self-test lineal de arriba.
+- **Crítico fresco**: subagente distinto del implementador, que SOLO compara
+  bar vs candidato y NUNCA edita código.
+- **Un gap por ronda**: el crítico devuelve el ÚNICO mayor gap, falsificable y
+  medible ("gap card-header es 16px; artboard 32px", "jerarquía: CTA pierde
+  peso visual"). Prohibido "se ve mal" o listas de 10 items.
+- **Rondas**: máximo 5 (default). El builder cierra el gap indicado y se
+  recaptura.
+
+**Condiciones de parada (verificar TODAS cada ronda):**
+
+| Condición | Acción |
+|---|---|
+| Crítico verdict: iguala o supera la barra | done + tabla de rondas |
+| Cap de rondas alcanzado | escalar humano con gap abierto registrado |
+| Mismo gap 2 rondas seguidas | parar: el builder no puede cerrarlo; escalar |
+| Ronda rompe un stream verde (tests) | revertir cambio de esa ronda; parar |
+
+Reporte final en task board: tabla ronda/gap/acción/verdict + screenshots lado
+a lado. El crítico jamás hereda contexto del builder (contexto fresco = juicio
+independiente); prohibido lanzar procesos detached dentro del crítico.
+
 ## Cambios de diseño a mitad de implementación
 
 Si durante el build surge una razón válida para cambiar el diseño aprobado:

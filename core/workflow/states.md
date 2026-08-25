@@ -122,3 +122,28 @@ Los gates G1/G2 NO son fases: son estados de espera definidos arriba.
 3. Un incremento solo puede estar en UN estado a la vez.
 4. Toda transición debe quedar registrada en el shared context con fecha y agente responsable.
 5. Self-healing: máximo 3 reintentos autónomos antes de pasar a `blocked` con escape-report.
+
+## 6. Handoff Compacto entre Agentes
+
+Toda transferencia de trabajo usa el formato compacto. Prohibido incrustar
+diffs completos, logs extensos o código en el shared context: los artefactos
+viven en archivos y se referencian por ruta.
+
+| Campo | Regla |
+|-------|-------|
+| `tarea` | nombre estable de la tarjeta del task board (no inventar otro) |
+| `estado_destino` | solo valores del enum canónico (§2) |
+| `artefactos` | rutas exactas tocadas/generadas, máximo 7 |
+| `commit` | SHA corto (≥7) cuando aplique; en la rama de feature del incremento |
+| `verificacion` | comando corrido + exit code por suite (sin salida cruda) |
+| `nota` | opcional; UNA línea, ≤80 caracteres |
+
+Reglas:
+
+1. Referencia por ruta, nunca contenido incrustado (salvo firmas de gate §3).
+2. La verificación declara COMANDO y RESULTADO; el log completo vive en archivo
+   o en la sesión, no en el shared context.
+3. Cada handoff ocupa ≤15 líneas del shared context.
+4. Handoff que viole el formato es hallazgo de proceso para `reviewer`
+   (drift de proceso), sin bloquear el flujo funcional salvo que oculte
+   verificación exigida.

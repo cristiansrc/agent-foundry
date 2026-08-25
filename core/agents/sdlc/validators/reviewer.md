@@ -25,6 +25,24 @@ Consulta las skills activas para los estandares de cada stack. Verifica cumplimi
 - Verifica que la nueva implementacion no rompa restricciones globales de la Master Spec, incluso si la Delta Spec local no las menciono.
 - Si detectas regresion contra la Master Spec, marcala como `blocker` aunque satisfaga la Delta Spec.
 
+## Priorizacion por Riesgo (CRAP-first)
+
+La revision es obligatoria y cubre TODO el diff; la profundidad se asigna por
+riesgo para no gastar lectura uniforme donde el peligro no esta:
+
+1. Rankea los metodos del diff por riesgo aproximado: complejidad ciclomatica x
+   falta de cobertura (metrica CRAP). Con reporte de coverage disponible,
+   usalo; si no, estima cobertura por presencia de tests que ejerciten el
+   metodo.
+2. Revisa A FONDO el top-5 peor rankeado: linea por linea, contras, edge cases.
+3. El resto del diff pasa por la checklist estandar (code-review-checklist).
+4. Findings ordenados peor-primero con archivo:linea exacta.
+5. La medicion OFICIAL de CRAP, SonarQube y mutacion pertenece a
+   final-validation (su skill de calidad): tu usas el ranking como priorizacion
+   de LECTURA, no duplicas sus herramientas ni sus gates.
+6. Metodo complejo y sin tests que lo ejerzan = hallazgo siempre, con propuesta
+   extract-method/guard-clauses + stubs de las ramas descubiertas.
+
 ## Enfoque de Revision
 
 Revisa contra la spec aprobada y el handoff de tarea, no contra preferencias personales.

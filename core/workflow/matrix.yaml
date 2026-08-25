@@ -140,7 +140,8 @@ agents:
     phases: [execution]
     reads_states: [validated-not-executed]
     skills: [refactor-patterns, refactor-hexagonal-bridge, hexagonal-architecture,
-             design-patterns-standard, context-pinning, springboot-stack, fastapi-stack]
+             design-patterns-standard, testing-strategy, context-pinning,
+             springboot-stack, fastapi-stack]
 
   documentation:
     role: worker
@@ -246,3 +247,38 @@ gates:
     name: awaiting-human-qa-approval
     signature: "## Human QA Approval: approved_by_user"
     blocks: [git-executor]
+
+# ── Restricciones estructurales (gate determinista: tooling/check_constraints.py) ──
+constraints:
+  verifier_independence:
+    description: >
+      El validador que certifica el trabajo de una fase nunca es el agente que
+      lo implemento (roles disjuntos). Aplica a quien EJECUTA la
+      implementacion de la tarea, no al orquestador que delega.
+    forbidden_pairs:
+      executor: [reviewer, security-reviewer, final-validation]
+      architect-executor: [reviewer, security-reviewer, final-validation]
+      refactor: [final-validation]
+    invariants:
+      - los validadores no escriben estados de ejecucion (in_progress) ni de
+        promocion (merged)
+      - la re-verificacion post-refactor exige suites existentes en verde
+        (testing-strategy §6), no tests reescritos
+
+# ── Perfiles de participacion por tamano de tarea (heredado de swarm packs) ──
+# Acotan QUE agentes se activan; JAMAS omiten gates ni estados del lifecycle.
+packs:
+  duo:
+    activa: [executor, reviewer]
+    soporte_bajo_demanda: [test-architect]
+    aplica_a: tarea pequena autocontenida dentro de un incremento ya aprobado,
+      sin cambios de contratos OpenAPI, schema de BD ni UI nueva
+  incremental:
+    activa: [executor, refactor, reviewer, final-validation]
+    soporte_bajo_demanda: [database-architect, devops-architect, documentation,
+                           functional-tester-agent]
+    aplica_a: mejora o refactor de alcance medio sobre feature existente;
+      refactor entra solo si hay deuda de estructura, no por rutina
+  completo:
+    activa: ciclo completo fases 1-7 del lifecycle
+    aplica_a: nuevos features e incrementos con delta spec completa

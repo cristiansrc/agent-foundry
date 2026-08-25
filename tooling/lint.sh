@@ -49,6 +49,15 @@ else
   echo "SKIP (pyyaml no disponible)"
 fi
 
+echo "== Constraints: independencia verifier/implementer y packs =="
+if command -v python3 >/dev/null && python3 -c 'import yaml' 2>/dev/null; then
+  if ! python3 "$ROOT/tooling/check_constraints.py"; then
+    fail "constraints del workflow violadas"
+  fi
+else
+  echo "SKIP (pyyaml no disponible)"
+fi
+
 echo ""
 if [ "$ERRORS" -eq 0 ]; then
   echo "LINT OK"

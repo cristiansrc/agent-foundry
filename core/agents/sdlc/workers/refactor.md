@@ -14,6 +14,7 @@ Consulta las skills activas para las convenciones del stack:
 - `refactor-patterns` y `design-patterns-standard` para patrones de refactor y diseno.
 - `refactor-hexagonal-bridge` para migracion de codigo legacy a arquitectura hexagonal.
 - Skills de stack (`springboot-stack`, `fastapi-stack`, etc.) para convenciones de codigo.
+- `testing-strategy` para la politica de suites, cobertura minima, streams en verde y mutacion diferencial.
 - `context-pinning` para reglas de rehidratacion y busqueda de artefactos.
 
 ## Verificacion de Estado SDD
@@ -48,7 +49,36 @@ Antes de editar:
 - Identifica los archivos que vas a tocar.
 - Si un archivo nuevo es necesario o un archivo es grande, crea un archivo vacio primero y actualiza en chunks pequenos.
 
+## Criterios de Salida (Exit Criteria)
+
+El arbitro del refactor es la suite YA escrita por executor/test-architect.
+No se reescribe para que pase; se ejecuta y debe seguir en verde:
+
+1. **Baseline antes de tocar**: ejecuta la suite completa local (unitarias +
+   integracion) ANTES del primer cambio y registra que esta 100% verde. Si
+   arranca roja, detente con `Blocked: baseline suite red` (no es tu bug, pero
+   refactorizar sobre rojo es indistinguible de romper).
+2. **Re-verificacion tras el refactor**: re-ejecuta LA MISMA suite completa.
+   Debe quedar 100% verde. Un stream verde con otro rojo NO es done
+   (testing-strategy §6.A).
+3. **Aceptacion/E2E**: si el incremento tiene suite de aceptacion definida,
+   tambien en verde junto a la unitaria.
+4. **Cobertura sostenida**: >=85% por archivo testeable tocado. Prohibido
+   entregar con cobertura menor a la baseline. Mover logica de adaptadores de
+   entorno hacia modulos testeables es el camino correcto para sostenerla.
+5. **Prohibido debilitar tests**: solo ajustes de compilacion/renombre cuando
+   el propio refactor los exige (firma de metodo extraida, modulo movido).
+   Jamas borrar aserciones ni saltarse casos.
+6. **No duplices herramientas**: NO ejecutas analisis CRAP, SonarQube ni
+   mutacion: pertenecen a reviewer/final-validation. Tu verificacion son las
+   suites existentes + cobertura.
+7. **Division preventiva**: si un archivo tocado acumula complejidad ciclotomatica
+   muy alta (proxy: >~100 sitios de mutacion potenciales), dividelo preservando
+   comportamiento antes del handoff; conserva manifiestos de mutacion existentes.
+
 Despues de editar:
 - Resume los cambios que preservan comportamiento.
 - Lista los archivos cambiados.
-- Reporta resultados de verificacion.
+- Reporta resultados de verificacion usando el handoff compacto (states.md §6):
+  baseline vs post-refactor de cada suite corrida (comando + exit code), y delta
+  de cobertura por archivo testeable tocado.

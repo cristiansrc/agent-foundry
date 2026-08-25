@@ -76,6 +76,7 @@ Ver `docs/migration-notes.md` para decisiones detalladas de migración.
   `design-readme.md`, `technical-debt.md`. `scaffold-project.sh` los instala en
   `docs/templates/` del repo activo. Fuente de formato: las skills dueñas de
   cada documento, no invención nueva.
+- **Stack Shell/QML (ambxst) en calidad/testing, 2026-08-24**: filas qmltestrunner+bats+kcov+qmllint/shellcheck en tablas de testing-strategy y code-quality; mutación y CRAP declarados NO disponibles para QML (fallback: gauntlet visual + Gate 2; prohibidos proxies caseros); variante Quickshell de verify-code.sh vive en code-quality §4 con referencia cruzada desde ambxst-packaging (fuente única del script).
 
 ## Mejoras de coordinación pendientes de discutir (Fase 7)
 

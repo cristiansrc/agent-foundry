@@ -37,8 +37,11 @@ Cómo empaquetar, instalar y distribuir el fork personal de ambxst.
 1. Versión bump en archivo `version`.
 2. Probar instalación limpia en VM o entorno desechable si el cambio toca deps.
 3. Verificar arranque: `qs -p shell.qml` sin errores en log.
-4. Commit semántico + push a `cristiansrc/ambxst`.
-5. Si el cambio es relevante como changelog upstream, proponerlo aparte (no
+4. Ejecutar la variante Quickshell/QML del bucle `verify-code.sh`
+   (qmllint + shellcheck + qmltestrunner/bats; definida en
+   `code-quality-and-sonarqube` §4) si el cambio toca QML o scripts.
+5. Commit semántico + push a `cristiansrc/ambxst`.
+6. Si el cambio es relevante como changelog upstream, proponerlo aparte (no
    mezclar changelog propio con el del proyecto original).
 
 ## Riesgos conocidos

@@ -157,6 +157,15 @@ testeado: es una frontera arquitectónica obligatoria.
 | **Spring Boot (Java/Kotlin)** | JUnit 5 + Mockito + Testcontainers | JaCoCo | **ArchUnit** + `CountDownLatch` |
 | **FastAPI (Python)** | pytest + httpx/TestClient + Testcontainers | pytest-cov | `import-linter` + `asyncio.gather` |
 | **Node.js (TS) / React** | Vitest / Jest + Playwright / Puppeteer | Istanbul / v8 | Dependency Cruiser |
+| **Shell/QML (ambxst: Quickshell + Hyprland)** | qmltestrunner (lógica QML testeable) + bats (bash) | kcov SOLO para bash; QML sin cobertura estándar | qmllint + shellcheck |
+
+> **Nota Shell/QML**: separar QML declarativo (visual, no testeable por unidad)
+> de lógica QML extraíble a módulos testeables (§3 definición operativa). La
+> verificación fuerte del visual NO es cobertura: es el bucle gauntlet de
+> `design-to-code` + prueba manual del Gate 2. La mutación diferencial (§6.B)
+> no tiene herramienta estándar para QML/bash: su rol lo cubren gauntlet +
+> revisión CRAP-first aproximada; prohibido inventar proxies caseros que
+> simulen métrica.
 
 ---
 

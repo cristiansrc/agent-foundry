@@ -45,6 +45,7 @@ sonar.exclusions=**/DTO.java,**/dtos.py,**/config/**
 | **Java / Kotlin (Spring)** | SpotBugs + Checkstyle | `./mvnw spotbugs:check` / `./gradlew spotbugsMain` |
 | **Go (Golang)** | `golangci-lint` | `golangci-lint run ./...` |
 | **Node.js / TypeScript** | ESLint + Prettier | `pnpm run lint` && `tsc --noEmit` |
+| **Shell / QML (ambxst)** | shellcheck + qmllint | `shellcheck <scripts>` && `qmllint <módulos>.qml` |
 
 ---
 
@@ -55,6 +56,13 @@ Las pruebas de mutación alteran intencionalmente el código de producción para
 - **Java/Kotlin**: `./gradlew pitest` / `./mvnw pitest:mutationAnalysis` (PITest)
 - **Python**: `mutmut run` (Mutmut)
 - **TypeScript**: `stryker run` (Stryker)
+
+> **Shell/QML (ambxst)**: no existe herramienta de mutación estándar para QML
+> ni bash. Prohibido simularla con proxies caseros: la verificación fuerte de
+> ese stack vive en el gauntlet visual (`design-to-code`) + QA manual del
+> Gate 2, y los tests unitarios que sí existen (qmltestrunner, bats) se
+> protegen con las reglas §6 de `testing-strategy` (solo añadir, jamás
+> debilitar).
 
 ### 3.1 Ejecución Diferencial Obligatoria
 
@@ -103,6 +111,12 @@ Protocolo para `final-validation` y para priorizar revisión:
 ni justificar en el task board. Meta tras refactor de un finding: bajarlo lo
 susto suficiente para salir del umbral; los métodos triviales ya nacen ≤ 6.
 
+> **Alcance por stack**: el cálculo exige cobertura estándar (JaCoCo, lcov,
+> pytest-cov...). En Shell/QML (ambxst) solo hay cobertura para bash (kcov):
+> para QML el ranking de riesgo es aproximación del reviewer (complejidad por
+> lectura × tests que ejercitan el método) y NO se reporta como métrica CRAP
+> oficial.
+
 ---
 
 ## 4. Script de Auto-Verificación Unificado (`./verify-code.sh`)
@@ -132,6 +146,36 @@ fi
 
 echo "✅ VERIFICACIÓN DE CÓDIGO COMPLETADA CON ÉXITO"
 ```
+
+### Variante Quickshell/QML (proyectos ambxst)
+
+Mismo contrato (exit 0 obligatorio), herramientas del stack shell:
+
+```bash
+#!/usr/bin/env bash
+set -e
+
+echo "=== 1. Lint QML (qmllint) ==="
+find . -name '*.qml' -not -path './.git/*' -print0 | xargs -0 -n1 qmllint
+
+echo "=== 2. Lint bash (shellcheck) ==="
+find . -name '*.sh' -not -path './.git/*' -print0 | xargs -0 -n1 shellcheck
+
+echo "=== 3. Tests de lógica QML (qmltestrunner) si existen ==="
+find tests -name 'tst_*.qml' -print -quit 2>/dev/null | grep -q . && \
+  qmltestrunner -input tests/tst_*.qml || echo "sin tests QML aún"
+
+echo "=== 4. Tests bash (bats) + cobertura kcov si están instalados ==="
+command -v bats >/dev/null 2>&1 && bats test/ || echo "sin bats aún"
+command -v kcov >/dev/null 2>&1 && command -v bats >/dev/null 2>&1 && \
+  kcov --include-path=. coverage test/ || true
+
+echo "✅ VERIFICACIÓN SHELL/QML COMPLETADA — visual pendiente: gauntlet + Gate 2"
+```
+
+> El smoke de arranque real (`qs -p shell.qml` sin errores) y la verificación
+> visual pertenecen al release checklist de `ambxst-packaging` y al gauntlet
+> de `design-to-code`: NO se automatizan aquí dentro.
 
 ---
 

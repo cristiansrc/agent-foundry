@@ -252,7 +252,7 @@ cualquier repo que use LM Studio — es independiente de agent-foundry.
 | `pre-flight-check` | Validación técnica obligatoria antes de cerrar tareas, aprobar incrementos o realizar commits. Exige evidencia real de filesystem, build, tests, cobertura, migraciones y servicios cuando aplique. |
 | `root-cause-analysis` | Protocolo de investigación no destructiva, triage de logs, análisis de causa raíz (RCA) y formulación de hipótesis para el agente bug-diagnostician. |
 | `security-standards` | Estándares de seguridad para aplicaciones Spring Boot y Frontend. Usar para JWT, OAuth2/OIDC, Keycloak, RBAC, prevención de vulnerabilidades y gestión de identidad. |
-| `testing-strategy` | Estrategia unificada de pruebas, metodología TDD (Red-Green-Refactor), pruebas de concurrencia, tests de arquitectura y cobertura mínima para múltiples stacks. |
+| `testing-strategy` | Estrategia unificada de pruebas, metodología TDD (Red-Green-Refactor), pruebas de concurrencia, tests de arquitectura, cobertura mínima, definición operativa de módulo testable y política de mutación diferencial para múltiples stacks. |
 
 ### Orquestación y Documentación
 
@@ -299,10 +299,10 @@ cualquier repo que use LM Studio — es independiente de agent-foundry.
 | Agente | Modelo de ejecución |
 |--------|--------------------|
 | `api-governance-agent` | opencode-go/minimax-m3 |
-| `architect-executor` | opencode-go/deepseek-v4-pro |
-| `bug-diagnostician` | opencode-go/deepseek-v4-pro |
+| `architect-executor` | opencode/muse-spark-1.2-contributor-free |
+| `bug-diagnostician` | opencode/muse-spark-1.2-contributor-free |
 | `context-curator` | opencode/muse-spark-1.2-contributor-free |
-| `database-architect` | opencode-go/deepseek-v4-pro |
+| `database-architect` | opencode/muse-spark-1.2-contributor-free |
 | `devops-architect` | opencode/mimo-v2.5-free |
 | `documentation` | opencode/muse-spark-1.2-contributor-free |
 | `enterprise-architect` | opencode-go/gpt-5.6-luna |
@@ -317,7 +317,7 @@ cualquier repo que use LM Studio — es independiente de agent-foundry.
 | `hyprmind-vision-analyst` | opencode-go/gpt-5.6-luna |
 | `master-orchestrator` | opencode-go/gpt-5.6-luna |
 | `planner` | opencode-go/minimax-m3 |
-| `refactor` | opencode-go/deepseek-v4-pro |
+| `refactor` | opencode/muse-spark-1.2-contributor-free |
 | `requirements-analyst` | opencode/muse-spark-1.2-contributor-free |
 | `reviewer` | opencode/muse-spark-1.2-contributor-free |
 | `security-reviewer` | opencode/muse-spark-1.2-contributor-free |

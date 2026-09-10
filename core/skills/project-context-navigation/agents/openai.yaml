@@ -1,0 +1,4 @@
+interface:
+  display_name: "Project Context Navigation"
+  short_description: "Orient quickly inside an unfamiliar project"
+  default_prompt: "Use $project-context-navigation to locate the authoritative project files and explain where this request belongs."

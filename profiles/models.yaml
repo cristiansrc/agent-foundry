@@ -2,8 +2,8 @@
 # ÚNICO lugar donde se declaran modelos concretos por proveedor.
 # Los agentes viven en core/ agnósticos; este archivo los une a un modelo real.
 # Cambiar de modelo/proveedor = editar aquí + tooling/build.sh.
-schema: foundry/profiles/models/v1
-updated: 2026-08-29
+schema: foundry/profiles/models/v2
+updated: 2026-09-10
 
 # ── 1. Tiers abstractos (capacidad requerida, sin marcas) ──────────────────
 tiers:
@@ -19,33 +19,35 @@ tiers:
 # ── 2. Agente → tier ───────────────────────────────────────────────────────
 # (temperature y permisos viven en permissions.yaml)
 agent_tiers:
-  master-orchestrator:    {tier: orchestration}
+  # OpenCode es el harness; `harness_provider` elige la suscripción que paga
+  # la inferencia. Luna jamás se consume desde OpenCode Go.
+  master-orchestrator:    {tier: orchestration, harness_provider: harness_chatgpt}
   hyprmind-orchestrator:  {tier: orchestration}
   hyprmind-deep-thinker:  {tier: orchestration}
   hyprmind-vision-analyst: {tier: orchestration, requires: vision}
   general:                {tier: orchestration}
-  enterprise-architect:   {tier: macro_architecture}
-  solution-architect:     {tier: patterns_logic}
+  enterprise-architect:   {tier: macro_architecture, harness_provider: harness_chatgpt}
+  solution-architect:     {tier: patterns_logic, harness_provider: harness_chatgpt}
   ui-designer:            {tier: patterns_logic}
-  planner:                {tier: planning_governance}
+  planner:                {tier: planning_governance, harness_provider: harness_chatgpt}
   api-governance-agent:   {tier: planning_governance}
   task-decomposer:        {tier: planning_governance}
-  spec-validator:         {tier: sdd_validation, locked: true}
-  enterprise-spec-validator: {tier: sdd_validation}
+  spec-validator:         {tier: sdd_validation, harness_provider: harness_chatgpt, locked: true}
+  enterprise-spec-validator: {tier: sdd_validation, harness_provider: harness_chatgpt}
   spec-remediator:        {tier: sdd_validation}
   context-curator:        {tier: sdd_validation}
   reviewer:               {tier: sdd_validation}
-  security-reviewer:      {tier: sdd_validation}
-  requirements-analyst:   {tier: sdd_validation}
-  final-validation:       {tier: sdd_validation}
+  security-reviewer:      {tier: code_heavy, harness_provider: harness_chatgpt}
+  requirements-analyst:   {tier: sdd_validation, harness_provider: harness_chatgpt}
+  final-validation:       {tier: sdd_validation, harness_provider: harness_chatgpt}
   documentation:          {tier: sdd_validation}
-  executor:               {tier: code_volume}
+  executor:               {tier: code_heavy}
   test-architect:         {tier: code_volume}
   devops-architect:       {tier: code_volume}
-  git-executor:           {tier: code_volume}
+  git-executor:           {tier: sdd_validation}
   refactor:               {tier: code_heavy}
   database-architect:     {tier: code_heavy}
-  bug-diagnostician:      {tier: code_heavy}
+  bug-diagnostician:      {tier: code_heavy, harness_provider: harness_chatgpt}
   architect-executor:     {tier: code_heavy}
   functional-tester-agent: {tier: ui_e2e}
 
@@ -54,12 +56,6 @@ providers:
   opencode:
     active: true
     models:
-      luna:
-        id: opencode-go/gpt-5.6-luna
-        status: active
-        context: 1M
-        vision: true
-        notes: Plan Go. Orquestación macro. El más caro (0.20/1.20) — reservar solo orchestration.
       glm_flash:
         id: opencode-go/glm-5.3-flash
         status: active
@@ -74,6 +70,20 @@ providers:
         vision: false
         cost: 0.22/0.66
         notes: Reactivado 2026-08-29. Especialista código pesado/RCA. code_heavy.
+      deepseek_v41_flash:
+        id: opencode-go/deepseek-v4.1-flash
+        status: active
+        context: 1M
+        vision: false
+        cost: 0.15/0.60
+        notes: Código de alto volumen. Sin entrenamiento ni retención según la tabla de privacidad de OpenCode Go (verificado 2026-09-10).
+      deepseek_flash_vision:
+        id: opencode-go/deepseek-v4-flash-vision-exp
+        status: active
+        context: 1M
+        vision: true
+        cost: 0.15/0.60
+        notes: UI/E2E con visión. Sin entrenamiento ni retención según la tabla de privacidad de OpenCode Go (verificado 2026-09-10).
       longcat:
         id: opencode-go/longcat-2.0
         status: active
@@ -95,30 +105,54 @@ providers:
         vision: false
         cost: 0.0175/0.0725
         notes: Más barato Go (0.017 input). Sin vision — no apto para ui_e2e con captura.
-      muse_spark:
-        id: opencode-go/muse-spark-1.2-contributor
-        status: active
-        context: 1M
-        vision: true
-        cost: 0.10/0.20
-        notes: Cloud económico con vision. code_volume y ui_e2e — reemplaza free Zen (mejor rate-limit).
     tier_bindings:
-      orchestration:       [luna]
+      orchestration:       [mimo_v25]
       macro_architecture:  [glm_flash]
       patterns_logic:      [mimo_v25]
       planning_governance: [longcat]
       sdd_validation:      [mimo_v25]
-      code_volume:         [muse_spark]
+      code_volume:         [deepseek_v41_flash]
       code_heavy:          [deepseek_flash]
-      ui_e2e:              [muse_spark]
+      ui_e2e:              [deepseek_flash_vision]
     fallbacks:
-      muse_spark:    [hy3]
-      hy3:           [muse_spark]
-      mimo_v25:      [muse_spark]
+      deepseek_v41_flash: [deepseek_flash]
+      deepseek_flash_vision: [glm_flash]
+      hy3:           [glm_flash]
+      mimo_v25:      [glm_flash]
       longcat:       [mimo_v25]
       deepseek_flash: [glm_flash]
       glm_flash:     [deepseek_flash]
-      luna:          []   # sin degradación; escalar al usuario
+      # Luna se consume exclusivamente a través de OAuth de ChatGPT.
+
+  # Usado únicamente por el adapter OpenCode para modelos autenticados con
+  # ChatGPT Plus/Pro. Los IDs requieren verificar `/models` tras `/connect`.
+  harness_chatgpt:
+    active: true
+    models:
+      luna:
+        id: openai/gpt-5.6-luna
+        status: active
+        context: 272K
+        vision: true
+        notes: Planificación, validación y arbitraje de alto valor.
+      terra:
+        id: openai/gpt-5.6-terra
+        status: active
+        context: 272K
+        vision: true
+        notes: Arquitectura, seguridad y RCA de alto riesgo.
+    tier_bindings:
+      orchestration:       [terra]
+      macro_architecture:  [terra]
+      patterns_logic:      [terra]
+      planning_governance: [luna]
+      sdd_validation:      [luna]
+      code_volume:         [luna]
+      code_heavy:          [terra]
+      ui_e2e:              [luna]
+    fallbacks:
+      luna: [terra]
+      terra: []
 
   chatgpt:
     active: true
@@ -222,9 +256,12 @@ providers:
 
 # ── 4. Bloqueados (nunca asignar) ──────────────────────────────────────────
 blocked:
-  - {id: opencode/muse-spark-1.2-contributor-free, reason: Reemplazado por opencode-go/muse-spark-1.2-contributor (paid, mejor rate-limit, 0.10/0.20) 2026-08-29.}
+  - {id: opencode/muse-spark-1.2-contributor-free, reason: "Bloqueado: variante Contributor permite usar prompts y completions para entrenamiento. 2026-09-10."}
+  - {id: opencode-go/muse-spark-1.2-contributor, reason: "Bloqueado: variante Contributor permite usar prompts y completions para entrenamiento. 2026-09-10."}
+  - {id: opencode-go/muse-spark-1.3-contributor, reason: "Bloqueado: variante Contributor permite usar prompts y completions para entrenamiento. 2026-09-10."}
   - {id: opencode/mimo-v2.5-free, reason: Reemplazado por opencode-go/mimo-v2.5 (paid, 0.14/0.28, 1M ctx) 2026-08-29.}
   - {id: opencode-go/minimax-m3, reason: Reemplazado por longcat-2.0 (0.30) + glm-5.3-flash (0.075) — mejor coste/calidad 2026-08-29. Mantener como rollback manual si longcat falla.}
+  - {id: opencode-go/omen-alpha, reason: Excluido por política de privacidad hasta verificar retención y entrenamiento.}
   - {id: opencode-go/deepseek-v4-pro, reason: Eliminado por coste — reemplazado por deepseek-v4-flash (0.22/0.66) 2026-08-29.}
   - {id: opencode/deepseek-v4-flash-free, reason: 503, respuestas vacías, bucles de compactación.}
   - {id: opencode-go/qwen3.7-plus, reason: Inestabilidad ~70%, timeouts Cloudflare 524.}

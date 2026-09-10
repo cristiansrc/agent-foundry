@@ -3,6 +3,21 @@
 # extraido fielmente de config-ai el 2026-08-22.
 schema: foundry/profiles/permissions/v1
 
+# Perfil de instalación del harness. Los excluidos permanecen en core como
+# histórico o perfil personal, pero no se despliegan a OpenCode.
+harness:
+  primary: [master-orchestrator]
+  active_subagents: [planner, task-decomposer, executor, reviewer,
+                     final-validation, git-executor]
+  optional_subagents: [solution-architect, enterprise-architect, ui-designer,
+                       test-architect, database-architect, devops-architect,
+                       documentation, functional-tester-agent, security-reviewer,
+                       spec-validator, enterprise-spec-validator,
+                       api-governance-agent, bug-diagnostician, spec-remediator,
+                       context-curator]
+  excluded: [general, architect-executor, requirements-analyst, refactor,
+             hyprmind-orchestrator, hyprmind-deep-thinker, hyprmind-vision-analyst]
+
 defaults:
   mode: all
   edit: deny
@@ -17,7 +32,7 @@ agents:
   refactor:               {edit: allow, bash: allow, temp: "0.2"}
   documentation:          {edit: allow, bash: deny, temp: "0.25"}
   spec-remediator:        {edit: allow, bash: deny, temp: "0.1"}
-  functional-tester-agent: {edit: allow, bash: allow, temp: "0.2"}
+  functional-tester-agent: {mode: subagent, edit: deny, bash: allow, temp: "0.2"}
   git-executor:           {edit: allow, bash: allow, temp: "0.1"}
 
   # ── Consultants ──────────────────────────────────────────────────────────
@@ -29,16 +44,16 @@ agents:
   test-architect:         {edit: allow, bash: allow, temp: "0.2"}
   task-decomposer:        {edit: allow, bash: deny, temp: "0.2"}
   context-curator:        {edit: deny, bash: deny, temp: "0.10"}
-  master-orchestrator:    {edit: deny, bash: deny, execute: allow, temp: "0.15"}
+  master-orchestrator:    {mode: primary, edit: deny, bash: deny, execute: allow, temp: "0.15"}
 
   # ── Validators ───────────────────────────────────────────────────────────
-  spec-validator:         {edit: allow, bash: deny, temp: "0.1"}
-  enterprise-spec-validator: {edit: allow, bash: deny, temp: "0.1"}
-  api-governance-agent:   {edit: deny, bash: allow, temp: "0.10"}
-  bug-diagnostician:      {edit: deny, bash: allow, temp: "0.10"}
-  reviewer:               {edit: deny, bash: allow, temp: "0.1"}
-  security-reviewer:      {edit: deny, bash: allow, temp: "0.1"}
-  final-validation:       {edit: deny, bash: allow, temp: "0.1"}
+  spec-validator:         {mode: subagent, edit: allow, bash: deny, temp: "0.1"}
+  enterprise-spec-validator: {mode: subagent, edit: allow, bash: deny, temp: "0.1"}
+  api-governance-agent:   {mode: subagent, edit: deny, bash: allow, temp: "0.10"}
+  bug-diagnostician:      {mode: subagent, edit: deny, bash: allow, temp: "0.10"}
+  reviewer:               {mode: subagent, edit: deny, bash: allow, temp: "0.1"}
+  security-reviewer:      {mode: subagent, edit: deny, bash: allow, temp: "0.1"}
+  final-validation:       {mode: subagent, edit: deny, bash: allow, temp: "0.1"}
 
   # ── Guardrails / Personal ────────────────────────────────────────────────
   general:                {mode: subagent, edit: deny, bash: deny, temp: "0.1"}

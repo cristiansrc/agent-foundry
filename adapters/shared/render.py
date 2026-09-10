@@ -26,7 +26,7 @@ PROFILES = ROOT / "profiles"
 OUT = ROOT / "adapters" / "opencode" / "out"
 INSTALLED_AGENTS = Path.home() / ".config" / "opencode" / "agents"
 
-PROVIDER = "opencode"
+DEFAULT_PROVIDER = "opencode"
 
 
 def parse_frontmatter(text: str) -> tuple[dict, str]:
@@ -52,12 +52,15 @@ def load_profiles() -> dict:
 
 def resolve_binding(agent: str, profiles: dict) -> dict:
     mcfg, pcfg = profiles["models"], profiles["perms"]
-    provider = mcfg["providers"][PROVIDER]
-    if not provider.get("active"):
-        sys.exit(f"FAIL: proveedor {PROVIDER} inactivo en models.yaml")
     info = mcfg["agent_tiers"].get(agent)
     if not info:
         sys.exit(f"FAIL: agente {agent} sin tier en models.yaml")
+    provider_name = info.get("harness_provider", DEFAULT_PROVIDER)
+    provider = mcfg["providers"].get(provider_name)
+    if provider is None:
+        sys.exit(f"FAIL: proveedor harness inexistente para {agent}: {provider_name}")
+    if not provider.get("active"):
+        sys.exit(f"FAIL: proveedor {provider_name} inactivo en models.yaml")
     tier = info["tier"]
     candidates = provider["tier_bindings"][tier]
     primary_id = None
@@ -79,6 +82,7 @@ def resolve_binding(agent: str, profiles: dict) -> dict:
         "permission": {k: p[k] for k in perm_keys},
         "mode": p.get("mode"),
         "tier": tier,
+        "provider": provider_name,
     }
 
 
@@ -123,16 +127,29 @@ def main() -> int:
     skills_out = OUT / "skills"
     agents_out.mkdir(parents=True)
 
-    print(f"== Adapter {PROVIDER}: agentes ==")
+    print("== Adapter OpenCode harness: agentes ==")
     count = 0
     manifest = []
+    harness = profiles["perms"].get("harness", {})
+    deployed = (set(harness.get("primary", [])) |
+                set(harness.get("active_subagents", [])) |
+                set(harness.get("optional_subagents", [])))
+    excluded = set(harness.get("excluded", []))
+    unknown = deployed & excluded
+    if unknown:
+        sys.exit(f"FAIL: agentes en deployed y excluded: {sorted(unknown)}")
     for src in sorted(CORE.glob("agents/**/*.md")):
         name = src.stem
+        if name not in deployed:
+            continue
         b = resolve_binding(name, profiles)
+        # El harness tiene un principal recomendado, pero deja los especialistas
+        # en `all` para que también aparezcan en el selector manual de OpenCode.
+        b["mode"] = "primary" if name in set(harness.get("primary", [])) else "all"
         content = render_agent(src, b)
         (agents_out / f"{name}.md").write_text(content, encoding="utf-8")
-        manifest.append({"agent": name, "tier": b["tier"], "model": b["model"]})
-        print(f"  {name:28s} [{b['tier']:20s}] -> {b['model']}")
+        manifest.append({"agent": name, "tier": b["tier"], "provider": b["provider"], "model": b["model"]})
+        print(f"  {name:28s} [{b['provider']}/{b['tier']}] -> {b['model']}")
         count += 1
 
     print(f"== Skills: copiando {CORE / 'skills'} ==")
@@ -142,15 +159,18 @@ def main() -> int:
 
     # Manifest + paridad
     (OUT / "manifest.yaml").write_text(
-        yaml.safe_dump({"provider": PROVIDER, "agents": manifest}, sort_keys=False,
+        yaml.safe_dump({"provider": "opencode-harness", "agents": manifest}, sort_keys=False,
                        allow_unicode=True), encoding="utf-8")
+    (OUT / "config.patch.json").write_text(
+        '{\n  "default_agent": "master-orchestrator"\n}\n', encoding="utf-8")
     print("== Paridad contra ~/.config/opencode/agents ==")
     diffs = parity_report(agents_out)
-    identical = count - len([d for d in diffs if not d.startswith("(sin")])
+    changed = len([d for d in diffs if not d.startswith("(sin")])
+    identical = max(0, count - changed)
     for d in diffs:
         print(f"  {d}")
     print(f"\nGenerados: {count} agentes, {n_skills} skills")
-    print(f"Iguales a lo instalado: {count - len(diffs)} | Diferencias: {len(diffs)}"
+    print(f"Iguales a lo instalado: {identical} | Diferencias: {len(diffs)}"
           if diffs and not diffs[0].startswith("(") else f"Generados: {count}")
     return 0
 

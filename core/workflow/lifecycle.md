@@ -93,7 +93,9 @@ Fase 4 Descomposición ─► Fase 5 Ejecución ─► Fase 6 Calidad
 - Self-healing: máximo 3 reintentos antes de `blocked` + escape-report.
 
 ### Fase 6 — Validación de Calidad
-- Agentes: `reviewer`, `security-reviewer`, `final-validation`.
+- Agentes: `reviewer`, `security-reviewer`, `final-validation` y, cuando hay UI,
+  `functional-tester-agent` antes del Gate 2. Los validadores reportan; no corrigen
+  el mismo cambio que certifican.
 - Estado: `validation-review` → `quality-approved`.
 - Criterios: cobertura ≥85% por archivo testable, sin bugs críticos,
   sin drift arquitectónico, hallazgos de seguridad resueltos o documentados.
@@ -113,7 +115,7 @@ Fase 4 Descomposición ─► Fase 5 Ejecución ─► Fase 6 Calidad
 2. **Placeholder Guard:** `<increment-name>` se resuelve dinámicamente o se pregunta.
 3. **Git exclusivo de git-executor:** ningún otro agente ejecuta comandos git.
 4. **Inmutabilidad de estado IA:** solo las firmas humanas del states.md §3 son editables por humanos.
-5. **Pre-push hook:** los pushes hacia ramas estables exigen shared context con
-   `quality-approved` + firma del Gate 2 (ver tooling/hooks).
+5. **Pre-push hook:** los pushes hacia ramas estables exigen el shared context
+   del incremento exacto con `quality-approved` + firma del Gate 2 (ver tooling/hooks).
 6. **Conventional Commits** con scope del incremento: `feat(<increment>): ...`.
 7. **MEMORY.md:** errores resueltos se registran como reglas para prevenir reincidencia.

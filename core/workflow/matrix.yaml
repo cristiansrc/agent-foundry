@@ -151,9 +151,9 @@ agents:
              openapi-standard]
 
   functional-tester-agent:
-    role: worker
+    role: validator
     phases: [quality]
-    triggers: [post-gate2-regression]
+    triggers: [pre-gate2-regression]
     skills: [functional-testing-standard, performance-testing-k6, testing-strategy,
              accessibility-standard, frontend-architecture, react-stack, angular-stack,
              context-pinning, bug-fixing-workflow]

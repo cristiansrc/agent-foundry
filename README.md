@@ -50,6 +50,15 @@ core/  ──►  profiles/  ──►  adapters/  ──►  configs instaladas
    partir de core + profiles. Una sola lógica de render en `shared/`.
 4. **`tooling/build.sh`**: reconstruye todas las salidas.
 
+### OpenCode como harness
+
+OpenCode concentra el flujo, agentes y permisos. La inferencia puede venir de
+dos suscripciones: ChatGPT OAuth para Luna/Terra en razonamiento y validación
+de alto valor, y OpenCode Go para LongCat, DeepSeek, MiMo y Muse en volumen.
+Luna no se consume desde OpenCode Go. El routing y la política de privacidad
+(incluido el bloqueo de Omen Alpha) están en
+[`docs/runbooks/opencode-harness.md`](docs/runbooks/opencode-harness.md).
+
 ## Roles de agentes
 
 | Rol | Agentes |

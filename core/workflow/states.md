@@ -110,7 +110,7 @@ Triggers (no son fases; activan al agente puntualmente):
 
 | Trigger | Significado |
 |---------|-------------|
-| `post-gate2-regression` | Pruebas E2E de regresión tras aprobar QA |
+| `pre-gate2-regression` | Pruebas E2E de regresión antes de aprobar QA |
 | `any-failure` | RCA ante fallo en cualquier fase |
 
 Los gates G1/G2 NO son fases: son estados de espera definidos arriba.

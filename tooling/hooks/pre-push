@@ -45,14 +45,23 @@ while read -r local_ref local_sha remote_ref remote_sha; do
             exit 1
         fi
     else
-        # Buscar cualquier contexto con Gate 2 firmado
-        context_file=$(grep -rl "## Human QA Approval: approved_by_user" \
-            docs/specs/.working/ docs/specs/ 2>/dev/null | head -1)
-        if [ -z "$context_file" ]; then
-            echo "PUSH ABORTADO: ningún incremento tiene firma del Gate 2 (QA humana)."
+        # Una rama estable no identifica por sí misma el incremento. Elegir
+        # “cualquier contexto firmado” podía aprobar un push no relacionado.
+        increment="${AGENT_FOUNDRY_INCREMENT:-}"
+        if [ -z "$increment" ]; then
+            echo "PUSH ABORTADO: una rama no-feature debe declarar AGENT_FOUNDRY_INCREMENT."
+            echo "  Ejemplo: AGENT_FOUNDRY_INCREMENT=012-pagos git push"
             exit 1
         fi
-        echo "[Git Guard] Usando contexto aprobado más reciente: $context_file"
+        for candidate in \
+            "docs/specs/.working/${increment}-sdd-context.md" \
+            "docs/specs/${increment}-sdd-context.md"; do
+            [ -f "$candidate" ] && { context_file="$candidate"; break; }
+        done
+        if [ -z "$context_file" ]; then
+            echo "PUSH ABORTADO: sin shared context para '$increment'."
+            exit 1
+        fi
     fi
 
     # Validación integral de estados (enum, gates, firmas exactas)

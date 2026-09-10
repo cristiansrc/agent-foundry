@@ -1,0 +1,4 @@
+interface:
+  display_name: "Documentation Reconciliation"
+  short_description: "Interpret and reconcile project documentation"
+  default_prompt: "Use $documentation-reconciliation to interpret the relevant project documentation and resolve source conflicts."

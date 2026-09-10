@@ -63,13 +63,6 @@ providers:
         vision: true
         cost: 0.075/0.25
         notes: Ganga 2026-08 — 0.075 input, fuerte en specs y arquitectura. macro_architecture.
-      deepseek_flash:
-        id: opencode-go/deepseek-v4-flash
-        status: active
-        context: 1M
-        vision: false
-        cost: 0.22/0.66
-        notes: Reactivado 2026-08-29. Especialista código pesado/RCA. code_heavy.
       deepseek_v41_flash:
         id: opencode-go/deepseek-v4.1-flash
         status: active
@@ -112,16 +105,16 @@ providers:
       planning_governance: [longcat]
       sdd_validation:      [mimo_v25]
       code_volume:         [deepseek_v41_flash]
-      code_heavy:          [deepseek_flash]
+      code_heavy:          [deepseek_v41_flash]
       ui_e2e:              [deepseek_flash_vision]
     fallbacks:
-      deepseek_v41_flash: [deepseek_flash]
+      deepseek_v41_flash: [glm_flash]
       deepseek_flash_vision: [glm_flash]
       hy3:           [glm_flash]
       mimo_v25:      [glm_flash]
       longcat:       [mimo_v25]
       deepseek_flash: [glm_flash]
-      glm_flash:     [deepseek_flash]
+      glm_flash:     [deepseek_v41_flash]
       # Luna se consume exclusivamente a través de OAuth de ChatGPT.
 
   # Usado únicamente por el adapter OpenCode para modelos autenticados con
@@ -263,6 +256,7 @@ blocked:
   - {id: opencode-go/minimax-m3, reason: Reemplazado por longcat-2.0 (0.30) + glm-5.3-flash (0.075) — mejor coste/calidad 2026-08-29. Mantener como rollback manual si longcat falla.}
   - {id: opencode-go/omen-alpha, reason: Excluido por política de privacidad hasta verificar retención y entrenamiento.}
   - {id: opencode-go/deepseek-v4-pro, reason: Eliminado por coste — reemplazado por deepseek-v4-flash (0.22/0.66) 2026-08-29.}
+  - {id: opencode-go/deepseek-v4-flash, reason: "Superseded por DeepSeek V4.1 Flash; DeepSeek retiró V4 Flash y enruta la ID antigua a V4.1. 2026-09-10."}
   - {id: opencode/deepseek-v4-flash-free, reason: 503, respuestas vacías, bucles de compactación.}
   - {id: opencode-go/qwen3.7-plus, reason: Inestabilidad ~70%, timeouts Cloudflare 524.}
   - {id: opencode-go/qwen3.6-plus, reason: Legacy. Usar Luna o MiniMax M3.}

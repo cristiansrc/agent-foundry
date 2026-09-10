@@ -312,22 +312,22 @@ cualquier repo que use LM Studio — es independiente de agent-foundry.
 | `api-governance-agent` | opencode-go/longcat-2.0 |
 | `bug-diagnostician` | openai/gpt-5.6-terra |
 | `context-curator` | opencode-go/mimo-v2.5 |
-| `database-architect` | opencode-go/deepseek-v4-flash |
+| `database-architect` | opencode-go/deepseek-v4.1-flash |
 | `devops-architect` | opencode-go/deepseek-v4.1-flash |
 | `documentation` | opencode-go/mimo-v2.5 |
 | `enterprise-architect` | openai/gpt-5.6-terra |
-| `enterprise-spec-validator` | openai/gpt-5.6-luna |
-| `executor` | opencode-go/deepseek-v4-flash |
+| `enterprise-spec-validator` | opencode-go/glm-5.3 |
+| `executor` | opencode-go/deepseek-v4.1-flash |
 | `final-validation` | openai/gpt-5.6-luna |
 | `functional-tester-agent` | opencode-go/deepseek-v4-flash-vision-exp |
 | `git-executor` | opencode-go/mimo-v2.5 |
 | `master-orchestrator` | openai/gpt-5.6-terra |
-| `planner` | openai/gpt-5.6-luna |
+| `planner` | openai/gpt-5.6-sol |
 | `reviewer` | opencode-go/mimo-v2.5 |
 | `security-reviewer` | openai/gpt-5.6-terra |
 | `solution-architect` | openai/gpt-5.6-terra |
 | `spec-remediator` | opencode-go/mimo-v2.5 |
-| `spec-validator` | openai/gpt-5.6-luna |
+| `spec-validator` | opencode-go/glm-5.3 |
 | `task-decomposer` | opencode-go/longcat-2.0 |
 | `test-architect` | opencode-go/deepseek-v4.1-flash |
 | `ui-designer` | opencode-go/mimo-v2.5 |
@@ -344,7 +344,7 @@ cualquier repo que use LM Studio — es independiente de agent-foundry.
 | `devops-architect` | `gpt-5.6-luna` |
 | `documentation` | `gpt-5.6-luna` |
 | `enterprise-architect` | `gpt-5.6-terra` |
-| `enterprise-spec-validator` | `gpt-5.6-luna` |
+| `enterprise-spec-validator` | default del proveedor |
 | `executor` | `gpt-5.6-terra` |
 | `final-validation` | `gpt-5.6-luna` |
 | `functional-tester-agent` | `gpt-5.6-luna` |
@@ -361,7 +361,7 @@ cualquier repo que use LM Studio — es independiente de agent-foundry.
 | `security-reviewer` | `gpt-5.6-terra` |
 | `solution-architect` | `gpt-5.6-terra` |
 | `spec-remediator` | `gpt-5.6-luna` |
-| `spec-validator` | `gpt-5.6-luna` |
+| `spec-validator` | default del proveedor |
 | `task-decomposer` | `gpt-5.6-luna` |
 | `test-architect` | `gpt-5.6-luna` |
 | `ui-designer` | `gpt-5.6-terra` |
@@ -378,7 +378,7 @@ cualquier repo que use LM Studio — es independiente de agent-foundry.
 | `devops-architect` | `qwen3-coder-next` |
 | `documentation` | `claude-haiku-4.5` |
 | `enterprise-architect` | `claude-sonnet-5` |
-| `enterprise-spec-validator` | `claude-haiku-4.5` |
+| `enterprise-spec-validator` | default del proveedor |
 | `executor` | `gpt-5.6-terra` |
 | `final-validation` | `claude-haiku-4.5` |
 | `functional-tester-agent` | `qwen3-coder-next` |
@@ -395,7 +395,7 @@ cualquier repo que use LM Studio — es independiente de agent-foundry.
 | `security-reviewer` | `gpt-5.6-terra` |
 | `solution-architect` | `claude-sonnet-5` |
 | `spec-remediator` | `claude-haiku-4.5` |
-| `spec-validator` | `claude-haiku-4.5` |
+| `spec-validator` | default del proveedor |
 | `task-decomposer` | `gpt-5.6-luna` |
 | `test-architect` | `qwen3-coder-next` |
 | `ui-designer` | `claude-sonnet-5` |

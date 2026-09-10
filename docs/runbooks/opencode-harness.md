@@ -11,7 +11,8 @@ trabajo distintos.
 3. Conectar o conservar **OpenCode Go** y confirmar sus modelos con `/models`.
 4. Solo después instalar con `tooling/sync.sh`.
 
-Los IDs `openai/gpt-5.6-luna` y `openai/gpt-5.6-terra` son nombres de binding
+Los IDs `openai/gpt-5.6-sol`, `openai/gpt-5.6-luna` y
+`openai/gpt-5.6-terra` son nombres de binding
 esperados. Si `/models` muestra un ID diferente, se actualiza
 `profiles/models.yaml` antes de usar agentes que dependan de ChatGPT OAuth.
 
@@ -20,10 +21,12 @@ esperados. Si `/models` muestra un ID diferente, se actualiza
 | Capacidad | Suscripción | Modelo principal | Uso |
 |---|---|---|---|
 | Orquestación | ChatGPT OAuth | Terra | master-orchestrator; decisiones y delegación con contexto global |
-| Razonamiento normal | ChatGPT OAuth | Luna | planner, validación SDD y validación final |
+| Planificación compleja | ChatGPT OAuth | Sol | planner y decisiones de alto impacto |
 | Razonamiento crítico | ChatGPT OAuth | Terra | arquitectura, seguridad y RCA complejos |
+| Validación crítica de specs | OpenCode Go | GLM-5.3 | spec-validator y enterprise-spec-validator; proveedor independiente del planner |
+| Validación normal | ChatGPT OAuth | Luna | validación final y arbitraje ligero |
 | Plan estructurado | OpenCode Go | LongCat 2.0 | task decomposition y gobernanza API normal |
-| Código | OpenCode Go | DeepSeek V4 Flash | executor y migraciones de datos |
+| Código | OpenCode Go | DeepSeek V4.1 Flash | executor y migraciones de datos |
 | Trabajo mecánico | OpenCode Go | MiMo-V2.5 | orquestación ligera, Git, docs y review normal |
 | Código de volumen | OpenCode Go | DeepSeek V4.1 Flash | testing y plataforma |
 | UI/E2E | OpenCode Go | DeepSeek V4 Flash Vision Exp | pruebas funcionales con captura |

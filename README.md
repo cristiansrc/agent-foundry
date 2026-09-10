@@ -148,7 +148,6 @@ cualquier repo que use LM Studio — es independiente de agent-foundry.
 | `devops-architect` | Worker (obrero) | Especialista en Infraestructura como Codigo, Docker, CI/CD y Observabilidad. |
 | `documentation` | Worker (obrero) | Creates project documentation, README content, API docs, deployment notes, diagrams, and functional documentation. |
 | `executor` | Worker (obrero) | Implementa código a partir de especificaciones SDD aprobadas y descomposiciones de tareas. |
-| `functional-tester-agent` | Worker (obrero) | Disena, ejecuta y valida pruebas funcionales y de interfaz de usuario (UI/E2E) en frontends. Automatiza la deteccion, reporte y correccion mecanica de errores. |
 | `git-executor` | Worker (obrero) | Agente exclusivo para operaciones de control de versiones con Git (ramas, commits, checkout, merges, push). |
 | `refactor` | Worker (obrero) | Refactors implemented code for maintainability, readability, modularity, and consistency without changing behavior. |
 | `spec-remediator` | Worker (obrero) | Corrige hallazgos de validación de forma iterativa siguiendo `spec-remediation`. |
@@ -165,6 +164,7 @@ cualquier repo que use LM Studio — es independiente de agent-foundry.
 | `bug-diagnostician` | Validator (validador) | Analiza fallos de QA y producción, examina logs, stack traces e inspecciona el grafo de Graphify para generar un Root Cause Analysis (RCA) detallado antes de implementar arreglos. |
 | `enterprise-spec-validator` | Validator (validador) | Valida la consistencia global del Solution Workspace, contratos inter-servicios, System Landscape y la deuda técnica global. |
 | `final-validation` | Validator (validador) | Performs final production-readiness validation across specs, implementation, tests, security, documentation, and maintainability. |
+| `functional-tester-agent` | Validator (validador) | Disena, ejecuta y reporta pruebas funcionales y de interfaz de usuario (UI/E2E) en frontends. |
 | `reviewer` | Validator (validador) | Revisa codigo generado para detectar bugs logicos, drift arquitectonico, mantenibilidad, tests faltantes y cumplimiento de specs. |
 | `security-reviewer` | Validator (validador) | Reviews web projects for security risks, OWASP issues, auth/authz flaws, sensitive data handling, and secure architecture. |
 | `spec-validator` | Validator (validador) | Valida specs SDD contra ambiguedad, inconsistencia, riesgo arquitectonico, restricciones faltantes y readiness de implementacion. |
@@ -251,7 +251,7 @@ cualquier repo que use LM Studio — es independiente de agent-foundry.
 | Skill | Descripción |
 |-------|-------------|
 | `bug-fixing-workflow` | Protocolo riguroso para la resolución de errores. Prioriza la reproducción empírica y la integridad arquitectónica sobre los parches rápidos. |
-| `code-quality-and-sonarqube` | Estándares de análisis estático de código, SonarQube, linters (Ruff, SpotBugs, golangci-lint, ESLint) y pruebas de mutación (PITest) con el bucle de auto-verificación ./verify-code.sh. |
+| `code-quality-and-sonarqube` | Estándares de análisis estático de código, SonarQube, linters (Ruff, SpotBugs, golangci-lint, ESLint), pruebas de mutación diferencial y análisis CRAP por diff con el bucle de auto-verificación ./verify-code.sh. |
 | `code-review-checklist` | Lista de verificación para revisión de código orientada a bugs, regresiones, drift arquitectónico, seguridad, performance, tests y cumplimiento de specs. |
 | `docker-standard` |  |
 | `functional-testing-standard` | Estándares y flujo de trabajo para el diseño, ejecución y corrección de pruebas funcionales en Frontends usando Puppeteer MCP o frameworks locales del workspace. |
@@ -298,7 +298,9 @@ cualquier repo que use LM Studio — es independiente de agent-foundry.
 
 | Skill | Descripción |
 |-------|-------------|
+| `documentation-reconciliation` | "Interpretar documentación de proyectos, distinguir estado actual de planes e histórico y resolver contradicciones entre README, specs, código y tests con evidencia." |
 | `n8n-stack` |  |
+| `project-context-navigation` | "Orientarse rápidamente en un proyecto desconocido para ubicar su estructura, fuentes de verdad, flujo de trabajo y archivos relevantes antes de responder o editar." |
 
 
 ## Modelos por herramienta
@@ -307,35 +309,28 @@ cualquier repo que use LM Studio — es independiente de agent-foundry.
 
 | Agente | Modelo de ejecución |
 |--------|--------------------|
-| `api-governance-agent` | opencode-go/minimax-m3 |
-| `architect-executor` | opencode/muse-spark-1.2-contributor-free |
-| `bug-diagnostician` | opencode/muse-spark-1.2-contributor-free |
-| `context-curator` | opencode/muse-spark-1.2-contributor-free |
-| `database-architect` | opencode/muse-spark-1.2-contributor-free |
-| `devops-architect` | opencode/mimo-v2.5-free |
-| `documentation` | opencode/muse-spark-1.2-contributor-free |
-| `enterprise-architect` | opencode-go/gpt-5.6-luna |
-| `enterprise-spec-validator` | opencode/muse-spark-1.2-contributor-free |
-| `executor` | opencode/mimo-v2.5-free |
-| `final-validation` | opencode/muse-spark-1.2-contributor-free |
-| `functional-tester-agent` | opencode-go/hy3 |
-| `general` | opencode-go/gpt-5.6-luna |
-| `git-executor` | opencode/mimo-v2.5-free |
-| `hyprmind-deep-thinker` | opencode-go/gpt-5.6-luna |
-| `hyprmind-orchestrator` | opencode-go/gpt-5.6-luna |
-| `hyprmind-vision-analyst` | opencode-go/gpt-5.6-luna |
-| `master-orchestrator` | opencode-go/gpt-5.6-luna |
-| `planner` | opencode-go/minimax-m3 |
-| `refactor` | opencode/muse-spark-1.2-contributor-free |
-| `requirements-analyst` | opencode/muse-spark-1.2-contributor-free |
-| `reviewer` | opencode/muse-spark-1.2-contributor-free |
-| `security-reviewer` | opencode/muse-spark-1.2-contributor-free |
-| `solution-architect` | opencode/muse-spark-1.2-contributor-free |
-| `spec-remediator` | opencode/muse-spark-1.2-contributor-free |
-| `spec-validator` | opencode/muse-spark-1.2-contributor-free |
-| `task-decomposer` | opencode-go/minimax-m3 |
-| `test-architect` | opencode/mimo-v2.5-free |
-| `ui-designer` | opencode/muse-spark-1.2-contributor-free |
+| `api-governance-agent` | opencode-go/longcat-2.0 |
+| `bug-diagnostician` | openai/gpt-5.6-terra |
+| `context-curator` | opencode-go/mimo-v2.5 |
+| `database-architect` | opencode-go/deepseek-v4-flash |
+| `devops-architect` | opencode-go/deepseek-v4.1-flash |
+| `documentation` | opencode-go/mimo-v2.5 |
+| `enterprise-architect` | openai/gpt-5.6-terra |
+| `enterprise-spec-validator` | openai/gpt-5.6-luna |
+| `executor` | opencode-go/deepseek-v4-flash |
+| `final-validation` | openai/gpt-5.6-luna |
+| `functional-tester-agent` | opencode-go/deepseek-v4-flash-vision-exp |
+| `git-executor` | opencode-go/mimo-v2.5 |
+| `master-orchestrator` | openai/gpt-5.6-terra |
+| `planner` | openai/gpt-5.6-luna |
+| `reviewer` | opencode-go/mimo-v2.5 |
+| `security-reviewer` | openai/gpt-5.6-terra |
+| `solution-architect` | openai/gpt-5.6-terra |
+| `spec-remediator` | opencode-go/mimo-v2.5 |
+| `spec-validator` | openai/gpt-5.6-luna |
+| `task-decomposer` | opencode-go/longcat-2.0 |
+| `test-architect` | opencode-go/deepseek-v4.1-flash |
+| `ui-designer` | opencode-go/mimo-v2.5 |
 
 ### ChatGPT (Codex CLI) — bindings activos
 
@@ -350,7 +345,7 @@ cualquier repo que use LM Studio — es independiente de agent-foundry.
 | `documentation` | `gpt-5.6-luna` |
 | `enterprise-architect` | `gpt-5.6-terra` |
 | `enterprise-spec-validator` | `gpt-5.6-luna` |
-| `executor` | `gpt-5.6-luna` |
+| `executor` | `gpt-5.6-terra` |
 | `final-validation` | `gpt-5.6-luna` |
 | `functional-tester-agent` | `gpt-5.6-luna` |
 | `general` | `gpt-5.6-sol` |
@@ -363,7 +358,7 @@ cualquier repo que use LM Studio — es independiente de agent-foundry.
 | `refactor` | `gpt-5.6-terra` |
 | `requirements-analyst` | `gpt-5.6-luna` |
 | `reviewer` | `gpt-5.6-luna` |
-| `security-reviewer` | `gpt-5.6-luna` |
+| `security-reviewer` | `gpt-5.6-terra` |
 | `solution-architect` | `gpt-5.6-terra` |
 | `spec-remediator` | `gpt-5.6-luna` |
 | `spec-validator` | `gpt-5.6-luna` |
@@ -384,11 +379,11 @@ cualquier repo que use LM Studio — es independiente de agent-foundry.
 | `documentation` | `claude-haiku-4.5` |
 | `enterprise-architect` | `claude-sonnet-5` |
 | `enterprise-spec-validator` | `claude-haiku-4.5` |
-| `executor` | `qwen3-coder-next` |
+| `executor` | `gpt-5.6-terra` |
 | `final-validation` | `claude-haiku-4.5` |
 | `functional-tester-agent` | `qwen3-coder-next` |
 | `general` | `claude-opus-5` |
-| `git-executor` | `qwen3-coder-next` |
+| `git-executor` | `claude-haiku-4.5` |
 | `hyprmind-deep-thinker` | `claude-opus-5` |
 | `hyprmind-orchestrator` | `claude-opus-5` |
 | `hyprmind-vision-analyst` | `claude-opus-5` |
@@ -397,7 +392,7 @@ cualquier repo que use LM Studio — es independiente de agent-foundry.
 | `refactor` | `gpt-5.6-terra` |
 | `requirements-analyst` | `claude-haiku-4.5` |
 | `reviewer` | `claude-haiku-4.5` |
-| `security-reviewer` | `claude-haiku-4.5` |
+| `security-reviewer` | `gpt-5.6-terra` |
 | `solution-architect` | `claude-sonnet-5` |
 | `spec-remediator` | `claude-haiku-4.5` |
 | `spec-validator` | `claude-haiku-4.5` |

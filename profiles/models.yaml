@@ -38,7 +38,7 @@ agent_tiers:
   spec-remediator:        {tier: sdd_validation}
   context-curator:        {tier: sdd_validation}
   reviewer:               {tier: sdd_validation}
-  security-reviewer:      {tier: code_heavy, harness_provider: harness_chatgpt}
+  security-reviewer:      {tier: sdd_validation, harness_provider: harness_chatgpt}
   requirements-analyst:   {tier: sdd_validation, harness_provider: harness_chatgpt}
   final-validation:       {tier: sdd_validation, harness_provider: harness_chatgpt}
   documentation:          {tier: sdd_validation}

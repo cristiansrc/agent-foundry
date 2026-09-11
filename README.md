@@ -324,7 +324,7 @@ cualquier repo que use LM Studio — es independiente de agent-foundry.
 | `master-orchestrator` | openai/gpt-5.6-terra |
 | `planner` | openai/gpt-5.6-sol |
 | `reviewer` | opencode-go/mimo-v2.5 |
-| `security-reviewer` | openai/gpt-5.6-terra |
+| `security-reviewer` | openai/gpt-5.6-luna |
 | `solution-architect` | openai/gpt-5.6-terra |
 | `spec-remediator` | opencode-go/mimo-v2.5 |
 | `spec-validator` | opencode-go/mimo-v2.5-pro |

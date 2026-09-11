@@ -316,7 +316,7 @@ cualquier repo que use LM Studio — es independiente de agent-foundry.
 | `devops-architect` | opencode-go/deepseek-v4.1-flash |
 | `documentation` | opencode-go/mimo-v2.5 |
 | `enterprise-architect` | openai/gpt-5.6-terra |
-| `enterprise-spec-validator` | opencode-go/glm-5.3 |
+| `enterprise-spec-validator` | opencode-go/mimo-v2.5-pro |
 | `executor` | opencode-go/deepseek-v4.1-flash |
 | `final-validation` | openai/gpt-5.6-luna |
 | `functional-tester-agent` | opencode-go/deepseek-v4-flash-vision-exp |
@@ -327,7 +327,7 @@ cualquier repo que use LM Studio — es independiente de agent-foundry.
 | `security-reviewer` | openai/gpt-5.6-terra |
 | `solution-architect` | openai/gpt-5.6-terra |
 | `spec-remediator` | opencode-go/mimo-v2.5 |
-| `spec-validator` | opencode-go/glm-5.3 |
+| `spec-validator` | opencode-go/mimo-v2.5-pro |
 | `task-decomposer` | opencode-go/longcat-2.0 |
 | `test-architect` | opencode-go/deepseek-v4.1-flash |
 | `ui-designer` | opencode-go/mimo-v2.5 |

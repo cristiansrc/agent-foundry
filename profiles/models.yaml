@@ -3,7 +3,7 @@
 # Los agentes viven en core/ agnósticos; este archivo los une a un modelo real.
 # Cambiar de modelo/proveedor = editar aquí + tooling/build.sh.
 schema: foundry/profiles/models/v2
-updated: 2026-09-10
+updated: 2026-09-11
 
 # ── 1. Tiers abstractos (capacidad requerida, sin marcas) ──────────────────
 tiers:
@@ -99,6 +99,12 @@ providers:
         vision: true
         cost: 0.14/0.28
         notes: Equilibrado mid-barato. Patrones GoF y validación SDD — 0.14 input, 1M ctx.
+      mimo_v25_pro:
+        id: opencode-go/mimo-v2.5-pro
+        status: active
+        context: 1M
+        vision: true
+        notes: Reemplazo de GLM 5.3 (flash + reasoning) 2026-09-11. Verificado ONLINE vía `opencode run`. Costo exacto pendiente de tabla OpenCode Go; ctx 1M heredado de la familia mimo-v2.5.
       hy3:
         id: opencode-go/hy3
         status: active
@@ -108,10 +114,10 @@ providers:
         notes: Más barato Go (0.017 input). Sin vision — no apto para ui_e2e con captura.
     tier_bindings:
       orchestration:       [mimo_v25]
-      macro_architecture:  [glm_flash]
+      macro_architecture:  [mimo_v25_pro]
       patterns_logic:      [mimo_v25]
       planning_governance: [longcat]
-      spec_validation_critical: [glm_reasoning]
+      spec_validation_critical: [mimo_v25_pro]
       sdd_validation:      [mimo_v25]
       code_volume:         [deepseek_v41_flash]
       code_heavy:          [deepseek_v41_flash]
@@ -121,6 +127,7 @@ providers:
       deepseek_flash_vision: [glm_flash]
       hy3:           [glm_flash]
       mimo_v25:      [glm_flash]
+      mimo_v25_pro:  [mimo_v25]
       longcat:       [mimo_v25]
       glm_flash:     [deepseek_v41_flash]
       # Luna se consume exclusivamente a través de OAuth de ChatGPT.

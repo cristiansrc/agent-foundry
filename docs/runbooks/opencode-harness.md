@@ -49,11 +49,21 @@ instalan como subagentes para que el selector principal no se llene de roles.
   `refactor` y los perfiles personales HyprMind. Se conservan como histórico o
   perfiles separados, pero no forman parte del SDLC normal.
 
+## Enforcement de routing: plugin `model-router`
+
+El `Task` tool no acepta `model` en sus args, así que el routing se fuerza en
+el hook `chat.message` (corre en cada sesión, incluidas las hijas de `Task`).
+Fuente: `plugins/opencode/model-router/`; generado:
+`adapters/opencode/out/plugin/foundry-model-router.ts`; instalado en
+`~/.config/opencode/plugins/` por `sync.sh`. Detalle en
+`docs/runbooks/model-router.md`.
+
 ## Sincronización y rollback
 
-`tooling/sync.sh` hace backup antes de reemplazar `agents/` y `skills/`, y
-fusiona únicamente `default_agent` en `opencode.json`: no borra MCPs ni
-proveedores existentes.
+`tooling/sync.sh` hace backup antes de reemplazar `agents/`, `skills/` y
+`plugins/foundry-model-router.ts`, y fusiona únicamente `default_agent` en
+`opencode.json`: no borra MCPs ni proveedores existentes. Reinicia OpenCode
+tras cada sync (config y plugins cargan al arrancar).
 
 Para cambiar la ruta de backups:
 

@@ -7,6 +7,9 @@ adapters/opencode/out/ la configuración nativa de OpenCode con paridad 1:1:
     out/agents/<nombre>.md   frontmatter final: description, mode, model,
                              temperature, permission (orden idéntico al legacy)
     out/skills/<skill>/...   copia directa de core/skills
+    out/plugin/foundry-model-router.ts  plugin generado desde
+                             plugins/opencode/model-router/model-router.ts.tmpl
+                             + ROUTING embebido (agente -> provider/model)
 
 Reglas de binding:
 - modelo  = tier del agente -> primer modelo de tier_bindings del proveedor activo
@@ -14,6 +17,7 @@ Reglas de binding:
 - perms   = permissions.yaml (edit/bash/execute); se omiten si no hay ninguno
 - vision  = si el agente exige vision, el modelo elegido debe soportarla
 """
+import json
 import shutil
 import sys
 from pathlib import Path
@@ -24,6 +28,7 @@ ROOT = Path(__file__).resolve().parents[2]
 CORE = ROOT / "core"
 PROFILES = ROOT / "profiles"
 OUT = ROOT / "adapters" / "opencode" / "out"
+PLUGIN_TMPL = ROOT / "plugins" / "opencode" / "model-router" / "model-router.ts.tmpl"
 INSTALLED_AGENTS = Path.home() / ".config" / "opencode" / "agents"
 
 DEFAULT_PROVIDER = "opencode"
@@ -102,6 +107,29 @@ def render_agent(src: Path, binding: dict) -> str:
     return "\n".join(lines) + "\n\n" + body
 
 
+def render_plugin(manifest: list[dict]) -> Path:
+    """Genera out/plugin/foundry-model-router.ts desde el tmpl + ROUTING.
+
+    El Task tool de OpenCode no acepta `model` en sus args, así que el
+    plugin fuerza el routing en el hook `chat.message` (corre en cada
+    sesión, incluidas las hijas creadas por Task).
+    """
+    if not PLUGIN_TMPL.exists():
+        sys.exit(f"FAIL: falta template del plugin: {PLUGIN_TMPL}")
+    tmpl = PLUGIN_TMPL.read_text(encoding="utf-8")
+    if "__ROUTING_JSON__" not in tmpl:
+        sys.exit("FAIL: template del plugin sin placeholder __ROUTING_JSON__")
+    routing = {entry["agent"]: entry["model"] for entry in manifest}
+    content = tmpl.replace("__ROUTING_JSON__", json.dumps(routing, indent=2, sort_keys=True))
+    plugin_out = OUT / "plugin"
+    plugin_out.mkdir(parents=True, exist_ok=True)
+    dest = plugin_out / "foundry-model-router.ts"
+    dest.write_text(content, encoding="utf-8")
+    if "__ROUTING_JSON__" in content:
+        sys.exit("FAIL: placeholder sin sustituir en plugin generado")
+    return dest
+
+
 def parity_report(outdir: Path) -> list[str]:
     diffs = []
     if not INSTALLED_AGENTS.exists():
@@ -156,6 +184,10 @@ def main() -> int:
     shutil.copytree(CORE / "skills", skills_out)
     n_skills = len(list(skills_out.glob("*/SKILL.md")))
     print(f"  {n_skills} skills")
+
+    # Plugin model-router (ROUTING embebido desde el manifest)
+    plugin_dest = render_plugin(manifest)
+    print(f"== Plugin: {plugin_dest.name} con {len(manifest)} rutas ==")
 
     # Manifest + paridad
     (OUT / "manifest.yaml").write_text(

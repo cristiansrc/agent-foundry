@@ -26,6 +26,17 @@ for inst in "$TARGET"/agents/*.md; do
   [ -f "$OUT/agents/$name" ] || { echo "  HUÉRFANO (no viene de core): $name"; DRIFT=$((DRIFT+1)); }
 done
 
+echo "== Plugin model-router: instalado vs generado =="
+if [ ! -f "$OUT/plugin/foundry-model-router.ts" ]; then
+  echo "  SIN GENERAR: corre tooling/build.sh"; DRIFT=$((DRIFT+1))
+elif [ ! -f "$TARGET/plugins/foundry-model-router.ts" ]; then
+  echo "  NO INSTALADO:      foundry-model-router.ts"; DRIFT=$((DRIFT+1))
+elif ! diff -q "$TARGET/plugins/foundry-model-router.ts" "$OUT/plugin/foundry-model-router.ts" >/dev/null; then
+  echo "  DESINCRONIZADO:    foundry-model-router.ts"; DRIFT=$((DRIFT+1))
+else
+  echo "  OK: foundry-model-router.ts"
+fi
+
 echo "== Skills: instalado vs generado =="
 for gen_dir in "$OUT"/skills/*/; do
   name=$(basename "$gen_dir")

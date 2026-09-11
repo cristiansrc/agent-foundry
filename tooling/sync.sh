@@ -10,24 +10,33 @@ if [ ! -d "$OUT/agents" ]; then
   echo "ERROR: no existe $OUT. Ejecuta primero tooling/build.sh" >&2
   exit 1
 fi
+if [ ! -f "$OUT/plugin/foundry-model-router.ts" ]; then
+  echo "ERROR: falta $OUT/plugin/foundry-model-router.ts. Ejecuta primero tooling/build.sh" >&2
+  exit 1
+fi
 
 echo "Esto sobrescribirá:"
 echo "  $TARGET/agents/*.md   <- $OUT/agents ($(ls "$OUT/agents" | wc -l) archivos)"
 echo "  $TARGET/skills/*      <- $OUT/skills ($(ls "$OUT/skills" | wc -l) skills)"
+echo "  $TARGET/plugins/foundry-model-router.ts <- $OUT/plugin/foundry-model-router.ts"
 echo "  $TARGET/opencode.json <- fusiona default_agent sin tocar MCPs/proveedores"
 read -rp "¿Continuar? [y/N] " answer
 [ "${answer:-n}" = "y" ] || exit 1
 
 mkdir -p "$TARGET"
-# Backup previo: permite rollback instantaneo
+# Backup previo: permite rollback instantaneo (plugins solo si existe)
 BACKUP_DIR="${AGENT_FOUNDRY_BACKUP_DIR:-$HOME/.local/share/agent-foundry/backups}"
 mkdir -p "$BACKUP_DIR"
 STAMP="$(date +%Y%m%d-%H%M%S)"
-tar -czf "$BACKUP_DIR/opencode-pre-sync-$STAMP.tar.gz" -C "$TARGET" agents skills
+BACKUP_ITEMS="agents skills"
+[ -d "$TARGET/plugins" ] && BACKUP_ITEMS="$BACKUP_ITEMS plugins"
+tar -czf "$BACKUP_DIR/opencode-pre-sync-$STAMP.tar.gz" -C "$TARGET" $BACKUP_ITEMS
 echo "Backup: $BACKUP_DIR/opencode-pre-sync-$STAMP.tar.gz"
 
 rsync -av --delete "$OUT/agents/" "$TARGET/agents/"
 rsync -av --delete "$OUT/skills/" "$TARGET/skills/"
+mkdir -p "$TARGET/plugins"
+cp -v "$OUT/plugin/foundry-model-router.ts" "$TARGET/plugins/foundry-model-router.ts"
 python3 - "$TARGET/opencode.json" "$OUT/config.patch.json" <<'PY'
 import json
 import sys

@@ -20,6 +20,8 @@ core/ (fuente de verdad) -> profiles/ (bindings modelo+permisos)
    proveedor) ni rutas absolutas `/home/`. El lint lo bloquea.
 4. **Fuente única**: temperatura y permisos viven SOLO en
    `profiles/permissions.yaml`; tier→modelo SOLO en `profiles/models.yaml`.
+   El `ROUTING` del plugin `model-router` deriva de ahí en el build; jamás se
+   hardcodea un modelo en `plugins/` ni en `core/`.
 5. **Cambios de agentes o skills** requieren: editar `core/` → `build.sh` →
    `sync.sh` → commit. Los tres pasos, siempre.
 6. **Cambios de perfil** siguen `docs/runbooks/model-change.md` (incluye evals).
@@ -34,7 +36,8 @@ core/ (fuente de verdad) -> profiles/ (bindings modelo+permisos)
 | `core/skills/<nombre>/SKILL.md` | Conocimiento técnico reutilizable |
 | `core/workflow/` | lifecycle, states (enum canónico), matrix, graphify-governance |
 | `profiles/*.yaml` | Bindings de ejecución (lo único tool-específico) |
-| `adapters/*/render.py` | Generadores nativos por herramienta |
+| `plugins/opencode/model-router/` | Template del plugin de routing (placeholder `__ROUTING_JSON__`, sin IDs) |
+| `adapters/*/render.py` | Generadores nativos por herramienta (opencode también renderiza `out/plugin/`) |
 | `evals/cases/*.yaml` | Suites de regresión de comportamiento |
 
 ## Verificación antes de cerrar una tarea aquí

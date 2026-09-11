@@ -49,6 +49,30 @@ else
   echo "SKIP (pyyaml no disponible)"
 fi
 
+echo "== Plugin model-router: template y anti-drift =="
+if [ ! -f "$ROOT/plugins/opencode/model-router/model-router.ts.tmpl" ]; then
+  fail "falta template plugins/opencode/model-router/model-router.ts.tmpl"
+elif ! grep -q '__ROUTING_JSON__' "$ROOT/plugins/opencode/model-router/model-router.ts.tmpl"; then
+  fail "template del plugin sin placeholder __ROUTING_JSON__"
+else
+  echo "OK (template + placeholder)"
+fi
+if grep -rInE 'opencode-go/[a-z0-9]|openai/gpt|gpt-5\.6-(luna|terra|sol)|deepseek-v4|mimo-v2\.5|minimax-m3|muse-spark|glm-5\.3|longcat|qwen3' \
+    "$ROOT/plugins/opencode/model-router/model-router.ts.tmpl" 2>/dev/null; then
+  fail "modelo concreto hardcodeado en template del plugin (solo __ROUTING_JSON__)"
+else
+  echo "OK (template sin modelos)"
+fi
+if [ -f "$ROOT/adapters/opencode/out/plugin/foundry-model-router.ts" ]; then
+  if grep -q '__ROUTING_JSON__' "$ROOT/adapters/opencode/out/plugin/foundry-model-router.ts"; then
+    fail "plugin generado con placeholder sin sustituir (corre build.sh)"
+  else
+    echo "OK (plugin generado sustituido)"
+  fi
+else
+  echo "SKIP (out/plugin aún no generado; corre build.sh)"
+fi
+
 echo "== Constraints: independencia verifier/implementer y packs =="
 if command -v python3 >/dev/null && python3 -c 'import yaml' 2>/dev/null; then
   if ! python3 "$ROOT/tooling/check_constraints.py"; then

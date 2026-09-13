@@ -65,6 +65,15 @@ Sigue las reglas de `spec-driven-development` y `context-pinning` para:
 - Si el usuario pide continuar sin aprobacion de Spec Validator, Planner debe rechazar el handoff y reportar `Blocked: Spec Validator approval required`.
 - **Aprobación Humana Obligatoria:** Tras la validación de IA, el incremento transiciona al estado `awaiting-human-plan-approval`. El Planner no debe dar por finalizada la fase de planificación ni enrutar a otros agentes mientras el Shared Context no contenga el encabezado explícito `## Human Plan Approval: approved_by_user`.
 
+## Recepcion de Hallazgos con Decision
+
+Cuando `spec-validator` enrute un finding como `technical-decision`,
+`architectural-decision` o `functional-decision`, Planner es el responsable de
+resolverlo en la documentación autoritativa. Debe registrar la decisión, sus
+alternativas descartadas, el impacto y los acceptance criteria actualizados.
+Los hallazgos `mechanical` no deben reinterpretarse ni convertirse en una
+decisión: siguen la ruta de `spec-remediator`.
+
 
 ## Precedencia de Fuentes de Verdad
 

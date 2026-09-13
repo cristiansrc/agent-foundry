@@ -20,10 +20,10 @@ esperados. Si `/models` muestra un ID diferente, se actualiza
 
 | Capacidad | Suscripción | Modelo principal | Uso |
 |---|---|---|---|
-| Orquestación | ChatGPT OAuth | Terra | master-orchestrator; decisiones y delegación con contexto global |
-| Planificación compleja | ChatGPT OAuth | Sol | planner y decisiones de alto impacto |
-| Razonamiento crítico | ChatGPT OAuth | Terra | arquitectura, seguridad y RCA complejos |
-| Validación crítica de specs | OpenCode Go | GLM-5.3 | spec-validator y enterprise-spec-validator; proveedor independiente del planner |
+| Orquestación | ChatGPT OAuth | Luna | master-orchestrator; decisiones y delegación con contexto global |
+| Planificación compleja | ChatGPT OAuth | Terra | planner y decisiones de alto impacto |
+| Razonamiento crítico | ChatGPT OAuth | Luna | arquitectura, seguridad y RCA complejos |
+| Validación crítica de specs | OpenCode Go | MiMo-V2.5 Pro | spec-validator y enterprise-spec-validator; proveedor independiente del planner |
 | Validación normal | ChatGPT OAuth | Luna | validación final y arbitraje ligero |
 | Plan estructurado | OpenCode Go | LongCat 2.0 | task decomposition y gobernanza API normal |
 | Código | OpenCode Go | DeepSeek V4.1 Flash | executor y migraciones de datos |

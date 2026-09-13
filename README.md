@@ -310,22 +310,22 @@ cualquier repo que use LM Studio — es independiente de agent-foundry.
 | Agente | Modelo de ejecución |
 |--------|--------------------|
 | `api-governance-agent` | opencode-go/longcat-2.0 |
-| `bug-diagnostician` | openai/gpt-5.6-terra |
+| `bug-diagnostician` | openai/gpt-5.6-luna |
 | `context-curator` | opencode-go/mimo-v2.5 |
 | `database-architect` | opencode-go/deepseek-v4.1-flash |
 | `devops-architect` | opencode-go/deepseek-v4.1-flash |
 | `documentation` | opencode-go/mimo-v2.5 |
-| `enterprise-architect` | openai/gpt-5.6-terra |
+| `enterprise-architect` | openai/gpt-5.6-luna |
 | `enterprise-spec-validator` | opencode-go/mimo-v2.5-pro |
 | `executor` | opencode-go/deepseek-v4.1-flash |
 | `final-validation` | openai/gpt-5.6-luna |
 | `functional-tester-agent` | opencode-go/deepseek-v4-flash-vision-exp |
 | `git-executor` | opencode-go/mimo-v2.5 |
-| `master-orchestrator` | openai/gpt-5.6-terra |
-| `planner` | openai/gpt-5.6-sol |
+| `master-orchestrator` | openai/gpt-5.6-luna |
+| `planner` | openai/gpt-5.6-terra |
 | `reviewer` | opencode-go/mimo-v2.5 |
 | `security-reviewer` | openai/gpt-5.6-luna |
-| `solution-architect` | openai/gpt-5.6-terra |
+| `solution-architect` | openai/gpt-5.6-luna |
 | `spec-remediator` | opencode-go/mimo-v2.5 |
 | `spec-validator` | opencode-go/mimo-v2.5-pro |
 | `task-decomposer` | opencode-go/longcat-2.0 |
@@ -358,7 +358,7 @@ cualquier repo que use LM Studio — es independiente de agent-foundry.
 | `refactor` | `gpt-5.6-terra` |
 | `requirements-analyst` | `gpt-5.6-luna` |
 | `reviewer` | `gpt-5.6-luna` |
-| `security-reviewer` | `gpt-5.6-terra` |
+| `security-reviewer` | `gpt-5.6-luna` |
 | `solution-architect` | `gpt-5.6-terra` |
 | `spec-remediator` | `gpt-5.6-luna` |
 | `spec-validator` | default del proveedor |
@@ -392,7 +392,7 @@ cualquier repo que use LM Studio — es independiente de agent-foundry.
 | `refactor` | `gpt-5.6-terra` |
 | `requirements-analyst` | `claude-haiku-4.5` |
 | `reviewer` | `claude-haiku-4.5` |
-| `security-reviewer` | `gpt-5.6-terra` |
+| `security-reviewer` | `claude-haiku-4.5` |
 | `solution-architect` | `claude-sonnet-5` |
 | `spec-remediator` | `claude-haiku-4.5` |
 | `spec-validator` | default del proveedor |

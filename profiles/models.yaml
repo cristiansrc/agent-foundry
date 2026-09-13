@@ -156,14 +156,14 @@ providers:
         vision: true
         notes: Planificación y decisiones de alta complejidad vía ChatGPT OAuth.
     tier_bindings:
-      orchestration:       [terra]
-      macro_architecture:  [terra]
-      patterns_logic:      [terra]
-      planning_governance: [sol]
-      spec_validation_critical: [sol]
+      orchestration:       [luna]
+      macro_architecture:  [luna]
+      patterns_logic:      [luna]
+      planning_governance: [terra]
+      spec_validation_critical: [terra]
       sdd_validation:      [luna]
       code_volume:         [luna]
-      code_heavy:          [terra]
+      code_heavy:          [luna]
       ui_e2e:              [luna]
     fallbacks:
       luna: [terra]

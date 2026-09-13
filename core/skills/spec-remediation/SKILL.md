@@ -19,14 +19,15 @@ Guía para corregir de forma segura y granular los hallazgos reportados por el `
     - Leer shared context activo, spec activa, OpenAPI, migraciones/config relevantes y último reporte de validación.
     - Verificar que los archivos citados por el hallazgo existen en disco.
     - Si la evidencia del hallazgo no existe en los archivos actuales, marcarlo como `validator/process-bug` o `superseded` y pedir revalidación.
-2. **Clasificación de Hallazgos**: 
-    - `mechanical`: Errores de formato o metadatos.
-    - `contract-drift`: Desajuste entre Spec y OpenAPI/Migraciones.
-    - `design-decision`: Ambigüedad en la lógica de negocio.
-    - `migration-risk`: Riesgos en cambios de base de datos.
-    - `validator/process-bug`: El validador se equivoca.
-    - `user-decision`: Requiere intervención humana.
-3. **Priorización**: Tomar el primer hallazgo seguro (`mechanical` o `contract-drift`) cuya fuente autoritativa sea inequívoca.
+2. **Clasificación de Hallazgos**: consumir la clasificación y ruta emitidas
+   por `spec-validator`:
+     - `mechanical` -> `spec-remediator`.
+     - `technical-decision`, `architectural-decision` o
+       `functional-decision` -> `planner`.
+     - Un `contract-drift` solo es mecánico si la fuente autoritativa y la
+       corrección exacta son inequívocas; en caso contrario va a `planner`.
+3. **Priorización**: tomar el primer hallazgo `mechanical` con ruta
+   `spec-remediator` y evidencia suficiente.
 4. **Corrección Mínima**: Aplicar el cambio más pequeño posible para resolver un único hallazgo.
 5. **Registro**: Actualizar el shared context solo con progreso de remediación, hallazgo tratado, archivos modificados y siguiente validación requerida. No escribir aprobación.
 6. **Re-Validación Selectiva**: Solicitar validación solo de ese hallazgo o del artefacto afectado al `spec-validator` oficial.
@@ -53,6 +54,8 @@ Guía para corregir de forma segura y granular los hallazgos reportados por el `
 - **Límite de Intentos**: Máximo 4 intentos por hallazgo. Si persiste, escribir `<active-repo>/docs/specs/.working/<increment-name>-remediator-bug-report.md` y detener el flujo.
 - **Alcance**: No puede crear ni llamar a `task-decomposer` ni `executor`. Solo trabaja sobre artefactos SDD (Specs, OpenAPI, Migraciones, Config).
 - **Decisiones de Diseño**: Si un hallazgo requiere una decisión de arquitectura profunda, debe enrutar al Planner o al Usuario.
+- **Routing Guard**: Si falta `change_type`, la ruta no coincide o el hallazgo
+  no es `mechanical`, no editar; bloquear y enrutar a `planner`.
 - **Estado Conservador**: Si hay duda, bloquear. Una remediación insegura es peor que un hallazgo pendiente.
 
 ## Resultado Esperado Por Iteración

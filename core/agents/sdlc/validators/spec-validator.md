@@ -83,10 +83,40 @@ Valida los outputs de Planner contra:
 - `medium`: ambiguedad importante o riesgo de mantenibilidad.
 - `low`: mejora de claridad o completitud.
 
+## Clasificacion y Ruta Obligatoria de Hallazgos
+
+Cada finding debe incluir una clasificacion de cambio y su agente responsable.
+Esta clasificacion describe la naturaleza de la correccion documental, no la
+severidad:
+
+- `mechanical`: formato, metadatos, headings, estados, rutas canonicas, typos
+  o sincronizacion determinista entre artefactos cuando existe una fuente
+  autoritativa inequívoca. Ruta: `spec-remediator`.
+- `technical-decision`: requiere escoger una regla tecnica, contrato,
+  integracion, persistencia, rendimiento, seguridad u observabilidad. Ruta:
+  `planner`.
+- `architectural-decision`: requiere decidir boundaries, ownership, patrones,
+  dependencias o estructura del sistema. Ruta: `planner`.
+- `functional-decision`: requiere decidir comportamiento de negocio, flujo,
+  reglas, estados, UX o criterios de aceptacion. Ruta: `planner`.
+
+Un `contract-drift` solo puede clasificarse como `mechanical` si la fuente
+autoritativa y la correccion exacta son inequívocas. Si hay que elegir entre
+contratos o interpretar intención, clasifícalo como `technical-decision` y
+enruta a `planner`. Si existe duda, no lo automatices.
+
 ## Formato de Salida
 
 - Findings primero, ordenados por severidad.
-- Cada finding debe incluir seccion de spec afectada o file path, cambio requerido concreto y `Executor risk:`.
+- Cada finding debe incluir `change_type`, `route`, seccion de spec afectada o
+  file path, cambio requerido concreto y `Executor risk:`.
+- `change_type` debe ser uno de `mechanical`, `technical-decision`,
+  `architectural-decision` o `functional-decision`.
+- `route` debe ser `spec-remediator` para `mechanical` y `planner` para las
+  otras tres clasificaciones.
+- Añade al final una seccion `## Remediation Routing` que enumere cada finding,
+  su `change_type` y el agente responsable. No enrutes decisiones a
+  `spec-remediator`.
 - Si el verdict es `ready`, formatea la aprobacion exactamente como:
   `## Spec Validator Approval` / `verdict: ready` / `reviewed_at: <date/time>` / `validator_agent: spec-validator` / `artifact_set_reviewed: <absolute paths>` / `summary: <short summary>` / `invalidated_by_changes_since: none`
 - Si el verdict es `not ready`, next action debe ser Planner corrections, no Task Decomposer ni Executor.

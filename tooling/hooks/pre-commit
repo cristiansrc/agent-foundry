@@ -5,6 +5,14 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." >/dev/null 2>&1 || cd "$(git rev-parse --show-toplevel)" && pwd)"
 cd "$ROOT"
 
+if ! command -v gitleaks >/dev/null 2>&1; then
+  echo "ERROR: gitleaks no esta instalado. Consulta docs/runbooks/gitleaks.md." >&2
+  exit 1
+fi
+
+echo "== pre-commit foundry: gitleaks =="
+gitleaks git --staged --verbose
+
 echo "== pre-commit foundry: lint =="
 ./tooling/lint.sh
 

@@ -66,7 +66,7 @@ agents:
     reads_states: [planning, awaiting-human-plan-approval]
     skills: [spec-driven-development, openapi-standard, restful-standard, context-pinning,
              workspace-coordination, graphify, springboot-stack, fastapi-stack,
-             keycloak-standard, security-standards, postgresql-standard]
+             keycloak-standard, security-standards, postgresql-standard, secret-scanning]
 
   enterprise-spec-validator:
     role: validator
@@ -104,7 +104,8 @@ agents:
              repository-dto-patterns, jpa-stack, flyway-migrations,
              postgresql-standard, mysql-standard, oracle-standard, sqlserver-standard,
              n8n-stack, security-standards, keycloak-standard, testing-strategy,
-             pre-flight-check, context-pinning, bug-fixing-workflow, design-to-code]
+             pre-flight-check, context-pinning, bug-fixing-workflow, design-to-code,
+             secret-scanning]
 
   architect-executor:
     role: worker
@@ -148,7 +149,7 @@ agents:
     phases: [execution, gitops]
     reads_states: [validated-not-executed]
     skills: [documentation-lifecycle, documentation-standards, context-pinning,
-             openapi-standard]
+             openapi-standard, secret-scanning]
 
   functional-tester-agent:
     role: validator
@@ -193,14 +194,14 @@ agents:
     skills: [pre-flight-check, testing-strategy, code-quality-and-sonarqube,
              security-standards, keycloak-standard, docker-standard,
              observability-standard, documentation-lifecycle, documentation-standards,
-             context-pinning]
+             context-pinning, secret-scanning]
 
   git-executor:
     role: worker
     phases: [requirements, gitops]
     gate_required: G2-para-promocion
     exclusive: git
-    skills: [git-ops]
+    skills: [git-ops, secret-scanning]
 
   context-curator:
     role: consultant

@@ -21,6 +21,8 @@ Consulta las skills activas para los estandares tecnicos del stack. No repitas r
 - `security-standards` y `keycloak-standard` para reglas de seguridad.
 - `workspace-coordination` para validar sincronización global-local y auditoría de deudas técnicas.
 - `graphify` para el uso de grafos de dependencias estructurales.
+- `secret-scanning` para verificar que specs, ejemplos y configuracion no
+  contienen secretos.
 
 ## Objetivo Principal
 
@@ -74,6 +76,9 @@ Valida los outputs de Planner contra:
 - Desalineación o desactualización del contrato del proyecto local frente a los cambios descritos en `docs/specs/workspace_changes.md` del Workspace.
 - Introducción o detección de deuda técnica no documentada y registrada en el archivo local `projects/<project-name>/docs/specs/technical_debt.md`.
 - Manipulación manual o alteración del bloque de estado de IA (`## Current status` o `## Spec Validator Approval`) por parte del humano. Si detectas cambios manuales no firmados por el agente, reportar severidad `blocker` y bloquear el incremento en estado `corrupted-state`.
+- Secretos o credenciales reales en specs, ejemplos, fixtures, logs o artefactos
+  documentales. Reportar severidad `blocker` con `Blocked: secret detected`; no
+  incluir el valor detectado en el finding.
 
 
 ## Definiciones de Severidad

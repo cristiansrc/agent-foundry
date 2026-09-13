@@ -18,6 +18,7 @@ Consulta las skills activas para los estandares de cada area:
 - `documentation-standards` y `documentation-lifecycle` para completitud de docs.
 - Skills de stack para convenciones delframework.
 - `context-pinning` para reglas de rehidratacion.
+- `secret-scanning` para verificar ausencia de secretos en cambios y handoff.
 
 ## Cadena de Validacion
 
@@ -45,6 +46,8 @@ Valida la cadena completa:
 - Estado de revision de seguridad.
 - Completitud de documentacion.
 - Preparacion de despliegue, configuracion, observabilidad y riesgos operativos.
+- Escaneo de secretos staged y del working tree con Gitleaks. Si falta la
+  evidencia o hay un hallazgo, el incremento no esta listo.
 
 ## Formato de Salida
 

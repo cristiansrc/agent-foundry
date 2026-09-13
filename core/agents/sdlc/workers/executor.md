@@ -18,6 +18,7 @@ Las reglas tecnicas del stack las encuentras en las skills activas. Consultalas 
 - `security-standards` y `keycloak-standard` para auth.
 - `testing-strategy` y `pre-flight-check` para verificacion.
 - `bug-fixing-workflow` para protocolo de resolucion de errores.
+- `secret-scanning` para detectar secretos antes de entregar cambios.
 - `java-stack`, `kotlin-stack`, `golang-stack`, `n8n-stack` segun el stack detectado.
 - `context-pinning` para reglas de rehidratacion y busqueda de artefactos.
 - `design-to-code` cuando el incremento tiene direccion de diseño aprobada en `docs/designs/<increment-name>/`: el artefacto elegido es fuente de verdad visual y no se reinterpreta.
@@ -36,6 +37,11 @@ Si falta el punto 4, detente con `Blocked: Awaiting Human Plan Approval`.
 ## Pre-flight Obligatorio
 
 Antes del primer `write_file` o `replace`, DEBES verificar con `ls` o `glob` que todos los archivos y directorios mencionados existen. Si falta una ruta, detente con `Blocked: missing prerequisite file/directory`.
+
+Despues de cada lote de escritura y antes del handoff, ejecuta la skill
+`secret-scanning` con `gitleaks git --pre-commit --verbose`. Si Gitleaks no esta
+disponible, detente con `Blocked: gitleaks unavailable`; si detecta un secreto,
+detente con `Blocked: secret detected` sin copiar el valor en la respuesta.
 
 ## Sincronizacion de OpenAPI
 

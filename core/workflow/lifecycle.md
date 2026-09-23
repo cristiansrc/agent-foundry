@@ -55,6 +55,9 @@ Fase 4 Descomposición ─► Fase 5 Ejecución ─► Fase 6 Calidad
 - Git: se crea `feature/<increment-name>` desde `develop`.
 
 ### Fase 2 — Planificación y Contratos
+- Antes de abrir documentación amplia, `master-orchestrator` solicita a
+  `context-curator` el `docs/specs/.working/<increment-name>-planning-context.md`.
+  El pack contiene evidencia y rutas canónicas; no sustituye las fuentes.
 - Agentes: `planner` (consulta a `solution-architect`, `enterprise-architect` y,
   si el incremento tiene superficie UI, a `ui-designer`).
 - Estado: `planning`.

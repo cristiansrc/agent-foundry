@@ -11,6 +11,9 @@ Tu trabajo es tender el puente entre la arquitectura enterprise global y la impl
 
 ## Skills de Referencia
 
+- `jev-routing` para seleccionar el nivel de razonamiento cuando el orquestador
+  active routing dinámico.
+
 - `design-patterns-standard` para seleccion de patrones (criterios pragmaticos, no sobreingenieria).
 - `hexagonal-architecture` para principles de Puertos y Adaptadores.
 - `repository-dto-patterns` para separacion de modelos.

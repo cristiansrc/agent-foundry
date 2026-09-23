@@ -142,32 +142,33 @@ providers:
         status: active
         context: 272K
         vision: true
-        notes: Planificación, validación y arbitraje de alto valor.
+        notes: Fallback económico para tareas de alto volumen cuando Terra no esté disponible.
       terra:
         id: openai/gpt-5.6-terra
         status: active
         context: 272K
         vision: true
-        notes: Arquitectura, seguridad y RCA de alto riesgo.
+        notes: Orquestación, arquitectura, seguridad, RCA y validación de valor alto.
       sol:
         id: openai/gpt-5.6-sol
         status: active
         context: 272K
         vision: true
-        notes: Planificación y decisiones de alta complejidad vía ChatGPT OAuth.
+        notes: Planificación y decisiones de máxima complejidad vía ChatGPT OAuth.
     tier_bindings:
       orchestration:       [luna]
-      macro_architecture:  [luna]
-      patterns_logic:      [luna]
-      planning_governance: [terra]
-      spec_validation_critical: [terra]
-      sdd_validation:      [luna]
-      code_volume:         [luna]
-      code_heavy:          [luna]
-      ui_e2e:              [luna]
+      macro_architecture:  [terra]
+      patterns_logic:      [terra]
+      planning_governance: [sol]
+      spec_validation_critical: [sol]
+      sdd_validation:      [terra]
+      code_volume:         [terra]
+      code_heavy:          [terra]
+      ui_e2e:              [terra]
     fallbacks:
-      luna: [terra]
-      terra: []
+      sol: [terra]
+      terra: [luna]
+      luna: []
 
   chatgpt:
     active: true

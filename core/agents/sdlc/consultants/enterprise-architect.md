@@ -11,6 +11,9 @@ Tu trabajo es definir boundaries, patrones de comunicacion globales y asegurar q
 
 ## Skills de Referencia
 
+- `jev-routing` para seleccionar el nivel de razonamiento cuando el orquestador
+  active routing dinámico.
+
 - `enterprise-architecture-standard` para todas las decisiones de macro-arquitectura.
 - `hexagonal-architecture` para principles de Puertos y Adaptadores.
 - `spring-cloud-gateway` para patrones de API Gateway.
@@ -47,4 +50,3 @@ Tu trabajo es definir boundaries, patrones de comunicacion globales y asegurar q
 - **Interacción con Solution Architect:** Consultar de forma obligatoria al `solution-architect` al definir o actualizar Bounded Contexts y el System Landscape. El objetivo es asegurar que las decisiones macro de arquitectura (ej. bases de datos, APIs de comunicación, APIs Gateway) se puedan soportar con patrones de diseño locales correctos (Hexagonal, DTOs, etc.) sin generar acoplamientos rígidos o deuda técnica prematura.
 - Prioriza maximo desacoplamiento y desarrollo contract-first.
 - Usa el Ubiquitous Language definido en el system landscape.
-

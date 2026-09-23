@@ -77,6 +77,7 @@ Ver `docs/migration-notes.md` para decisiones detalladas de migración.
   `docs/templates/` del repo activo. Fuente de formato: las skills dueñas de
   cada documento, no invención nueva.
 - **Stack Shell/QML (ambxst) en calidad/testing, 2026-08-24**: filas qmltestrunner+bats+kcov+qmllint/shellcheck en tablas de testing-strategy y code-quality; mutación y CRAP declarados NO disponibles para QML (fallback: gauntlet visual + Gate 2; prohibidos proxies caseros); variante Quickshell de verify-code.sh vive en code-quality §4 con referencia cruzada desde ambxst-packaging (fuente única del script).
+- **Routing dinámico con Jev, 2026-09-22**: `master-orchestrator` queda fijo en Luna; Jev selecciona agente y nivel de razonamiento únicamente para Planner, arquitectos, diagnóstico, seguridad y validación final. El MCP `foundry-jev` usa Vercel AI Gateway como proveedor inicial y conserva Jev oficial como alternativa. El plugin traduce `low/medium/high/critical` a Luna/Terra/Sol, aplica umbrales de confianza y mantiene fallback estático. El Gate 1 evita reactivar Planner cuando solo corresponde descomponer tareas.
 
 ## Mejoras de coordinación pendientes de discutir (Fase 7)
 

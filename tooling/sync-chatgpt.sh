@@ -5,13 +5,13 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 OUT="$ROOT/adapters/chatgpt/out/skills"
 TARGET="${CODEX_SKILLS_DIR:-$HOME/.codex/skills}"
 
-if [ ! -d "$OUT/project-context-navigation" ] || [ ! -d "$OUT/documentation-reconciliation" ]; then
+if [ ! -d "$OUT/project-context-navigation" ] || [ ! -d "$OUT/documentation-reconciliation" ] || [ ! -d "$OUT/agent-foundry-reader" ]; then
   echo "ERROR: ejecuta tooling/build.sh primero." >&2
   exit 1
 fi
 
 mkdir -p "$TARGET"
-for skill in project-context-navigation documentation-reconciliation; do
+for skill in project-context-navigation documentation-reconciliation agent-foundry-reader; do
   rm -rf "$TARGET/$skill"
   cp -a "$OUT/$skill" "$TARGET/$skill"
   echo "Instalada: $TARGET/$skill"

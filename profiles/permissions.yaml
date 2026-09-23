@@ -43,8 +43,11 @@ agents:
   enterprise-architect:   {edit: allow, bash: deny, temp: "0.2"}
   test-architect:         {edit: allow, bash: allow, temp: "0.2"}
   task-decomposer:        {edit: allow, bash: deny, temp: "0.2"}
-  context-curator:        {edit: deny, bash: deny, temp: "0.10"}
-  master-orchestrator:    {mode: primary, edit: deny, bash: deny, execute: allow, temp: "0.15"}
+  context-curator:
+    edit: {"*": deny, "docs/specs/.working/**": allow}
+    bash: deny
+    temp: "0.10"
+  master-orchestrator:    {mode: primary, edit: deny, bash: deny, execute: allow, task: allow, temp: "0.15"}
 
   # ── Validators ───────────────────────────────────────────────────────────
   spec-validator:         {mode: subagent, edit: allow, bash: deny, temp: "0.1"}

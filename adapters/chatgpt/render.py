@@ -18,6 +18,7 @@ import yaml
 from foundry import CORE, copy_skills, core_agents, load_profiles
 
 OUT = Path(__file__).resolve().parent / "out"
+DESKTOP_ONLY = Path(__file__).resolve().parent / "skills"
 
 
 def build_agents_md() -> str:
@@ -99,6 +100,12 @@ def main() -> int:
     OUT.mkdir(parents=True, exist_ok=True)
     (OUT / "AGENTS.md").write_text(build_agents_md(), encoding="utf-8")
     n = copy_skills(agents_out)
+    if DESKTOP_ONLY.exists():
+        import shutil
+        for skill_dir in sorted(DESKTOP_ONLY.iterdir()):
+            if skill_dir.is_dir():
+                shutil.copytree(skill_dir, agents_out / skill_dir.name)
+                n += 1
     (OUT / "config.toml").write_text(
         build_config_toml(profiles["models"]), encoding="utf-8")
     print(f"[chatgpt] AGENTS.md generado | {n} skills | config.toml")

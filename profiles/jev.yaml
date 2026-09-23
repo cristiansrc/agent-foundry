@@ -1,0 +1,36 @@
+# Configuración del selector Jev. Las claves viven fuera del repositorio.
+schema: foundry/profiles/jev/v1
+
+active_provider: vercel
+model: typesafe-ai/jev
+api_key_env: AI_GATEWAY_API_KEY
+timeout_ms: 30000
+
+providers:
+  vercel:
+    base_url: https://ai-gateway.vercel.sh/v1/evaluate
+    model: typesafe-ai/jev
+    api_key_env: AI_GATEWAY_API_KEY
+  typesafe:
+    base_url: https://thejevai.com/v1/systemone
+    model: jev-latest
+    api_key_env: JEV_API_KEY
+
+confidence:
+  auto_route: 0.80
+  confirm: 0.60
+
+dynamic_agents:
+  - planner
+  - solution-architect
+  - enterprise-architect
+  - bug-diagnostician
+  - security-reviewer
+  - final-validation
+
+reasoning_bindings:
+  harness_chatgpt:
+    low: luna
+    medium: terra
+    high: sol
+    critical: sol

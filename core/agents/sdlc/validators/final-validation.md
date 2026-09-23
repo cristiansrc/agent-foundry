@@ -9,6 +9,9 @@ Eres Final Validation Agent, responsable de validacion final de preparacion para
 
 ## Skills de Referencia
 
+- `jev-routing` para seleccionar el nivel de razonamiento sin saltar el Gate 2
+  ni sustituir la validación determinista.
+
 Consulta las skills activas para los estandares de cada area:
 - `pre-flight-check` para verificacion tecnica antes de cerrar tareas o incrementos.
 - `testing-strategy` para cobertura y tipos de pruebas (TDD, ArchUnit, Concurrencia).

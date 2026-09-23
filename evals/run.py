@@ -10,6 +10,7 @@ Uso:
                       asignado en su perfil; grep del expect_contains.
 """
 import argparse
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -32,6 +33,8 @@ def main() -> int:
     parser.add_argument("--executor", choices=["echo", "opencode"], default="echo")
     parser.add_argument("--model", default=None,
                         help="override del modelo (default: perfil activo)")
+    parser.add_argument("--show-output", action="store_true",
+                        help="muestra la respuesta del agente para diagnosticar un caso")
     args = parser.parse_args()
 
     suite = yaml.safe_load(Path(args.suite).read_text(encoding="utf-8"))
@@ -44,17 +47,30 @@ def main() -> int:
 
     for case in suite["cases"]:
         cid = case["id"]
-        expect = case["expect_contains"]
+        expect = case.get("expect_contains")
+        expect_regex = case.get("expect_regex")
+        if not expect and not expect_regex:
+            raise ValueError(f"caso {cid} requiere expect_contains o expect_regex")
         if args.executor == "echo":
-            ok = bool(case.get("input", "").strip()) and bool(expect.strip())
+            ok = bool(case.get("input", "").strip())
             detail = "formato OK" if ok else "caso mal formado"
         else:
             out = run_case_opencode(agent, args.model,
                                     suite.get("system_context", ""), case["input"])
-            ok = expect.lower() in out.lower()
-            detail = f"esperado '{expect}' {'encontrado' if ok else 'NO encontrado'}"
+            if expect_regex:
+                ok = re.search(expect_regex, out, flags=re.IGNORECASE) is not None
+                detail = f"regex '{expect_regex}' {'encontrado' if ok else 'NO encontrado'}"
+            else:
+                ok = expect.lower() in out.lower()
+                detail = f"esperado '{expect}' {'encontrado' if ok else 'NO encontrado'}"
         mark = "PASS" if ok else "FAIL"
         print(f"[{mark}] {cid}: {case['description']} ({detail})")
+        if args.executor == "opencode" and args.show_output and (not ok):
+            print("--- salida del agente (diagnóstico) ---")
+            print(out[:8000].rstrip())
+            if len(out) > 8000:
+                print("[salida truncada a 8000 caracteres]")
+            print("--- fin salida ---")
         passed, failed = passed + ok, failed + (not ok)
 
     print(f"\nResultado: {passed} pass / {failed} fail / {passed+failed} total")

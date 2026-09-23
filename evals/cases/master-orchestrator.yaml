@@ -1,0 +1,16 @@
+# Casos de evaluación: master-orchestrator
+version: 1
+agent: master-orchestrator
+
+system_context: |
+  Eres master-orchestrator. Antes de enviar planificación amplia al planner,
+  delega un Planning Context Pack al context-curator; OpenCode tiene una sola
+  profundidad de subagentes, así que la secuencia es plana.
+
+cases:
+  - id: contexto-amplio-se-cura-primero
+    description: No envía specs extensas directamente al planner
+    expect_contains: "context-curator"
+    input: |
+      Hay una master spec, dos delta specs, OpenAPI, cinco migraciones y varios
+      tests relevantes. Planifica un cambio transversal de facturación.

@@ -22,9 +22,11 @@ Las reglas tecnicas del stack las encuentras en las skills activas. No las repit
 - `rabbitmq-standard`, `kafka-standard`, `amazon-sqs-standard` segun el broker
 - `frontend-architecture`, `react-stack` o `angular-stack`
 - `context-pinning` para reglas de rehidratacion y filesystem
+- `planning-context-pack` para consumir contexto curado, trazable y vigente antes de releer fuentes extensas
 - `documentation-lifecycle` para handoff de documentacion
 - `graphify` para el uso del grafo de conocimiento y análisis de dependencias
 - `workspace-coordination` para sincronización de contratos global-local y gestión de deuda técnica
+- `jev-routing` cuando el orquestador solicite seleccionar el nivel de razonamiento de esta tarea
 
 ## Objetivo Principal
 
@@ -35,6 +37,12 @@ Las reglas tecnicas del stack las encuentras en las skills activas. No las repit
 ## Contexto Compartido de Planificacion
 
 Sigue las reglas de `spec-driven-development` y `context-pinning` para:
+- Si existe `docs/specs/.working/<increment-name>-planning-context.md`, úsalo
+  como índice de alta señal antes de abrir specs completas. Conserva su
+  trazabilidad: abre el artefacto canónico solo para resolver un elemento
+  marcado `incomplete`/`conflicting` o verificar la sección concreta que una
+  decisión vaya a cambiar. No trates el pack como fuente de verdad ni lo
+  reescribas; pide actualización al `context-curator` cuando esté stale.
 - Contexto Compartido: Mantener un único archivo activo en `docs/specs/.working/<increment-name>-sdd-context.md`.
 - Sincronización Descendente: Si trabajas en un Solution Workspace, verificar `docs/specs/workspace_changes.md` global al iniciar. Si hay cambios globales que afecten el proyecto, marcar el incremento como `planning`/`revision-needed` y adaptar los contratos locales.
 - Registro de Deuda Técnica: Si por fuerza técnica o indicación del usuario se introduce deuda o bypass, registrar obligatoriamente la entrada en `projects/<project-name>/docs/specs/technical_debt.md` con un plan de mitigación explícito.

@@ -80,7 +80,7 @@ def resolve_binding(agent: str, profiles: dict) -> dict:
     if primary_id is None:
         sys.exit(f"FAIL: sin modelo activo para {agent} (tier {tier})")
     p = pcfg["agents"].get(agent, {})
-    perm_keys = [k for k in ("edit", "bash", "execute") if k in p]
+    perm_keys = [k for k in ("edit", "bash", "execute", "task") if k in p]
     return {
         "model": primary_id,
         "temperature": p.get("temp"),
@@ -102,12 +102,16 @@ def render_agent(src: Path, binding: dict) -> str:
     if binding["permission"]:
         lines.append("permission:")
         for k, v in binding["permission"].items():
-            lines.append(f"  {k}: {v}")
+            # `permission.<tool>` admite tanto una acción única como un mapa
+            # de patrones. Serializarlo con YAML evita frontmatter inválido
+            # para permisos acotados, p. ej. escritura solo en .working/.
+            dumped = yaml.safe_dump({k: v}, allow_unicode=True, sort_keys=False).rstrip()
+            lines.extend(f"  {line}" for line in dumped.splitlines())
     lines.append("---")
     return "\n".join(lines) + "\n\n" + body
 
 
-def render_plugin(manifest: list[dict]) -> Path:
+def render_plugin(manifest: list[dict], profiles: dict) -> Path:
     """Genera out/plugin/foundry-model-router.ts desde el tmpl + ROUTING.
 
     El Task tool de OpenCode no acepta `model` en sus args, así que el
@@ -120,7 +124,24 @@ def render_plugin(manifest: list[dict]) -> Path:
     if "__ROUTING_JSON__" not in tmpl:
         sys.exit("FAIL: template del plugin sin placeholder __ROUTING_JSON__")
     routing = {entry["agent"]: entry["model"] for entry in manifest}
+    jev_cfg = yaml.safe_load((PROFILES / "jev.yaml").read_text(encoding="utf-8")) \
+        if (PROFILES / "jev.yaml").exists() else {}
+    harness = profiles["models"]["providers"].get("harness_chatgpt", {})
+    harness_models = harness.get("models", {})
+    reasoning = {}
+    for level, slot in jev_cfg.get("reasoning_bindings", {}).get("harness_chatgpt", {}).items():
+        if slot in harness_models:
+            reasoning[level] = harness_models[slot]["id"]
+    jev_payload = {
+        "provider": jev_cfg.get("active_provider", "vercel"),
+        "providers": jev_cfg.get("providers", {}),
+        "model": jev_cfg.get("model", "typesafe-ai/jev"),
+        "confidence": jev_cfg.get("confidence", {"auto_route": 0.80, "confirm": 0.60}),
+        "dynamic_agents": jev_cfg.get("dynamic_agents", []),
+        "reasoning_models": reasoning,
+    }
     content = tmpl.replace("__ROUTING_JSON__", json.dumps(routing, indent=2, sort_keys=True))
+    content = content.replace("__JEV_CONFIG_JSON__", json.dumps(jev_payload, indent=2, sort_keys=True))
     plugin_out = OUT / "plugin"
     plugin_out.mkdir(parents=True, exist_ok=True)
     dest = plugin_out / "foundry-model-router.ts"
@@ -186,7 +207,7 @@ def main() -> int:
     print(f"  {n_skills} skills")
 
     # Plugin model-router (ROUTING embebido desde el manifest)
-    plugin_dest = render_plugin(manifest)
+    plugin_dest = render_plugin(manifest, profiles)
     print(f"== Plugin: {plugin_dest.name} con {len(manifest)} rutas ==")
 
     # Manifest + paridad

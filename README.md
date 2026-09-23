@@ -16,7 +16,7 @@ herramienta: **opencode**, **chatgpt** (Codex CLI) y **kiro**.
 - [Agentes](#agentes)
   - [Ciclo de desarrollo de software (26)](#ciclo-de-desarrollo-de-software-26)
   - [Asistentes personales — HyprMind (3)](#asistentes-personales--hyprmind-3)
-- [Skills](#skills-73)
+- [Skills](#skills-76)
   - [Arquitectura y Metodología](#arquitectura-y-metodología)
   - [Backend y Lenguajes](#backend-y-lenguajes)
   - [Datos y Mensajería](#datos-y-mensajería)
@@ -29,7 +29,8 @@ herramienta: **opencode**, **chatgpt** (Codex CLI) y **kiro**.
 - [Modelos por herramienta](#modelos-por-herramienta)
   - [OpenCode](#opencode--bindings-activos)
   - [ChatGPT (Codex CLI)](#chatgpt-codex-cli--bindings-activos)
-  - [Kiro](#kiro--bindings-activos)
+- [Kiro](#kiro--bindings-activos)
+- [Skills para ChatGPT Desktop](#skills-para-chatgpt-desktop)
 
 ## Cómo funciona
 
@@ -89,7 +90,7 @@ tooling/sync.sh           # instala las salidas generadas (~/.config/opencode, e
 
 ## MCPs (Model Context Protocol) en OpenCode
 
-Cinco MCPs extienden las capacidades de los agentes. Se configuran en
+Seis MCPs extienden las capacidades de los agentes. Se configuran en
 `~/.config/opencode/opencode.json` y se instalan con `tooling/sync.sh`.
 
 | MCP | Tipo | Propósito |
@@ -99,6 +100,10 @@ Cinco MCPs extienden las capacidades de los agentes. Se configuran en
 | **context7** | Remoto | Documentación actualizada de frameworks/librerías en tiempo real (override de conocimiento interno stale). |
 | **github** | Remoto + OAuth | Issues, PRs, repos, search y releases. Requiere autorización OAuth第一次 (un solo splash screen). |
 | **foundry-vision** | Local | Visión sobre imágenes (OCR, descripción de UI, análisis de capturas) corriendo en LM Studio con **qwen3-vl-8b**. Sin costo, sin salida de datos. |
+| **foundry-jev** | Local | Selector tipado de agente, nivel de razonamiento y aclaración humana mediante Jev. Vercel es el proveedor inicial; Jev oficial queda como alternativa. |
+
+La arquitectura, configuración, umbrales de confianza y procedimiento de
+activación están documentados en [`docs/runbooks/jev-routing.md`](docs/runbooks/jev-routing.md).
 
 ### Configuración de AWS
 
@@ -180,7 +185,7 @@ cualquier repo que use LM Studio — es independiente de agent-foundry.
 | `hyprmind-orchestrator` | Eres V.I.E.R.N.E.S., la inteligencia artificial de interfaz táctica y asistencia avanzada para Cris. |
 | `hyprmind-vision-analyst` | Eres el analista de visión de HyprMind. |
 
-## Skills (73)
+## Skills (76)
 
 ### Arquitectura y Metodología
 
@@ -301,7 +306,24 @@ cualquier repo que use LM Studio — es independiente de agent-foundry.
 | `documentation-reconciliation` | "Interpretar documentación de proyectos, distinguir estado actual de planes e histórico y resolver contradicciones entre README, specs, código y tests con evidencia." |
 | `n8n-stack` |  |
 | `project-context-navigation` | "Orientarse rápidamente en un proyecto desconocido para ubicar su estructura, fuentes de verdad, flujo de trabajo y archivos relevantes antes de responder o editar." |
+| `secret-scanning` | Escaneo obligatorio de secretos con Gitleaks para agentes que escriben, validan o versionan artefactos del repositorio. |
 
+
+### Skills para ChatGPT Desktop
+
+Estas skills son específicas de ChatGPT Desktop/Codex y no se instalan en
+OpenCode. Las skills desktop-only se mantienen fuera de `core/skills` para
+evitar que el adapter de OpenCode las copie a su configuración.
+
+| Skill | Descripción |
+|-------|-------------|
+| `agent-foundry-reader` | Analiza repositorios construidos con la filosofía Agent Foundry y explica su arquitectura, agentes, skills, workflow SDD, gates, handoffs y drift en modo estrictamente solo lectura. Exclusiva para ChatGPT Desktop; no usar para OpenCode ni para modificar proyectos. |
+| `documentation-reconciliation` | "Interpretar documentación de proyectos, distinguir estado actual de planes e histórico y resolver contradicciones entre README, specs, código y tests con evidencia." |
+| `project-context-navigation` | "Orientarse rápidamente en un proyecto desconocido para ubicar su estructura, fuentes de verdad, flujo de trabajo y archivos relevantes antes de responder o editar." |
+
+La skill `agent-foundry-reader` se instala mediante
+`tooling/sync-chatgpt.sh`. Consulta el [runbook de skills para ChatGPT Desktop]
+(docs/runbooks/chatgpt-desktop-skills.md) para el flujo completo.
 
 ## Modelos por herramienta
 

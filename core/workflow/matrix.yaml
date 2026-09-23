@@ -25,8 +25,8 @@ agents:
     writes_states: [planning]
     reads_states: [requirements-discovery, validated-not-executed, revision-needed,
                    awaiting-human-plan-approval]
-    skills: [spec-driven-development, openapi-first, openapi-standard, restful-standard,
-             hexagonal-architecture, enterprise-architecture-standard, design-patterns-standard,
+    skills: [spec-driven-development, jev-routing, openapi-first, openapi-standard, restful-standard,
+             hexagonal-architecture, enterprise-architecture-standard, design-patterns-standard, planning-context-pack,
              frontend-architecture, context-pinning, workspace-coordination, documentation-lifecycle, graphify,
              springboot-stack, python-stack, fastapi-stack, react-stack, angular-stack,
              jpa-stack, flyway-migrations, security-standards, keycloak-standard,
@@ -38,7 +38,7 @@ agents:
     role: consultant
     phases: [planning]
     consults_for: [planner]
-    skills: [design-patterns-standard, hexagonal-architecture,
+    skills: [jev-routing, design-patterns-standard, hexagonal-architecture,
              springboot-stack, fastapi-stack, repository-dto-patterns]
 
   ui-designer:
@@ -55,7 +55,7 @@ agents:
     role: consultant
     phases: [init, planning]
     consults_for: [planner]
-    skills: [enterprise-architecture-standard, workspace-coordination, hexagonal-architecture,
+    skills: [jev-routing, enterprise-architecture-standard, workspace-coordination, hexagonal-architecture,
              graphify, security-standards, keycloak-standard, observability-standard,
              spring-cloud-gateway, kafka-standard, rabbitmq-standard, amazon-sqs-standard]
 
@@ -162,7 +162,7 @@ agents:
   bug-diagnostician:
     role: validator
     triggers: [any-failure]
-    skills: [root-cause-analysis, bug-fixing-workflow, observability-standard,
+    skills: [jev-routing, root-cause-analysis, bug-fixing-workflow, observability-standard,
              context-pinning, graphify]
 
   spec-remediator:
@@ -184,14 +184,14 @@ agents:
   security-reviewer:
     role: validator
     phases: [quality]
-    skills: [security-standards, keycloak-standard, docker-standard,
+    skills: [jev-routing, security-standards, keycloak-standard, docker-standard,
              observability-standard, spring-cloud-gateway, springboot-stack, fastapi-stack]
 
   final-validation:
     role: validator
     phases: [quality]
     gate_produces: G2-input
-    skills: [pre-flight-check, testing-strategy, code-quality-and-sonarqube,
+    skills: [jev-routing, pre-flight-check, testing-strategy, code-quality-and-sonarqube,
              security-standards, keycloak-standard, docker-standard,
              observability-standard, documentation-lifecycle, documentation-standards,
              context-pinning, secret-scanning]
@@ -208,16 +208,16 @@ agents:
     phases: [transversal]
     reads_states: [awaiting-human-plan-approval, awaiting-human-qa-approval]
     skills: [context-curation, context-pinning, spec-driven-development,
-             workspace-coordination, graphify]
+             workspace-coordination, graphify, planning-context-pack]
 
   master-orchestrator:
     role: consultant
     phases: [transversal]
-    delegates_to: [requirements-analyst, planner, task-decomposer, executor,
+    delegates_to: [requirements-analyst, context-curator, planner, task-decomposer, executor,
                    architect-executor, test-architect, spec-validator, final-validation,
                    git-executor, database-architect, devops-architect,
                    functional-tester-agent, bug-diagnostician]
-    skills: []   # orquesta por delegación; consume workflow, no skills técnicas
+    skills: [jev-routing]   # mantiene contexto; Jev decide rutas permitidas
 
   general:
     role: guardrail

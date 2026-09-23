@@ -9,6 +9,62 @@ import type { Plugin } from "@opencode-ai/plugin"
 // which runs for every session including subtask children created by Task.
 
 const ROUTING: Record<string, string> = __ROUTING_JSON__;
+const JEV_CONFIG = __JEV_CONFIG_JSON__ as {
+  provider: string;
+  providers: Record<string, { base_url: string; model: string; api_key_env: string }>;
+  confidence: { auto_route: number; confirm: number };
+  dynamic_agents: string[];
+  reasoning_models: Record<string, string>;
+};
+const pendingJevDecisions: Array<{ agent: string; reasoning: string; confidence: number; needsHuman: boolean }> = [];
+
+async function askJev(state: unknown) {
+  const provider = JEV_CONFIG.providers[JEV_CONFIG.provider];
+  const key = provider && process.env[provider.api_key_env];
+  if (!provider || !key) return null;
+  const questions = {
+    next_agent: {
+      type: "choice",
+      instructions: "Choose the next authorized Agent Foundry agent for this task.",
+      criteria: Object.fromEntries(JEV_CONFIG.dynamic_agents.map((name) => [name, name])),
+    },
+    reasoning_level: {
+      type: "choice",
+      instructions: "Choose the minimum reasoning level needed: low, medium, high, or critical.",
+      criteria: {
+        low: "Mechanical or fully specified work",
+        medium: "Several dependencies or moderate interpretation",
+        high: "Architecture, security, RCA, or high-impact decisions",
+        critical: "Irreversible or highly consequential decisions",
+      },
+    },
+    needs_human_clarification: {
+      type: JEV_CONFIG.provider === "vercel" ? "boolean" : "noul",
+      instructions: "Does the task require a human decision before routing?",
+    },
+  };
+  try {
+    const response = await fetch(provider.base_url, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ model: provider.model, state, questions }),
+    });
+    if (!response.ok) return null;
+    const payload = await response.json() as { answers?: Record<string, any>; data?: { answers?: Record<string, any> } };
+    const answers = payload.answers ?? payload.data?.answers ?? {};
+    const agent = answers.next_agent?.choice;
+    const reasoning = answers.reasoning_level?.choice;
+    const confidence = Math.min(
+      answers.next_agent?.confidence ?? answers.next_agent?.probability ?? 0,
+      answers.reasoning_level?.confidence ?? answers.reasoning_level?.probability ?? 0,
+    );
+    const humanProbability = answers.needs_human_clarification?.noul ?? answers.needs_human_clarification?.probability ?? 0;
+    if (!agent || !reasoning || !JEV_CONFIG.dynamic_agents.includes(agent)) return null;
+    return { agent, reasoning, confidence, needsHuman: humanProbability >= 0.5 };
+  } catch {
+    return null;
+  }
+}
 
 function splitModel(id: string): { providerID: string; modelID: string } | null {
   const slash = id.indexOf("/");
@@ -30,7 +86,12 @@ export const FoundryModelRouter = (async ({ client }) => {
       try {
         const agent = (input as { agent?: string }).agent;
         if (!agent) return;
-        const want = ROUTING[agent];
+        const pendingIndex = pendingJevDecisions.findIndex((decision) => decision.agent === agent);
+        const pending = pendingIndex >= 0 ? pendingJevDecisions.splice(pendingIndex, 1)[0] : undefined;
+        const dynamicModel = pending && !pending.needsHuman && pending.confidence >= JEV_CONFIG.confidence.auto_route
+          ? JEV_CONFIG.reasoning_models[pending.reasoning]
+          : undefined;
+        const want = dynamicModel ?? ROUTING[agent];
         if (!want) return;
         const split = splitModel(want);
         if (!split) {
@@ -43,7 +104,12 @@ export const FoundryModelRouter = (async ({ client }) => {
         const before = `${msg.model.providerID}/${msg.model.modelID}`;
         msg.model.providerID = split.providerID;
         msg.model.modelID = split.modelID;
-        await log("info", `routing ${agent}: ${before} -> ${want}`, { sessionID: (input as { sessionID?: string }).sessionID });
+        await log("info", `routing ${agent}: ${before} -> ${want}`, {
+          sessionID: (input as { sessionID?: string }).sessionID,
+          source: dynamicModel ? "jev" : "static",
+          reasoning: pending?.reasoning,
+          confidence: pending?.confidence,
+        });
       } catch {
         // enforcement must never throw
       }
@@ -52,9 +118,30 @@ export const FoundryModelRouter = (async ({ client }) => {
     "tool.execute.before": async (input, output) => {
       try {
         if ((input as { tool?: string }).tool !== "task") return;
-        const args = (output as { args?: { subagent_type?: string } }).args;
+        const args = (output as { args?: { subagent_type?: string; prompt?: string; description?: string } }).args;
         const name = args?.subagent_type;
         if (!name) return;
+        if (JEV_CONFIG.dynamic_agents.includes(name)) {
+          const decision = await askJev({
+            task: args.prompt ?? args.description ?? "",
+            requested_agent: name,
+            available_agents: JEV_CONFIG.dynamic_agents,
+            policy: "Agent Foundry gates and permissions are authoritative.",
+          });
+          if (decision && !decision.needsHuman && decision.confidence >= JEV_CONFIG.confidence.auto_route) {
+            pendingJevDecisions.push(decision);
+            // `subagent_type` is part of the Task schema, unlike `model` in
+            // older OpenCode releases. This keeps agent selection portable;
+            // model selection is applied in the child chat.message hook.
+            args.subagent_type = decision.agent;
+          }
+          await log("info", `jev decision for task -> ${decision?.agent ?? name}`, {
+            sessionID: (input as { sessionID?: string }).sessionID,
+            confidence: decision?.confidence,
+            reasoning: decision?.reasoning,
+            needsHuman: decision?.needsHuman,
+          });
+        }
         const want = ROUTING[name];
         if (!want) {
           await log("warn", `task delegating to unknown agent ${name}`);

@@ -22,6 +22,7 @@ registra el qué y el por qué).
 | `playwright` | local (npx @playwright/mcp) | functional-tester-agent, ui-designer (self-test visual) | Reemplaza puppeteer (ARCHIVADO). 23 tools default |
 | `context7` | remote mcp.context7.com | executor, planner, architect-executor | Docs versionadas reales (Spring Boot, React 19...). Mata APIs alucinadas. Solo 2 tools |
 | `github` | remote api.githubcopilot.com + OAuth | git-executor | PRs, issues, Actions. Primera vez: `opencode mcp auth github` |
+| `foundry-jev` | local (stdio) | master-orchestrator y agentes con routing dinámico | Selecciona agente, nivel de razonamiento y aclaración humana. Proveedor inicial Vercel (`AI_GATEWAY_API_KEY`); alternativa Jev oficial (`JEV_API_KEY`). |
 
 ## Pendientes de decisión (no instalados)
 

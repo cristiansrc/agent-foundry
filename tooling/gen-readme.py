@@ -117,7 +117,7 @@ def skills_table() -> str:
             (l.strip("# ").strip() for l in body.split("\n") if l.startswith("# ")), "")
         existing[p.parent.name] = clean_desc(desc)
 
-    lines = ["## Skills (73)", ""]
+    lines = [f"## Skills ({len(existing)})", ""]
     categorized = set()
     for cat, names in SKILL_CATEGORIES:
         present = [n for n in names if n in existing]
@@ -134,6 +134,40 @@ def skills_table() -> str:
         for n in rest:
             lines.append(f"| `{n}` | {existing[n]} |")
     return "\n".join(lines).rstrip() + "\n"
+
+
+def desktop_skills_table() -> str:
+    existing = {}
+    for p in (CORE / "skills").glob("*/SKILL.md"):
+        fm, body = parse_fm(p)
+        desc = fm.get("description") or next(
+            (l.strip("# ").strip() for l in body.split("\n") if l.startswith("# ")), "")
+        existing[p.parent.name] = clean_desc(desc)
+
+    desktop = {"project-context-navigation", "documentation-reconciliation"}
+    desktop_dir = ROOT / "adapters" / "chatgpt" / "skills"
+    for p in desktop_dir.glob("*/SKILL.md"):
+        fm, body = parse_fm(p)
+        desc = fm.get("description") or next(
+            (l.strip("# ").strip() for l in body.split("\n") if l.startswith("# ")), "")
+        existing[p.parent.name] = clean_desc(desc)
+        desktop.add(p.parent.name)
+
+    lines = [
+        "### Skills para ChatGPT Desktop", "",
+        "Estas skills son específicas de ChatGPT Desktop/Codex y no se instalan en",
+        "OpenCode. Las skills desktop-only se mantienen fuera de `core/skills` para",
+        "evitar que el adapter de OpenCode las copie a su configuración.", "",
+        "| Skill | Descripción |", "|-------|-------------|",
+    ]
+    for name in sorted(desktop):
+        lines.append(f"| `{name}` | {existing[name]} |")
+    lines += [
+        "", "La skill `agent-foundry-reader` se instala mediante",
+        "`tooling/sync-chatgpt.sh`. Consulta el [runbook de skills para ChatGPT Desktop]",
+        "(docs/runbooks/chatgpt-desktop-skills.md) para el flujo completo.",
+    ]
+    return "\n".join(lines)
 
 
 def models_tables() -> str:
@@ -183,7 +217,9 @@ def models_tables() -> str:
 
 def main() -> int:
     readme = README.read_text(encoding="utf-8")
-    block = "\n\n".join([agents_tables(), skills_table(), models_tables()])
+    block = "\n\n".join([
+        agents_tables(), skills_table(), desktop_skills_table(), models_tables()
+    ])
     new_content = f"{BEGIN}\n\n{block}\n\n{END}"
     if BEGIN in readme:
         updated = re.sub(re.escape(BEGIN) + r".*?" + re.escape(END),

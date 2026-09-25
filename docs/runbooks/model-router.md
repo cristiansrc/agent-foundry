@@ -1,23 +1,17 @@
-# Runbook: Plugin `model-router` (OpenCode)
+# Runbook: Plugin `model-router` (OpenCode V2)
 
-Enforcement en runtime del routing `agente → modelo`. Incluye routing estático
-y selección dinámica opcional mediante Jev. Compensa dos límites
-de OpenCode sin romper la arquitectura agnóstica de la foundry.
+Static routing lives in the agent files' `model:` (rendered from
+`profiles/models.yaml`); V2 subagents honor it natively. The plugin adds
+observability plus optional dynamic agent selection via Jev. It compensates
+no V1 limits anymore — it is routing policy + logs, not enforcement.
 
-## Por qué existe
+## Por qué existe (V2)
 
-1. El `Task` tool no acepta `model` en sus args
-   (`description, prompt, subagent_type, task_id, command, background`). Un
-   hook `tool.execute.before` sobre `task` no puede inyectar
-   `output.args.model`: el schema lo rechazaría.
-2. `handleSubtask` (`session/prompt.ts`) pinta el mensaje padre con el modelo
-   del primario aunque la sesión hija corra otro modelo. Parece "siempre
-   terra" aunque la ejecución sea correcta.
-
-El hook que sí corre en cada sesión —padre e hijas de `Task`— es
-`chat.message`, y puede reescribir `output.message.model` antes de guardar.
-Eso hace este plugin con una tabla `ROUTING` renderizada desde
-`profiles/models.yaml`.
+1. Cada agente renderizado lleva su `model:` en el frontmatter y el subagente
+   V2 lo usa nativamente (o hereda el de la sesión padre si no tiene).
+2. La selección dinámica de *agente* vía Jev no existe en el core: el plugin
+   la aplica reescribiendo el input del tool `subagent` (sucesor V2 de `task`)
+   cuando Jev devuelve confianza de auto-route.
 
 ## Fuentes y generados
 
@@ -35,8 +29,8 @@ Flujo: `profiles/models.yaml` → `build.sh` → `out/plugin/` → `sync.sh` →
 
 | Hook | Comportamiento |
 |------|----------------|
-| `chat.message` | Aplica el modelo estático o la decisión Jev pendiente a la sesión hija antes de guardar el mensaje. Nunca lanza. |
-| `tool.execute.before` (tool `task`) | Para los agentes dinámicos consulta Jev con el prompt compacto, valida confianza y puede cambiar `subagent_type`; la selección de modelo se aplica en `chat.message`. Si Jev falla, conserva el routing estático. |
+| `ctx.tool.hook("execute.before")` (tool `subagent`) | Para los agentes dinámicos consulta Jev con el prompt compacto, valida confianza y puede cambiar el subagente solicitado. Si Jev falla o no hay credencial, conserva el routing estático (modelo del agent file). |
+| (observabilidad) | Cada delegación registra `subagent -> <agente> should run <modelo>` en el log del servidor. |
 
 ## Cambiar un modelo
 
@@ -62,8 +56,8 @@ Reinicia OpenCode: config y plugins cargan una sola vez al arrancar.
 grep -c '__ROUTING_JSON__' adapters/opencode/out/plugin/foundry-model-router.ts  # 0
 # Instalado == generado
 diff adapters/opencode/out/plugin/foundry-model-router.ts ~/.config/opencode/plugins/foundry-model-router.ts
-# En OpenCode: delega una tarea y busca en logs el servicio foundry-model-router
-# (routing <agente>: <antes> -> <después> / task -> <agente> should run <modelo>)
+# En OpenCode: delega una tarea y busca en el log `[foundry-model-router]`
+# (subagent -> <agente> should run <modelo> / jev reroute <a> -> <b>)
 ```
 
 ## Rollback
@@ -76,14 +70,14 @@ diff adapters/opencode/out/plugin/foundry-model-router.ts ~/.config/opencode/plu
 ## Límites conocidos
 
 - Si un ID de `ROUTING` no existe en `/models` (proveedor no conectado), el
-  `getModel` fallará con `Model not found`: completa `/connect` antes del
+  subagente fallará con `Model not found`: completa `/connect` antes del
   sync (ver `opencode-harness.md`).
-- El plugin no gestiona `variant`: la deja intacta.
+- El plugin no gestiona `variant`.
 - `chatgpt`/`kiro` no usan este plugin: su routing vive en sus propios
   adapters.
 - La selección dinámica requiere `AI_GATEWAY_API_KEY` para Vercel o `JEV_API_KEY`
   para el proveedor oficial. Sin credencial solo funciona el routing estático.
-- El contexto disponible en `tool.execute.before` es el prompt de la tarea; el
+- El contexto disponible en `execute.before` es el prompt de la tarea; el
   contexto autoritativo completo debe haber sido reducido por el orquestador.
-- Las decisiones pendientes viven en memoria del plugin y se descartan al
-  reiniciar OpenCode.
+- Modelo por nivel de razonamiento Jev no se puede forzar vía hooks V2: el
+  subagente corre su modelo del agent file.

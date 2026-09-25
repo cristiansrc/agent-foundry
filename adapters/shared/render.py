@@ -160,7 +160,7 @@ def parity_report(outdir: Path) -> list[str]:
         if not inst.exists():
             diffs.append(f"NUEVO: {gen.name}")
             continue
-        if gen.read_text() != inst.read_text():
+        if gen.read_text(encoding="utf-8") != inst.read_text(encoding="utf-8"):
             diffs.append(f"DIFIERE: {gen.name}")
     for inst in sorted(INSTALLED_AGENTS.glob("*.md")):
         if not (outdir / inst.name).exists():

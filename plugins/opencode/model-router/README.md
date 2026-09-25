@@ -5,19 +5,18 @@ Enforces per-agent model routing at runtime. Source of truth stays in
 artifact lives in `adapters/opencode/out/plugin/foundry-model-router.ts`
 (never edit `out/` by hand).
 
-## Why it exists
+## Why it exists (V2)
 
-OpenCode's `Task` tool schema has **no `model` field**
-(`description, prompt, subagent_type, task_id, command, background` only), so a
-`tool.execute.before` hook cannot inject `output.args.model` — it would be
-rejected. And `handleSubtask` in `session/prompt.ts` shows the parent model on
-the assistant message even when the child session runs the right model, which
-looks like "always terra".
+V2 subagents natively use their agent file's `model:` (rendered from
+`ROUTING`), so static enforcement via message rewriting is obsolete — there
+is no V2 equivalent of the V1 `chat.message` model override. This plugin
+keeps two jobs:
 
-The enforceable hook is `chat.message`: every session (parent or subtask
-child) creates its user message through it, and the hook can rewrite
-`output.message.model` before the message is saved. That is what this plugin
-does, using a `ROUTING` table rendered at build time from `profiles/`.
+1. Observability: log which model each `subagent` invocation *should* get.
+2. Jev dynamic selection: rewrite the requested subagent when Jev returns an
+   auto-route decision (`ctx.tool.hook("execute.before")` on tool `subagent`,
+   the V2 successor of V1 `task`). Without a Jev credential only static
+   routing applies.
 
 ## Data flow
 
@@ -32,12 +31,15 @@ profiles/models.yaml (tiers + tier_bindings, única fuente)
 `__ROUTING_JSON__` placeholder — never a concrete `provider/model` ID
 (lint enforces this).
 
-## Hooks
+## Hooks (V2 API — `export default { id, setup }`, zero imports)
+
+The generated artifact must not import `@opencode/plugin`: the package is
+not resolvable from `~/.config/opencode/plugins/`, so any import fails the
+load. A plain `{ id, setup }` object satisfies the V2 loader.
 
 | Hook | What it does |
 |------|--------------|
-| `chat.message` | If `input.agent` is in `ROUTING`, splits `provider/model` and overwrites `output.message.model` when it differs. Never throws; logs via `client.app.log`. |
-| `tool.execute.before` (tool `task`) | Observability only: logs which model the named `subagent_type` *should* get per `ROUTING`. Does not mutate args (schema has no `model`). |
+| `ctx.tool.hook("execute.before")` (tool `subagent`) | For dynamic agents, asks Jev and rewrites the requested subagent on auto-route confidence; otherwise logs static `ROUTING` expectation. Never throws. |
 
 ## Change a model
 

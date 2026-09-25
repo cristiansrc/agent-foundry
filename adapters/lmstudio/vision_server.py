@@ -24,9 +24,9 @@ try:
 except ImportError:
     from mcp.server.fastmcp import FastMCP
 
-BASE_URL = os.environ.get("VLM_BASE_URL", "http://127.0.0.1:1234/v1").rstrip("/")
+BASE_URL = (os.environ.get("VLM_BASE_URL") or "http://127.0.0.1:1234/v1").rstrip("/")
 MODEL = os.environ.get("VLM_MODEL", "")
-TIMEOUT_S = int(os.environ.get("VLM_TIMEOUT_S", "300"))
+TIMEOUT_S = int(os.environ.get("VLM_TIMEOUT_S") or "300")
 
 mcp = FastMCP("foundry-vision")
 

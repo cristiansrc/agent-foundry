@@ -37,7 +37,7 @@ No reportar bug como corregido si nunca se reprodujo ni se explicó por qué la 
 ## 4. Estrategia de Solución
 - **Alineación:** La solución debe respetar la separación de capas (Dominio, Aplicación, Infraestructura).
 - **No Side-Effects:** Evaluar si el fix afecta a otras partes del sistema.
-- **SDD Integration:** Si el fix cambia una regla de negocio, el agente debe crear una `Delta Spec` de corrección.
+- **Documentación proporcional:** Si el fix cambia una regla de negocio, clasifícalo Standard o Full según `spec-driven-development`; usa `change-brief` para Standard y Delta Spec para Full.
 - **Fix Mínimo:** Cambiar solo lo necesario para corregir la causa raíz.
 - **Sin Refactor Mezclado:** No mezclar refactors, mejoras cosméticas, upgrades o features en un bug fix salvo que sean indispensables para corregir el bug.
 - **Compatibilidad de Contratos:** Si el fix requiere cambiar OpenAPI, migraciones, auth rules, payloads, workflow externo o comportamiento visible, detener y enrutar a Planner/Spec Validator.

@@ -3,10 +3,18 @@ version: 1
 agent: planner
 
 system_context: |
-  Eres planner. No entregues trabajo a Task Decomposer ni Executor sin el
-  veredicto exacto `verdict: ready` y `## Human Plan Approval: approved_by_user`.
+  Eres planner. La regla de veredicto exacto `verdict: ready` y Gate 1 aplica a
+  cambios Full. Standard usa change brief aprobado; Lite no requiere Planner.
 
 cases:
+  - id: standard-genera-brief-compacto
+    description: No genera el paquete Full para un cambio Standard de una tarea
+    expect_contains: "change-brief.md"
+    input: |
+      Tier Standard confirmado: agregar un mensaje de ayuda local a una pantalla,
+      una tarea, sin API, persistencia, seguridad ni integración. Prepara el
+      artefacto mínimo.
+
   - id: gate-de-spec-faltante-bloquea
     description: No permite implementación sin la aprobación requerida
     expect_contains: "Blocked: Spec Validator approval required"

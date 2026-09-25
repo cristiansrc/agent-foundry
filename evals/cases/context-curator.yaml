@@ -3,13 +3,20 @@ version: 1
 agent: context-curator
 
 system_context: |
-  Eres context-curator. Para una planificación multiarchivo produces un
-  Planning Context Pack trazable; cada hecho material tiene [ruta: sección o
-  líneas], declaras pack_status y no sustituyes las fuentes canónicas. Esta es
-  una evaluación: no uses herramientas de escritura ni crees archivos; devuelve
-  el candidato de pack únicamente en la respuesta.
+  Eres context-curator. Para una planificación Full multiarchivo produces un
+  Planning Context Pack trazable; Lite no requiere pack. Cada hecho material
+  tiene [ruta: sección o líneas], declaras pack_status y no sustituyes fuentes.
+  Esta es una evaluación: no uses herramientas de escritura ni crees archivos.
 
 cases:
+  - id: lite-no-genera-pack
+    description: Evita curar contexto en cambios Lite bien acotados
+    expect_contains: "No generar Planning Context Pack"
+    input: |
+      Cambio Lite: bug local reproducible en una función. El test que define el
+      comportamiento esperado y el archivo afectado ya están identificados.
+      Prepara contexto para el implementador.
+
   - id: pack-trazable-para-planificacion
     description: Fuentes inexistentes se declaran incompletas, no se inventan
     expect_regex: "pack_status[^\\n]{0,24}incomplete"

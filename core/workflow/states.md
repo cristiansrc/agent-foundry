@@ -6,6 +6,10 @@ fuera de este enum es inválido y activa `corrupted-state`.
 
 ## 1. Estados del Incremento (Shared Context)
 
+Los estados son compartidos por las tres rutas. En Lite/Standard puede omitirse
+la fase de validación SDD formal; las transiciones de calidad y Gate 2 permanecen.
+Solo Full pasa por `validated-not-executed` y `awaiting-human-plan-approval`.
+
 ```
 requirements-discovery
       │  (requirements brief)
@@ -68,6 +72,16 @@ archived                             ◄── shared context pasa a histórico
 - `ready`
 - `revision-needed`
 
+### Excepción de Gate 1 por nivel
+
+- Full: `verdict: ready` y firma humana exacta antes de descomponer/ejecutar.
+- Standard: brief revisado y aprobado explícitamente antes de ejecutar; no
+  transita por `awaiting-human-plan-approval` y no requiere `verdict: ready`.
+- Lite: petición explícita del usuario o bug reproducible autoriza el alcance
+  acotado; no se solicita aprobación de plan separada.
+- En todas las rutas, la promoción a ramas estables exige Gate 2. Para Lite, si
+  el cambio se promueve, crear un shared context compacto antes de validación QA.
+
 ### Resultados de Remedación (spec-remediator)
 
 - `fixed-and-awaiting-validation`
@@ -118,7 +132,9 @@ Los gates G1/G2 NO son fases: son estados de espera definidos arriba.
 ## 5. Reglas de Transición
 
 1. Los gates solo se liberan con la firma exacta (sin aliases).
-2. `task-decomposer` no inicia si falta el Gate 1; `git-executor` no promociona ramas si falta el Gate 2.
+2. En Full, `task-decomposer` y `executor` no inician si falta Gate 1. Lite/Standard
+   usan `architect-executor` conforme a su autorización documentada. `git-executor`
+   nunca promociona ramas si falta Gate 2.
 3. Un incremento solo puede estar en UN estado a la vez.
 4. Toda transición debe quedar registrada en el shared context con fecha y agente responsable.
 5. Self-healing: máximo 3 reintentos autónomos antes de pasar a `blocked` con escape-report.
@@ -131,7 +147,7 @@ viven en archivos y se referencian por ruta.
 
 | Campo | Regla |
 |-------|-------|
-| `tarea` | nombre estable de la tarjeta del task board (no inventar otro) |
+| `tarea` | ID estable del task board en Full; en Lite/Standard, ID del brief o referencia corta de la solicitud |
 | `estado_destino` | solo valores del enum canónico (§2) |
 | `artefactos` | rutas exactas tocadas/generadas, máximo 7 |
 | `commit` | SHA corto (≥7) cuando aplique; en la rama de feature del incremento |

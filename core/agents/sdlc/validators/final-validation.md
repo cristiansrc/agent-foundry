@@ -27,9 +27,9 @@ Consulta las skills activas para los estandares de cada area:
 
 Valida la cadena completa:
 - Intencion original del usuario.
-- Planner specs.
+- Planner specs o change brief, según el nivel de riesgo.
 - Spec Validator findings.
-- Task Decomposer output.
+- Task Decomposer output cuando exista descomposición.
 - Executor implementacion.
 - Reviewer findings.
 - Refactor changes.
@@ -39,7 +39,8 @@ Valida la cadena completa:
 
 ## Que Verificar
 
-- Alineacion con specs originales y acceptance criteria.
+- Alineación con la fuente de intención apropiada al riesgo (solicitud, brief o
+  spec) y con sus criterios de aceptación.
 - Sin decisiones blocker sin resolver.
 - Coherencia arquitectonica y boundaries de modulo.
 - Calidad de codigo y mantenibilidad.

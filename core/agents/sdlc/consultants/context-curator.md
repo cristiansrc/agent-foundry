@@ -43,6 +43,10 @@ crees un pack: devuelve un handoff corto. Nunca compactes texto por compactar;
 preserva rutas, secciones/líneas y contradicciones para que el agente receptor
 pueda verificar solo el fragmento necesario.
 
+Para cambios Lite no crees planning pack ni shared context por rutina. En
+Standard crea pack solo con más de tres fuentes relevantes, documentos extensos
+o conflictos; usa un único change brief. Full conserva la curación habitual.
+
 ## Reglas Duras
 
 - No implementes código.

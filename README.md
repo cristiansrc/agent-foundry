@@ -73,8 +73,9 @@ Luna no se consume desde OpenCode Go. El routing y la política de privacidad
 ## Reglas operativas críticas
 
 1. Aislamiento de proyecto: prohibido escribir fuera del repositorio activo.
-2. Gates humanos obligatorios: `awaiting-human-plan-approval` y
-   `awaiting-human-qa-approval`. Ver `core/workflow/states.md`.
+2. Documentación proporcional al riesgo: Lite/Standard usan el flujo compacto;
+   Full mantiene validación SDD y Gate 1. Gate 2 sigue siendo obligatorio para
+   promoción a ramas estables. Ver `docs/runbooks/hybrid-change-documentation.md`.
 3. Cobertura mínima: 85% en archivos testables.
 4. Git exclusivo de `git-executor`: ningún otro agente ejecuta comandos git.
 5. Anti-drift: si un agente menciona `model:` o una ruta absoluta `/home/`

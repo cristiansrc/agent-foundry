@@ -1,13 +1,36 @@
 ---
 name: spec-driven-development
-description: Ciclo de vida de desarrollo basado en especificaciones (Master Specs e Incrementos). Asegura que el código siempre esté alineado con la documentación, ya sea en proyectos nuevos, nuevas funcionalidades o modificaciones.
+description: Documentación de cambios proporcional al riesgo con ruta Lite, Standard y SDD Full para mantener calidad sin artefactos innecesarios.
 ---
 
-# Spec-Driven Development (SDD) Incremental
+# Documentación Híbrida de Cambios (SDD proporcional al riesgo)
 
-Esta skill define el estándar para la creación y evolución de especificaciones técnicas en sistemas existentes. Su objetivo es impedir que Planner, Spec Validator, Task Decomposer o Executor avancen con artefactos ambiguos, contradictorios o no verificados en disco.
+Esta skill define documentación y gates proporcionales al riesgo. No todos los
+cambios requieren el ciclo SDD completo. La ruta Full conserva las garantías
+formales; Lite/Standard reducen artefactos, no pruebas ni responsabilidad.
+La política operativa y el árbol de decisión están en
+`docs/runbooks/hybrid-change-documentation.md`.
 
-## 0. Roles y Ownership
+## Clasificación obligatoria del cambio
+
+Antes de enrutar, clasifica `Lite`, `Standard` o `Full` y registra una razón
+breve cuando se cree un artefacto persistente. Ante duda, usa el nivel superior.
+
+- **Lite:** bug reproducible cuyo comportamiento esperado ya está definido, o
+  refactor interno; sin regla nueva ni cambio de contrato, datos, permisos,
+  integración o arquitectura.
+- **Standard:** cambio visible acotado a una sola tarea y módulo, sin API pública,
+  persistencia, autorización, integración entre servicios ni decisiones de alto
+  impacto. Usa `templates/change-brief.md` y aprobación humana del brief.
+- **Full:** cambio de contratos/API, datos/migraciones, seguridad, integraciones,
+  concurrencia/transacciones críticas, varios servicios o arquitectura; también
+  cambios con riesgo incierto. Aplica el ciclo SDD formal.
+
+Escala en cualquier momento si aparece un contrato afectado, decisión faltante,
+riesgo no contemplado o necesidad de varias tareas/agentes. Nunca bajes de Full
+por costo, urgencia o tamaño del diff.
+
+## 0. Roles y Ownership del flujo Full
 - `requirements-analyst`: levanta requerimientos funcionales cuando la solicitud aun no está lista para SDD formal. No escribe OpenAPI, migraciones, specs incrementales formales, task boards ni código.
 - `planner`: dueño de specs, contratos OpenAPI, decisiones técnicas, restricciones de arquitectura y shared context durante planificación.
 - `spec-validator`: dueño del veredicto de readiness. Puede actualizar reportes de validación y metadatos de lifecycle/status, pero no debe corregir decisiones técnicas.
@@ -16,28 +39,32 @@ Esta skill define el estándar para la creación y evolución de especificacione
 - `executor`: implementa desde task board/spec aprobados; no toma decisiones de arquitectura ni reinterpreta contratos.
 - `final-validation`: valida cumplimiento final contra intención original, specs, contratos, seguridad, tests y documentación.
 
-## 1. Proyectos Nuevos (Greenfield)
+## 1. Proyectos Nuevos (Greenfield) — Full
 El agente debe generar una `Master Spec` inicial que cubra el objetivo, contratos, modelo de datos y reglas de negocio globales.
 
-## 2. Desarrollo Incremental (Nuevas Funcionalidades)
-Para añadir características a un sistema existente:
+## 2. Desarrollo Incremental (Nuevas Funcionalidades) — según riesgo
+Para cambios Lite/Standard sigue la clasificación anterior. Para cambios Full:
 1. **Delta Spec:** Crear un archivo de incremento en `docs/specs/increments/` (ej. `002-feature-name.md`).
 2. **Impacto:** Describir qué partes de la `Master Spec` se ven afectadas o extendidas.
-3. **Contrato:** Actualizar el `openapi.yaml` antes de tocar el código.
+3. **Contrato:** Actualizar el `openapi.yaml` antes del código solo si cambia un contrato API.
 4. **Validación:** El `spec-validator` debe asegurar que el incremento no rompa reglas core.
 5. **Contexto Compartido:** Mantener un único archivo activo en `docs/specs/.working/<increment-name>-sdd-context.md`.
-6. **Task Board:** Crear `docs/specs/tasks/<increment-name>-task-board.md` solo cuando el incremento esté `validated-not-executed`.
+6. **Task Board:** Crear `docs/specs/tasks/<increment-name>-task-board.md` después de Gate 1 cuando la ejecución requiera descomposición; no crear boards para una única tarea atómica.
 7. **Grafo de Dependencias:** Si Graphify está configurado, usar `graphify-out/GRAPH_REPORT.md` para mapear dependencias y prever impactos en la estructura de la solución.
 
 **Placeholder Guard:** reemplazar siempre `<increment-name>` por el nombre real del incremento (ej. `user-auth`, `invoice-export`). Si el nombre no es claro, preguntar al usuario. Nunca crear archivos con placeholders literales.
 
-## 3. Modificación de Funcionalidades Existentes
+## 3. Modificación de Funcionalidades Existentes — Full cuando cambie comportamiento contractual
 Cuando se cambia el comportamiento actual:
 1. **Razonamiento:** Documentar por qué el comportamiento actual ya no es válido.
 2. **Refactor Plan:** Detallar los cambios en los puertos y adaptadores para mantener la integridad hexagonal.
 3. **Consolidación:** Al finalizar, los cambios deben fusionarse en la `Master Spec` para que esta siempre represente el estado real del sistema.
 
-## 4. Fases Obligatorias por Incremento
+## 4. Cobertura requerida por riesgo
+
+Las áreas siguientes son obligatorias en Full cuando apliquen. En Lite/Standard
+documenta solo las que cambian o afectan la decisión; no rellenes secciones con
+"no aplica" repetidamente.
 - **Contexto:** Relación con specs anteriores.
 - **Contratos API:** Definición exacta de endpoints (vía OpenAPI).
 - **Modelo de Datos:** Cambios en tablas, índices o entidades (vía Flyway).
@@ -52,13 +79,13 @@ Cuando se cambia el comportamiento actual:
     - El Planner debe incluir tareas explícitas para configurar estas herramientas en el primer incremento de cada proyecto.
 - **Criterios de Aceptación:** Checklist para el `final-validation`.
 
-## 5. Gates Obligatorios
+## 5. Gates Obligatorios — flujo Full
 - No ejecutar `task-decomposer` si la spec o el shared context están en `planning`, `draft`, `validator-review`, `revision-needed` o `implementation-blocked`.
 - Solo se permite descomposición cuando el último veredicto de `spec-validator` es `ready` y el estado es `validated-not-executed`.
 - La aprobación debe existir en el shared context como heading exacto `## Spec Validator Approval`.
 - El bloque de aprobación debe contener exactamente: `verdict: ready`, `reviewed_at`, `validator_agent: spec-validator`, `artifact_set_reviewed`, `summary` e `invalidated_by_changes_since: none`.
 - **Solution Workspace Gate:** En Solution Workspaces (bajo `projects/`), si la especificación modifica contratos OpenAPI expuestos, esquemas de bases de datos compartidas o integraciones entre servicios, es obligatorio que el agente `enterprise-spec-validator` apruebe la alineación global otorgando el veredicto de `Workspace Aligned` en la Master Spec global del Workspace antes de descomponer o ejecutar.
-- **Gate de Aprobación Humana de Plan:** Se prohíbe a `task-decomposer` o `executor` iniciar cualquier tarea de implementación si en el Shared Context no existe el encabezado explícito `## Human Plan Approval: approved_by_user`. Si falta, el estado queda bloqueado en `awaiting-human-plan-approval`.
+- **Gate de Aprobación Humana de Plan:** En Full se prohíbe a `task-decomposer` o `executor` iniciar implementación sin `## Human Plan Approval: approved_by_user` en Shared Context. Si falta, bloquear en `awaiting-human-plan-approval`. Standard requiere aprobación humana explícita del brief antes de ejecución, sin exigir `spec-validator ready`; Lite usa la solicitud explícita del usuario como autorización del alcance.
 - **Gate de Aprobación Humana de QA (Cierre):** Se prohíbe realizar fusiones a ramas estables (`develop`, `qa`, `master`) si en el Shared Context no existe el encabezado explícito `## Human QA Approval: approved_by_user`. Si falta, el estado queda bloqueado en `awaiting-human-qa-approval`.
 
 
@@ -66,13 +93,13 @@ Cuando se cambia el comportamiento actual:
 - Si cualquier review summary o validator output dice `not ready`, la siguiente acción es corrección por Planner y nueva validación, no implementación ni descomposición.
 - No se permite declarar una inconsistencia como resuelta sin verificar el archivo autoritativo real.
 - No se permiten frases como `Known Technical Debt`, `Override Approved by User` o `fix post-increment` para saltarse inconsistencias de spec/OpenAPI/migraciones, salvo aprobación explícita del usuario registrada en el shared context.
-- Debe existir un único shared context activo por incremento; contextos anteriores deben marcarse como `superseded` o históricos.
+- En Full debe existir un único shared context activo por incremento; en Standard usar el change brief como contexto compacto. En Lite no crear contexto persistente por rutina; crearlo antes de QA si se requiere promoción estable. Contextos anteriores deben marcarse como `superseded` o históricos.
 - El task board solo puede usar estados `todo`, `in_progress`, `done` o `blocked`, tanto en estado superior como en tareas.
 - Estados como `decomposition-ready`, `validator-approved`, `ready`, `planning`, `executing`, `pending` o `ready-for-decomposition` están prohibidos en task boards.
 - Después de aprobación de Spec Validator y antes de que Executor empiece, el estado superior del task board debe ser `todo`.
 - Si un task board contiene `Blocker:` o estado superior `blocked`, no puede tener tareas de implementación ejecutables en `todo`; esas tareas deben quedar `blocked` hasta que Planner/Spec Validator resuelvan el contrato.
 - Excepción pre-descomposición: un task board bloqueado únicamente por `Awaiting Spec Validator approval` no invalida la spec por sí mismo si todas sus tareas de implementación están `blocked`. Debe tratarse como artefacto pendiente/stale que `task-decomposer` reescribirá o desbloqueará después de `verdict: ready`.
-- Antes del primer `verdict: ready`, el task board no debe ser evidencia obligatoria de readiness de la spec. Si aparece, debe listarse como `Pending execution artifact` o histórico, no como contrato canónico requerido.
+- Antes del primer `verdict: ready`, el task board no debe ser evidencia obligatoria de readiness de la spec. Si aparece, debe listarse como `Pending execution artifact` o histórico, no como contrato canónico requerido. Lite/Standard de una sola tarea no requieren task board.
 - La spec no puede tener afirmaciones de ciclo de vida contradictorias: si el encabezado dice `planning` o `draft`, ningún footer o resumen puede decir `validated-not-executed`, `Listo para Task Decomposer` o equivalente.
 - Si Planner cambia specs, OpenAPI, migraciones, reglas de transacción, seguridad, integración, task-board prerequisites o runtime config después de un `verdict: ready`, ese ready queda invalidado. El shared context debe registrar `invalidated_by_changes_since` con la razón y volver a `Spec Validator review`.
 - `ready with minor changes` no autoriza descomposición ni ejecución. Solo `verdict: ready` exacto autoriza avanzar.
@@ -107,7 +134,7 @@ Todo checklist de consistencia debe incluir:
 - Si Graphify está configurado en el proyecto, el reporte de dependencias (`graphify-out/GRAPH_REPORT.md`) debe incluirse en los `Canonical artifacts` del shared context y verificarse su estado de actualización.
 - El shared context no debe duplicar headings obligatorios como `## Spec Validator Approval` o `## Next action`; duplicarlos vuelve ambiguo el estado real.
 
-## 7. Shared Context Mínimo
+## 7. Shared Context Mínimo — Full
 El shared context debe incluir, como mínimo:
 - `## Current status`
 - `## Canonical artifacts`
@@ -120,9 +147,9 @@ El shared context debe incluir, como mínimo:
 - `## Stale terms guard`
 - `## Next action`
 
-Si falta `## Artifact evidence` o `## Spec Validator Approval`, el incremento no está listo para descomposición ni ejecución.
+Si falta `## Artifact evidence` o `## Spec Validator Approval`, un incremento Full no está listo para descomposición ni ejecución. Standard usa el formato compacto `templates/change-brief.md`; Lite puede prescindir del archivo hasta cierre/QA.
 
-## 8. Formato Mínimo de Task Board
+## 8. Formato de Task Board — cuando hay descomposición
 El task board debe ser creado o reescrito por `task-decomposer` después de `validated-not-executed` y debe incluir:
 - Ruta absoluta de spec aprobada y shared context usado.
 - Estado superior: `todo`, `in_progress`, `done` o `blocked`.

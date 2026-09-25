@@ -30,6 +30,11 @@ GATE2_SIG = "## Human QA Approval: approved_by_user"
 STATUS_RE = re.compile(r"^#+\s*Current status\s*:?\s*$\n?\s*[-*]?\s*`?([a-z_-]+)`?",
                        re.M | re.I)
 VERDICT_READY = re.compile(r"verdict\s*:\s*ready", re.I)
+TIER_RE = re.compile(
+    r"^(?:#+\s*change\s+tier\s*:?\s*\r?\n\s*[-*]\s*|"
+    r"(?:[-*]\s*)?(?:change\s+tier|tier)\s*:\s*)(lite|standard|full)\s*$",
+    re.I | re.M,
+)
 
 
 def validate_file(path: Path) -> list[str]:
@@ -46,14 +51,19 @@ def validate_file(path: Path) -> list[str]:
     has_gate1 = GATE1_SIG in text
     has_gate2 = GATE2_SIG in text
     has_ready = bool(VERDICT_READY.search(text))
+    tier_match = TIER_RE.search(text)
+    # Contexts antiguos sin clasificación conservan el contrato Full estricto.
+    tier = tier_match.group(1).lower() if tier_match else "full"
+    if re.search(r"^\s*(?:[-*]\s*)?(?:change\s+tier|tier)\s*:", text, re.I | re.M) and not tier_match:
+        errors.append(f"{path.name}: change tier inválido; use lite, standard o full")
 
     if status == "awaiting-human-plan-approval" and not has_ready:
         errors.append(f"{path.name}: Gate 1 sin 'Spec Validator Approval verdict: ready' previo")
-    if status in ("decomposition-completed", "in_progress") and not has_gate1:
+    if status in ("decomposition-completed", "in_progress") and tier != "lite" and not has_gate1:
         errors.append(f"{path.name}: ejecucion/descomposicion sin firma del Gate 1")
-    if status == "quality-approved" and not has_gate1:
+    if status == "quality-approved" and tier != "lite" and not has_gate1:
         errors.append(f"{path.name}: quality-approved sin Gate 1 registrado")
-    if status == "awaiting-human-qa-approval" and not has_gate1:
+    if status == "awaiting-human-qa-approval" and tier != "lite" and not has_gate1:
         errors.append(f"{path.name}: espera de Gate 2 sin Gate 1 registrado")
     if status in ("merged", "archived") and not has_gate2:
         errors.append(f"{path.name}: promocion/archivo sin firma del Gate 2")

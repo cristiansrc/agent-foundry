@@ -33,14 +33,28 @@ la solución.
 
 ## 3. Flujo Incremental
 
+La ruta se selecciona según `docs/runbooks/hybrid-change-documentation.md`:
+
 ```
-Fase 1 Requerimientos ─► Fase 2 Planificación ─► Fase 3 Validación IA
+Lite: solicitud/bug reproducible ─► architect-executor ─► calidad ─► Gate 2
+Standard: change brief ─► aprobación humana ─► architect-executor ─► calidad ─► Gate 2
+Full: requirements/Planner ─► spec-validator ready ─► Gate 1 ─► decomposer ─► Executor ─► calidad ─► Gate 2
+```
+
+Lite y Standard mantienen las pruebas, revisión independiente y controles de
+calidad. El Gate 1 con veredicto `ready` de Spec Validator es obligatorio para
+Full; en Standard se aprueba el brief antes de ejecutar y en Lite la petición
+explícita del usuario delimita y autoriza el cambio. Gate 2 sigue siendo
+obligatorio para promoción a ramas estables.
+
+```text
+FULL: Fase 1 Requerimientos ─► Fase 2 Planificación ─► Fase 3 Validación IA
         │                                              │ verdict ready
         ▼                                              ▼
    GATE HUMANO 1: aprobación de plan (states.md §3)
         │
         ▼
-Fase 4 Descomposición ─► Fase 5 Ejecución ─► Fase 6 Calidad
+       Fase 4 Descomposición (si aplica) ─► Fase 5 Ejecución ─► Fase 6 Calidad
                                                 │
                                                 ▼
                               GATE HUMANO 2: aprobación QA
@@ -50,19 +64,23 @@ Fase 4 Descomposición ─► Fase 5 Ejecución ─► Fase 6 Calidad
 ```
 
 ### Fase 1 — Levantamiento de Requerimientos
-- Agente: `requirements-analyst`. Estado: `requirements-discovery`.
+- En Full ambiguo: agente `requirements-analyst`. Estado: `requirements-discovery`.
 - Entregable: `docs/specs/requirements/<increment-name>-requirements-brief.md`.
+- Omitir en Lite/Standard cuando el objetivo ya está claro.
 - Git: se crea `feature/<increment-name>` desde `develop`.
 
 ### Fase 2 — Planificación y Contratos
-- Antes de abrir documentación amplia, `master-orchestrator` solicita a
+- En Full, antes de abrir documentación amplia, `master-orchestrator` solicita a
   `context-curator` el `docs/specs/.working/<increment-name>-planning-context.md`.
   El pack contiene evidencia y rutas canónicas; no sustituye las fuentes.
+- En Standard, crear un único brief compacto desde `templates/change-brief.md`;
+  el planning pack es condicional (>3 archivos/fuentes extensas/conflictos).
+- Omitir esta fase documental en Lite.
 - Agentes: `planner` (consulta a `solution-architect`, `enterprise-architect` y,
   si el incremento tiene superficie UI, a `ui-designer`).
 - Estado: `planning`.
-- Entregable: Delta Spec `docs/specs/increments/<increment-name>.md` +
-  actualización de `openapi.yaml`.
+- Full: Delta Spec `docs/specs/increments/<increment-name>.md` y actualización
+  de contratos solo cuando cambien. Standard: change brief. Lite: ninguno.
 
 #### Fase 2.5 — Exploración de Diseño UI (solo incrementos con UI)
 - Agente: `ui-designer`. Protocolo: skill `ui-design-exploration`.
@@ -74,20 +92,25 @@ Fase 4 Descomposición ─► Fase 5 Ejecución ─► Fase 6 Calidad
   `design-to-code`: prohibido reinterpretar la UI durante implementación.
 
 ### Fase 3 — Validación IA
-- Agentes: `spec-validator` (+ `enterprise-spec-validator` si hay workspace,
+- Solo Full. Agentes: `spec-validator` (+ `enterprise-spec-validator` si hay workspace,
   + `api-governance-agent` si cambian contratos).
 - Estado: `validator-review` → `validated-not-executed` o `revision-needed`
   (con ciclo de `spec-remediator` hasta llegar a ready).
 
 ### GATE HUMANO 1 — Aprobación de Plan
-- Estado: `awaiting-human-plan-approval`. Firma: ver states.md §3.
+- Full: estado `awaiting-human-plan-approval` y veredicto `ready`.
+- Standard: aprobación explícita del change brief antes de ejecutar; no requiere
+  el ciclo de Spec Validator.
+- Lite: no hay aprobación de plan separada; la petición del usuario define el
+  alcance autorizado.
 
 ### Fase 4 — Descomposición
+- Solo Full cuando haya más de una tarea, dependencias o varios agentes.
 - Agente: `task-decomposer`. Estado: `decomposition-completed`.
 - Entregable: `docs/specs/tasks/<increment-name>-task-board.md` en `todo`.
 
 ### Fase 5 — Ejecución
-- Agentes: `executor` (con spec SDD validada) o `architect-executor` (sin spec),
+- Agentes: `executor` (Full con spec validada) o `architect-executor` (Lite/Standard),
   con soporte de `test-architect`, `database-architect`, `devops-architect`,
   `refactor` y `documentation`.
 - Estados: `in_progress`; tareas `todo → in_progress → done | blocked`.
@@ -120,5 +143,6 @@ Fase 4 Descomposición ─► Fase 5 Ejecución ─► Fase 6 Calidad
 4. **Inmutabilidad de estado IA:** solo las firmas humanas del states.md §3 son editables por humanos.
 5. **Pre-push hook:** los pushes hacia ramas estables exigen el shared context
    del incremento exacto con `quality-approved` + firma del Gate 2 (ver tooling/hooks).
+   Lite puede crear ese contexto compacto durante el cierre; el Gate 2 no se omite.
 6. **Conventional Commits** con scope del incremento: `feat(<increment>): ...`.
 7. **MEMORY.md:** errores resueltos se registran como reglas para prevenir reincidencia.

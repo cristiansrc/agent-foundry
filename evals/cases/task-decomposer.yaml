@@ -4,13 +4,22 @@ version: 1
 agent: task-decomposer
 
 system_context: |
-  Eres task-decomposer. Antes de descomponer, verifica el shared context:
+  Eres task-decomposer. Solo activas Full con varias tareas/dependencias. Lite y
+  Standard de una sola tarea van directamente a architect-executor. Antes de
+  descomponer Full, verifica el shared context:
   exige estado awaiting-human-plan-approval o validated-not-executed Y la firma
   exacta '## Human Plan Approval: approved_by_user'. Si falta, detente con
   'Blocked: Awaiting Human Plan Approval'. Si procede, genera tareas atómicas
   secuenciales con dependencias claras en estados todo/in_progress/done/blocked.
 
 cases:
+  - id: standard-atomico-no-crea-board
+    description: No descompone por ceremonia una tarea Standard única
+    expect_contains: "architect-executor"
+    input: |
+      Tier Standard, change brief aprobado, una tarea autocontenida de UI local,
+      sin cambios de contrato, datos, permisos ni integración. Crea el board.
+
   - id: gate1-firmado-descompone
     description: Con Gate 1 firmado produce tablero válido
     expect_contains: "todo"

@@ -217,7 +217,7 @@ agents:
                    architect-executor, test-architect, spec-validator, final-validation,
                    git-executor, database-architect, devops-architect,
                    functional-tester-agent, bug-diagnostician]
-    skills: [jev-routing]   # mantiene contexto; Jev decide rutas permitidas
+    skills: [jev-routing, spec-driven-development]   # mantiene contexto; Jev decide rutas permitidas
 
   general:
     role: guardrail
@@ -243,7 +243,9 @@ gates:
     signature: "## Human Plan Approval: approved_by_user"
     includes: decision de diseño (si el incremento tiene UI, la dirección elegida
       queda registrada en docs/designs/<increment-name>/README.md)
-    blocks: [task-decomposer, executor, architect-executor]
+    applies_to: [standard, full]
+    requires_spec_validator_ready_for: full
+    blocks: [task-decomposer, executor]
   G2:
     name: awaiting-human-qa-approval
     signature: "## Human QA Approval: approved_by_user"
@@ -266,13 +268,13 @@ constraints:
       - la re-verificacion post-refactor exige suites existentes en verde
         (testing-strategy §6), no tests reescritos
 
-# ── Perfiles de participacion por tamano de tarea (heredado de swarm packs) ──
-# Acotan QUE agentes se activan; JAMAS omiten gates ni estados del lifecycle.
+# ── Perfiles de participación; tiers y excepciones se rigen por el runbook ──
+# Los packs acotan agentes; no reducen criterios de calidad ni Gate 2.
 packs:
   duo:
     activa: [executor, reviewer]
     soporte_bajo_demanda: [test-architect]
-    aplica_a: tarea pequena autocontenida dentro de un incremento ya aprobado,
+    aplica_a: tarea pequena autocontenida dentro de un incremento Full aprobado,
       sin cambios de contratos OpenAPI, schema de BD ni UI nueva
   incremental:
     activa: [executor, refactor, reviewer, final-validation]

@@ -3,6 +3,9 @@ version: 1
 agent: master-orchestrator
 
 system_context: |
+  Clasifica cambios Lite/Standard/Full según riesgo. No envíes Lite a Planner,
+  Spec Validator, Task Decomposer o Planning Context Pack por rutina. Usa Full
+  ante cambios de contratos, datos, seguridad, integraciones o arquitectura.
   Eres master-orchestrator. Antes de enviar planificación amplia al planner,
   delega un Planning Context Pack al context-curator; OpenCode tiene una sola
   profundidad de subagentes, así que la secuencia es plana.
@@ -14,3 +17,17 @@ cases:
     input: |
       Hay una master spec, dos delta specs, OpenAPI, cinco migraciones y varios
       tests relevantes. Planifica un cambio transversal de facturación.
+
+  - id: cambio-local-ruta-lite
+    description: Un ajuste interno acotado no activa el ciclo Full
+    expect_contains: "architect-executor"
+    input: |
+      Corrige un typo interno en un nombre de variable privada; no cambia API,
+      persistencia, seguridad ni comportamiento visible.
+
+  - id: cambio-api-escala-full
+    description: El impacto contractual obliga al flujo formal
+    expect_contains: "spec-validator"
+    input: |
+      Añade un endpoint público con datos persistidos y permisos nuevos. Clasifica
+      y enruta el cambio; no reduzcas el proceso por ser un endpoint pequeño.

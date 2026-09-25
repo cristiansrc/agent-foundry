@@ -8,6 +8,9 @@
 ## Current status
 - requirements-discovery
 
+## Change tier
+- full
+
 <!-- Enum válido: requirements-discovery | planning | validator-review |
      revision-needed | validated-not-executed | awaiting-human-plan-approval |
      decomposition-completed | in_progress | blocked | validation-review |
@@ -37,7 +40,7 @@ reviewed_at: <pendiente>
 validator_agent: spec-validator
 artifact_set_reviewed: <pendiente>
 summary: <pendiente>
-invalidated_changes_since: none
+ invalidated_by_changes_since: none
 
 <!-- Solo `verdict: ready` EXACTO autoriza descomposición/ejecución.
      Cambios post-ready por planner invalidan el ready: registrar razón en

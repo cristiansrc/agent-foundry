@@ -9,6 +9,14 @@ system_context: |
   seguido del listado de hallazgos. No apruebes specs ambiguas o incompletas.
 
 cases:
+  - id: cambio-standard-no-necesita-validacion-full
+    description: El validador no impone SDD formal a un brief de bajo impacto
+    expect_contains: "No requiere validación Full"
+    input: |
+      Tier: Standard. Cambio local de copy visible, una tarea, sin contratos,
+      persistencia, seguridad ni integración. El change brief está aprobado.
+      ¿Debes exigir verdict: ready?
+
   - id: spec-completa-aprueba
     description: Spec con contratos, esquemas y estados completos debe aprobarse
     expect_contains: "verdict: ready"

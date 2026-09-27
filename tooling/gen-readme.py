@@ -56,9 +56,6 @@ SKILL_CATEGORIES = [
         "git-ops", "documentation-lifecycle", "documentation-standards",
         "context-curation", "context-pinning", "workspace-coordination",
         "eval-ops-agent-benchmarks", "graphify"]),
-    ("Asistentes Personales", [
-        "hyprmind-delegation-protocol", "hyprmind-memory-manager",
-        "hyprmind-workspace-manager"]),
     ("Sistema Local (ambxst / Linux)", [
         "ambxst-shell-dev", "ambxst-plugins", "ambxst-theming",
         "ambxst-packaging", "linux-dev"]),
@@ -101,11 +98,12 @@ def agents_tables() -> str:
               "| Agente | Rol | Descripción |", "|--------|-----|-------------|"]
     for _, name, role_label, desc in sorted(sdlc):
         lines.append(f"| `{name}` | {role_label} | {desc} |")
-    lines += ["", f"### Asistentes personales — HyprMind ({len(personal)})", "",
-              "*Fuera del SDLC; interactúan contigo y delegan al flujo de desarrollo.*",
-              "", "| Agente | Descripción |", "|--------|-------------|"]
-    for name, _, desc in sorted(personal):
-        lines.append(f"| `{name}` | {desc} |")
+    if personal:
+        lines += ["", f"### Asistentes personales — HyprMind ({len(personal)})", "",
+                  "*Fuera del SDLC; interactúan contigo y delegan al flujo de desarrollo.*",
+                  "", "| Agente | Descripción |", "|--------|-------------|"]
+        for name, _, desc in sorted(personal):
+            lines.append(f"| `{name}` | {desc} |")
     return "\n".join(lines)
 
 

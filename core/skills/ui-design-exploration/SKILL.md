@@ -69,7 +69,7 @@ Justificación: <la escribe el humano>
 ## Contrato de handoff a implementación
 
 Cuando el humano apruebe una dirección, el artefacto elegido es FUENTE DE
-VERDAD para el executor (ver skill `design-to-code`): layout, jerarquía,
+VERDAD para el ui-executor (ver skill `design-to-code`): layout, jerarquía,
 tokens, estados incluidos. Cambiar el diseño durante implementación = volver
 a esta skill, no improvisar en código.
 

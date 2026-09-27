@@ -1,6 +1,6 @@
 ---
 name: design-to-code
-description: Traducción fiel de un artefacto de diseño aprobado (HTML en docs/designs/) a componentes reales del stack destino, con verificación visual automatizada — el puente entre la dirección elegida y el executor.
+description: Traducción fiel de un artefacto de diseño aprobado (HTML en docs/designs/) a componentes reales del stack destino, con verificación visual automatizada — el puente entre la dirección elegida y el ui-executor.
 ---
 
 # Skill: Design to Code
@@ -42,8 +42,10 @@ Tras implementar, antes de reportar done:
 
 1. Compila y pasa typecheck del stack.
 2. Levanta el dev server.
-3. Con Puppeteer MCP (o equivalente): navega cada pantalla implementada,
-   compara contra el artboard lado a lado (screenshot vs archivo local).
+3. Con Playwright MCP (o equivalente): navega cada pantalla implementada,
+   compara contra el artboard lado a lado (screenshot vs archivo local) usando
+   tu visión nativa. Si tu modelo no tuviera visión, usa el MCP `foundry-vision`
+   (`analyze_ui_screenshot`) como respaldo para la comparación.
 4. Ejecuta los estados diseñados (vacío, error, hover) y confirma que existen.
 5. Reporta en el task board: archivos creados + screenshots de verificación.
 

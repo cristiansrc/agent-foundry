@@ -14,9 +14,8 @@ herramienta: **opencode**, **chatgpt** (Codex CLI) y **kiro**.
   - [Configuración de AWS](#configuración-de-aws)
   - [¿Por qué visión local (qwen3-vl-8b) en vez de una API cloud?](#por-qué-visión-local-qwen3-vl-8b-en-vez-de-una-api-cloud)
 - [Agentes](#agentes)
-  - [Ciclo de desarrollo de software (26)](#ciclo-de-desarrollo-de-software-26)
-  - [Asistentes personales — HyprMind (3)](#asistentes-personales--hyprmind-3)
-- [Skills](#skills-76)
+  - [Ciclo de desarrollo de software (27)](#ciclo-de-desarrollo-de-software-27)
+- [Skills](#skills-75)
   - [Arquitectura y Metodología](#arquitectura-y-metodología)
   - [Backend y Lenguajes](#backend-y-lenguajes)
   - [Datos y Mensajería](#datos-y-mensajería)
@@ -64,11 +63,10 @@ Luna no se consume desde OpenCode Go. El routing y la política de privacidad
 
 | Rol | Agentes |
 |-----|---------|
-| Workers (obreros) | executor, architect-executor, database-architect, devops-architect, refactor, documentation, spec-remediator, functional-tester-agent, git-executor |
+| Workers (obreros) | executor, ui-executor, architect-executor, database-architect, devops-architect, refactor, documentation, spec-remediator, functional-tester-agent, git-executor |
 | Consultants (consultores) | requirements-analyst, planner, enterprise-architect, solution-architect, test-architect, task-decomposer, context-curator, master-orchestrator |
 | Validators (validadores) | spec-validator, enterprise-spec-validator, api-governance-agent, bug-diagnostician, reviewer, security-reviewer, final-validation |
 | Guardrails | general |
-| Personal (fuera del SDLC) | hyprmind-orchestrator, hyprmind-deep-thinker, hyprmind-vision-analyst |
 
 ## Reglas operativas críticas
 
@@ -144,7 +142,7 @@ cualquier repo que use LM Studio — es independiente de agent-foundry.
 
 ## Agentes
 
-### Ciclo de desarrollo de software (26)
+### Ciclo de desarrollo de software (27)
 
 | Agente | Rol | Descripción |
 |--------|-----|-------------|
@@ -156,6 +154,7 @@ cualquier repo que use LM Studio — es independiente de agent-foundry.
 | `git-executor` | Worker (obrero) | Agente exclusivo para operaciones de control de versiones con Git (ramas, commits, checkout, merges, push). |
 | `refactor` | Worker (obrero) | Refactors implemented code for maintainability, readability, modularity, and consistency without changing behavior. |
 | `spec-remediator` | Worker (obrero) | Corrige hallazgos de validación de forma iterativa siguiendo `spec-remediation`. |
+| `ui-executor` | Worker (obrero) | Implementa la dirección de diseño UI aprobada como componentes reales del stack destino con verificación visual — traduce el artboard elegido 1:1 sin reinterpretarlo y lo valida con gauntlet visual antes de reportar done. |
 | `context-curator` | Consultant (consultor) | Filtra y prepara el contexto de alta señal para evitar ruido a los Obreros y gestionar el ciclo de vida del SDD context. |
 | `enterprise-architect` | Consultant (consultor) | Define el System Landscape, fronteras de microservicios y flujos globales siguiendo `enterprise-architecture-standard`. |
 | `master-orchestrator` | Consultant (consultor) | Agente Maestro y Orquestador Contextual. Mantiene el contexto de todo el proyecto y delega tareas específicas a subagentes especializados. No realiza modificaciones ni ejecuciones de código directas. |
@@ -175,17 +174,7 @@ cualquier repo que use LM Studio — es independiente de agent-foundry.
 | `spec-validator` | Validator (validador) | Valida specs SDD contra ambiguedad, inconsistencia, riesgo arquitectonico, restricciones faltantes y readiness de implementacion. |
 | `general` | Guardrail | Guardrail para llamadas accidentales al subagente general integrado de la herramienta anfitriona. Bloquea validaciones SDD ejecutadas por el agente equivocado. |
 
-### Asistentes personales — HyprMind (3)
-
-*Fuera del SDLC; interactúan contigo y delegan al flujo de desarrollo.*
-
-| Agente | Descripción |
-|--------|-------------|
-| `hyprmind-deep-thinker` | Eres el analista profundo de HyprMind. |
-| `hyprmind-orchestrator` | Eres V.I.E.R.N.E.S., la inteligencia artificial de interfaz táctica y asistencia avanzada para Cris. |
-| `hyprmind-vision-analyst` | Eres el analista de visión de HyprMind. |
-
-## Skills (78)
+## Skills (75)
 
 ### Arquitectura y Metodología
 
@@ -244,7 +233,7 @@ cualquier repo que use LM Studio — es independiente de agent-foundry.
 | `accessibility-standard` | Auditoría y diseño accesible WCAG 2.2 AA — criterios completos con verificación práctica (teclado, contraste, ARIA, targets táctiles, formularios), herramientas automatizadas y clasificación de severidad para bloquear releases. |
 | `angular-stack` |  |
 | `design-systems` | Descubrimiento, uso y validación de design systems en el código — extraer tokens y componentes existentes para que los diseños nuevos nazcan consistentes con la UI real del producto. |
-| `design-to-code` | Traducción fiel de un artefacto de diseño aprobado (HTML en docs/designs/) a componentes reales del stack destino, con verificación visual automatizada — el puente entre la dirección elegida y el executor. |
+| `design-to-code` | Traducción fiel de un artefacto de diseño aprobado (HTML en docs/designs/) a componentes reales del stack destino, con verificación visual automatizada — el puente entre la dirección elegida y el ui-executor. |
 | `frontend-architecture` | Arquitectura limpia para React y Angular. |
 | `minimalist-ui` | Clean editorial-style interfaces. Warm monochrome palette, typographic contrast, flat bento grids, muted pastels. No gradients, no heavy shadows. |
 | `react-stack` |  |
@@ -280,14 +269,6 @@ cualquier repo que use LM Studio — es independiente de agent-foundry.
 | `git-ops` | Gestión profesional del ciclo de vida de Git y GitHub. Automatiza la creación de ramas, commits semánticos y Pull Requests siguiendo estándares de la industria y el flujo SDD. |
 | `graphify` | "Use for any question about a codebase, its architecture, file relationships, or project content — especially when graphify-out/ exists, where the question should be treated as a graphify query first. Turns any input (code, docs, papers, images, videos) into a persistent knowledge graph with god nodes, community detection, and query/path/explain tools." |
 | `workspace-coordination` | Coordinación técnica ascendente y descendente entre el Solution Workspace y proyectos locales, incluyendo la gestión y visibilidad de la deuda técnica. |
-
-### Asistentes Personales
-
-| Skill | Descripción |
-|-------|-------------|
-| `hyprmind-delegation-protocol` | Protocolo estructurado de delegación del orquestador personal hacia agentes SDLC. |
-| `hyprmind-memory-manager` | Gestión de memoria conversacional del orquestador personal con caducidad por inactividad. |
-| `hyprmind-workspace-manager` | Procedimientos para abrir documentos e IDEs en el escritorio del usuario. |
 
 ### Sistema Local (ambxst / Linux)
 
@@ -335,26 +316,27 @@ La skill `agent-foundry-reader` se instala mediante
 |--------|--------------------|
 | `api-governance-agent` | opencode-go/longcat-2.0 |
 | `bug-diagnostician` | openai/gpt-6-sol |
-| `context-curator` | opencode-go/mimo-v2.5 |
+| `context-curator` | opencode-go/mimo-v2.6-flash |
 | `database-architect` | opencode-go/deepseek-v4.1-flash |
 | `devops-architect` | opencode-go/deepseek-v4.1-flash |
-| `documentation` | opencode-go/mimo-v2.5 |
+| `documentation` | opencode-go/mimo-v2.6-flash |
 | `enterprise-architect` | openai/gpt-6-sol |
-| `enterprise-spec-validator` | opencode-go/mimo-v2.5-pro |
+| `enterprise-spec-validator` | opencode-go/mimo-v2.6-pro |
 | `executor` | opencode-go/deepseek-v4.1-flash |
 | `final-validation` | openai/gpt-6-sol |
 | `functional-tester-agent` | opencode-go/deepseek-v4-flash-vision-exp |
-| `git-executor` | opencode-go/mimo-v2.5 |
+| `git-executor` | opencode-go/mimo-v2.6-flash |
 | `master-orchestrator` | openai/gpt-6-luna |
 | `planner` | openai/gpt-6-sol |
-| `reviewer` | opencode-go/mimo-v2.5 |
+| `reviewer` | opencode-go/mimo-v2.6-flash |
 | `security-reviewer` | openai/gpt-6-sol |
 | `solution-architect` | openai/gpt-6-sol |
-| `spec-remediator` | opencode-go/mimo-v2.5 |
-| `spec-validator` | opencode-go/mimo-v2.5-pro |
+| `spec-remediator` | opencode-go/mimo-v2.6-flash |
+| `spec-validator` | opencode-go/mimo-v2.6-pro |
 | `task-decomposer` | opencode-go/longcat-2.0 |
 | `test-architect` | opencode-go/deepseek-v4.1-flash |
-| `ui-designer` | opencode-go/mimo-v2.5 |
+| `ui-designer` | openai/gpt-6-sol |
+| `ui-executor` | opencode-go/deepseek-v4-flash-vision-exp |
 
 ### ChatGPT (Codex CLI) — bindings activos
 
@@ -374,9 +356,6 @@ La skill `agent-foundry-reader` se instala mediante
 | `functional-tester-agent` | `gpt-5.6-luna` |
 | `general` | `gpt-5.6-sol` |
 | `git-executor` | `gpt-5.6-luna` |
-| `hyprmind-deep-thinker` | `gpt-5.6-sol` |
-| `hyprmind-orchestrator` | `gpt-5.6-sol` |
-| `hyprmind-vision-analyst` | `gpt-5.6-sol` |
 | `master-orchestrator` | `gpt-5.6-sol` |
 | `planner` | `gpt-5.6-luna` |
 | `refactor` | `gpt-5.6-terra` |
@@ -389,6 +368,7 @@ La skill `agent-foundry-reader` se instala mediante
 | `task-decomposer` | `gpt-5.6-luna` |
 | `test-architect` | `gpt-5.6-luna` |
 | `ui-designer` | `gpt-5.6-terra` |
+| `ui-executor` | `gpt-5.6-luna` |
 
 ### Kiro — bindings activos
 
@@ -408,9 +388,6 @@ La skill `agent-foundry-reader` se instala mediante
 | `functional-tester-agent` | `qwen3-coder-next` |
 | `general` | `claude-opus-5` |
 | `git-executor` | `claude-haiku-4.5` |
-| `hyprmind-deep-thinker` | `claude-opus-5` |
-| `hyprmind-orchestrator` | `claude-opus-5` |
-| `hyprmind-vision-analyst` | `claude-opus-5` |
 | `master-orchestrator` | `claude-opus-5` |
 | `planner` | `gpt-5.6-luna` |
 | `refactor` | `gpt-5.6-terra` |
@@ -423,5 +400,6 @@ La skill `agent-foundry-reader` se instala mediante
 | `task-decomposer` | `gpt-5.6-luna` |
 | `test-architect` | `qwen3-coder-next` |
 | `ui-designer` | `claude-sonnet-5` |
+| `ui-executor` | `qwen3-coder-next` |
 
 <!-- END:GENERATED-TABLES -->

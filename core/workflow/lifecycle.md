@@ -7,7 +7,8 @@ agente-fase-skill en [matrix.yaml](matrix.yaml).
 ## 1. Clasificación de Agentes
 
 - **Workers (obreros):** implementan código, BD, docs e infraestructura.
-  `executor`, `architect-executor`, `database-architect`, `devops-architect`,
+  `executor`, `ui-executor`, `architect-executor`, `database-architect`,
+  `devops-architect`,
   `refactor`, `documentation`, `spec-remediator`, `functional-tester-agent`,
   `git-executor`.
 - **Consultants (consultores):** asesoran, diseñan y descomponen.
@@ -18,8 +19,6 @@ agente-fase-skill en [matrix.yaml](matrix.yaml).
   `spec-validator`, `enterprise-spec-validator`, `api-governance-agent`,
   `bug-diagnostician`, `reviewer`, `security-reviewer`, `final-validation`.
 - **Guardrails:** bloquean enrutes accidentales (`general`).
-- **Personal (fuera del SDLC):** `hyprmind-orchestrator`,
-  `hyprmind-deep-thinker`, `hyprmind-vision-analyst`.
 
 ## 2. Inicialización
 
@@ -70,7 +69,7 @@ Fase 4 Descomposición ─► Fase 5 Ejecución ─► Fase 6 Calidad
   `docs/designs/<increment-name>/` (estático o clickeable) + README comparativo.
 - El humano elige dirección (puede mezclar elementos); la elección queda
   registrada en el README y se firma junto al Gate 1.
-- La dirección elegida es fuente de verdad para el executor vía skill
+- La dirección elegida es fuente de verdad para el ui-executor vía skill
   `design-to-code`: prohibido reinterpretar la UI durante implementación.
 
 ### Fase 3 — Validación IA
@@ -88,6 +87,7 @@ Fase 4 Descomposición ─► Fase 5 Ejecución ─► Fase 6 Calidad
 
 ### Fase 5 — Ejecución
 - Agentes: `executor` (con spec SDD validada) o `architect-executor` (sin spec),
+  `ui-executor` (superficie UI con dirección aprobada),
   con soporte de `test-architect`, `database-architect`, `devops-architect`,
   `refactor` y `documentation`.
 - Estados: `in_progress`; tareas `todo → in_progress → done | blocked`.

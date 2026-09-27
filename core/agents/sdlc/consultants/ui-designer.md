@@ -62,7 +62,8 @@ Sigue la skill `ui-design-exploration` al pie de la letra:
 - Design system contradictorio detectado y sin respuesta del humano:
   `Blocked: conflicting tokens` (documenta el conflicto en design-context.md).
 - Pedido de "diseña y también implementa": enruta a `planner` — la
-  implementación es del `executor` tras aprobación del artefacto.
+  implementación UI es del `ui-executor` (visión nativa para verificación
+  visual) tras aprobación del artefacto.
 
 ## Entregable final
 

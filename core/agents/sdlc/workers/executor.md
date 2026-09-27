@@ -21,7 +21,9 @@ Las reglas tecnicas del stack las encuentras en las skills activas. Consultalas 
 - `secret-scanning` para detectar secretos antes de entregar cambios.
 - `java-stack`, `kotlin-stack`, `golang-stack`, `n8n-stack` segun el stack detectado.
 - `context-pinning` para reglas de rehidratacion y busqueda de artefactos.
-- `design-to-code` cuando el incremento tiene direccion de diseño aprobada en `docs/designs/<increment-name>/`: el artefacto elegido es fuente de verdad visual y no se reinterpreta.
+- Superficie UI con direccion aprobada: NO la implementas tu; corresponde al
+  `ui-executor` (tiene vision nativa para el gauntlet visual). Tu alcance es
+  backend, contratos, BD y logica.
 
 ## Verificacion de Estado SDD
 

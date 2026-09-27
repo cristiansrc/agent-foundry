@@ -41,13 +41,13 @@ la conexión OAuth de ChatGPT.
 El harness instala un agente principal: `master-orchestrator`. Los demás se
 instalan como subagentes para que el selector principal no se llene de roles.
 
-- Núcleo: `planner`, `task-decomposer`, `executor`, `reviewer`,
-  `final-validation`, `git-executor`.
+- Núcleo: `planner`, `task-decomposer`, `executor`, `ui-executor` (solo
+  incrementos con UI aprobada), `reviewer`, `final-validation`, `git-executor`.
 - Bajo demanda: arquitectura, datos, plataforma, seguridad, UI/E2E,
   documentación, diagnóstico y curación de contexto.
-- No desplegados: `general`, `architect-executor`, `requirements-analyst`,
-  `refactor` y los perfiles personales HyprMind. Se conservan como histórico o
-  perfiles separados, pero no forman parte del SDLC normal.
+- No desplegados: `general`, `architect-executor`, `requirements-analyst` y
+  `refactor`. Se conservan como histórico o perfiles separados, pero no forman
+  parte del SDLC normal.
 
 ## Enforcement de routing: plugin `model-router`
 

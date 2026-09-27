@@ -104,8 +104,20 @@ agents:
              repository-dto-patterns, jpa-stack, flyway-migrations,
              postgresql-standard, mysql-standard, oracle-standard, sqlserver-standard,
              n8n-stack, security-standards, keycloak-standard, testing-strategy,
-             pre-flight-check, context-pinning, bug-fixing-workflow, design-to-code,
+             pre-flight-check, context-pinning, bug-fixing-workflow,
              secret-scanning]
+
+  ui-executor:
+    role: worker
+    phases: [execution]
+    gate_required: G1
+    reads_states: [awaiting-human-plan-approval, validated-not-executed]
+    writes_states: [in_progress]
+    consumes_artifacts: [docs/designs/<increment-name>/ (direccion elegida)]
+    skills: [design-to-code, design-systems, react-stack, angular-stack,
+             frontend-architecture, ux-heuristics, accessibility-standard,
+             minimalist-ui, testing-strategy, pre-flight-check,
+             context-pinning, bug-fixing-workflow, secret-scanning]
 
   architect-executor:
     role: worker
@@ -224,26 +236,13 @@ agents:
     phases: []
     purpose: bloquear rutas accidentales al subagente general integrado
 
-  hyprmind-orchestrator:
-    role: personal
-    phases: []
-    skills: [hyprmind-delegation-protocol, hyprmind-memory-manager, hyprmind-workspace-manager]
-
-  hyprmind-deep-thinker:
-    role: personal
-    phases: []
-
-  hyprmind-vision-analyst:
-    role: personal
-    phases: []
-
 gates:
   G1:
     name: awaiting-human-plan-approval
     signature: "## Human Plan Approval: approved_by_user"
     includes: decision de diseño (si el incremento tiene UI, la dirección elegida
       queda registrada en docs/designs/<increment-name>/README.md)
-    blocks: [task-decomposer, executor, architect-executor]
+    blocks: [task-decomposer, executor, ui-executor, architect-executor]
   G2:
     name: awaiting-human-qa-approval
     signature: "## Human QA Approval: approved_by_user"
@@ -258,6 +257,7 @@ constraints:
       implementacion de la tarea, no al orquestador que delega.
     forbidden_pairs:
       executor: [reviewer, security-reviewer, final-validation]
+      ui-executor: [reviewer, security-reviewer, final-validation]
       architect-executor: [reviewer, security-reviewer, final-validation]
       refactor: [final-validation]
     invariants:

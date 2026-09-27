@@ -10,13 +10,13 @@ harness:
   active_subagents: [planner, task-decomposer, executor, reviewer,
                      final-validation, git-executor]
   optional_subagents: [solution-architect, enterprise-architect, ui-designer,
+                       ui-executor,
                        test-architect, database-architect, devops-architect,
                        documentation, functional-tester-agent, security-reviewer,
                        spec-validator, enterprise-spec-validator,
                        api-governance-agent, bug-diagnostician, spec-remediator,
                        context-curator]
-  excluded: [general, architect-executor, requirements-analyst, refactor,
-             hyprmind-orchestrator, hyprmind-deep-thinker, hyprmind-vision-analyst]
+  excluded: [general, architect-executor, requirements-analyst, refactor]
 
 defaults:
   mode: all
@@ -26,6 +26,7 @@ defaults:
 agents:
   # ── Workers ──────────────────────────────────────────────────────────────
   executor:               {edit: allow, bash: allow, temp: "0.15"}
+  ui-executor:            {edit: allow, bash: allow, temp: "0.15"}
   architect-executor:     {edit: allow, bash: allow, temp: "0.15"}
   database-architect:     {edit: allow, bash: allow, temp: "0.10"}
   devops-architect:       {edit: allow, bash: allow, temp: "0.2"}
@@ -58,8 +59,5 @@ agents:
   security-reviewer:      {mode: subagent, edit: deny, bash: allow, temp: "0.1"}
   final-validation:       {mode: subagent, edit: deny, bash: allow, temp: "0.1"}
 
-  # ── Guardrails / Personal ────────────────────────────────────────────────
+  # ── Guardrails ─────────────────────────────────────────────────────────
   general:                {mode: subagent, edit: deny, bash: deny, temp: "0.1"}
-  hyprmind-orchestrator:  {temp: "0.8"}
-  hyprmind-deep-thinker:  {temp: "0.5"}
-  hyprmind-vision-analyst: {temp: "0.2"}

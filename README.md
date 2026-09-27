@@ -185,7 +185,7 @@ cualquier repo que use LM Studio — es independiente de agent-foundry.
 | `hyprmind-orchestrator` | Eres V.I.E.R.N.E.S., la inteligencia artificial de interfaz táctica y asistencia avanzada para Cris. |
 | `hyprmind-vision-analyst` | Eres el analista de visión de HyprMind. |
 
-## Skills (76)
+## Skills (78)
 
 ### Arquitectura y Metodología
 
@@ -304,7 +304,9 @@ cualquier repo que use LM Studio — es independiente de agent-foundry.
 | Skill | Descripción |
 |-------|-------------|
 | `documentation-reconciliation` | "Interpretar documentación de proyectos, distinguir estado actual de planes e histórico y resolver contradicciones entre README, specs, código y tests con evidencia." |
+| `jev-routing` | Enrutamiento tipado mediante Jev para seleccionar agente, nivel de razonamiento y necesidad de intervención humana sin delegar permisos ni ejecución a Jev. |
 | `n8n-stack` |  |
+| `planning-context-pack` | Prepara un contexto de planificación persistente, mínimo y trazable desde specs y código para que un modelo de razonamiento no relea el repositorio completo. |
 | `project-context-navigation` | "Orientarse rápidamente en un proyecto desconocido para ubicar su estructura, fuentes de verdad, flujo de trabajo y archivos relevantes antes de responder o editar." |
 | `secret-scanning` | Escaneo obligatorio de secretos con Gitleaks para agentes que escriben, validan o versionan artefactos del repositorio. |
 
@@ -332,22 +334,22 @@ La skill `agent-foundry-reader` se instala mediante
 | Agente | Modelo de ejecución |
 |--------|--------------------|
 | `api-governance-agent` | opencode-go/longcat-2.0 |
-| `bug-diagnostician` | openai/gpt-5.6-luna |
+| `bug-diagnostician` | openai/gpt-6-sol |
 | `context-curator` | opencode-go/mimo-v2.5 |
 | `database-architect` | opencode-go/deepseek-v4.1-flash |
 | `devops-architect` | opencode-go/deepseek-v4.1-flash |
 | `documentation` | opencode-go/mimo-v2.5 |
-| `enterprise-architect` | openai/gpt-5.6-luna |
+| `enterprise-architect` | openai/gpt-6-sol |
 | `enterprise-spec-validator` | opencode-go/mimo-v2.5-pro |
 | `executor` | opencode-go/deepseek-v4.1-flash |
-| `final-validation` | openai/gpt-5.6-luna |
+| `final-validation` | openai/gpt-6-sol |
 | `functional-tester-agent` | opencode-go/deepseek-v4-flash-vision-exp |
 | `git-executor` | opencode-go/mimo-v2.5 |
-| `master-orchestrator` | openai/gpt-5.6-luna |
-| `planner` | openai/gpt-5.6-terra |
+| `master-orchestrator` | openai/gpt-6-luna |
+| `planner` | openai/gpt-6-sol |
 | `reviewer` | opencode-go/mimo-v2.5 |
-| `security-reviewer` | openai/gpt-5.6-luna |
-| `solution-architect` | openai/gpt-5.6-luna |
+| `security-reviewer` | openai/gpt-6-sol |
+| `solution-architect` | openai/gpt-6-sol |
 | `spec-remediator` | opencode-go/mimo-v2.5 |
 | `spec-validator` | opencode-go/mimo-v2.5-pro |
 | `task-decomposer` | opencode-go/longcat-2.0 |

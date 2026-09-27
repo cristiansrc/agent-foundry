@@ -11,20 +11,20 @@ trabajo distintos.
 3. Conectar o conservar **OpenCode Go** y confirmar sus modelos con `/models`.
 4. Solo después instalar con `tooling/sync.sh`.
 
-Los IDs `openai/gpt-5.6-sol`, `openai/gpt-5.6-luna` y
-`openai/gpt-5.6-terra` son nombres de binding
-esperados. Si `/models` muestra un ID diferente, se actualiza
+Los IDs `openai/gpt-6-sol` y `openai/gpt-6-luna` son nombres de binding
+esperados (OpenAI no lanzó GPT-6 Terra; sus slots los absorbe Sol v6).
+Si `/models` muestra un ID diferente, se actualiza
 `profiles/models.yaml` antes de usar agentes que dependan de ChatGPT OAuth.
 
 ## Política de routing
 
 | Capacidad | Suscripción | Modelo principal | Uso |
 |---|---|---|---|
-| Orquestación | ChatGPT OAuth | Luna | master-orchestrator; decisiones y delegación con contexto global |
-| Planificación compleja | ChatGPT OAuth | Terra | planner y decisiones de alto impacto |
-| Razonamiento crítico | ChatGPT OAuth | Luna | arquitectura, seguridad y RCA complejos |
+| Orquestación | ChatGPT OAuth | Luna v6 | master-orchestrator; decisiones y delegación con contexto global |
+| Planificación compleja | ChatGPT OAuth | Sol v6 | planner y decisiones de alto impacto |
+| Razonamiento crítico | ChatGPT OAuth | Sol v6 | arquitectura, seguridad y RCA complejos |
 | Validación crítica de specs | OpenCode Go | MiMo-V2.5 Pro | spec-validator y enterprise-spec-validator; proveedor independiente del planner |
-| Validación normal | ChatGPT OAuth | Luna | validación final y arbitraje ligero |
+| Validación de valor alto | ChatGPT OAuth | Sol v6 | validación final, seguridad y RCA |
 | Plan estructurado | OpenCode Go | LongCat 2.0 | task decomposition y gobernanza API normal |
 | Código | OpenCode Go | DeepSeek V4.1 Flash | executor y migraciones de datos |
 | Trabajo mecánico | OpenCode Go | MiMo-V2.5 | orquestación ligera, Git, docs y review normal |

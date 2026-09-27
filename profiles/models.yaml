@@ -3,7 +3,7 @@
 # Los agentes viven en core/ agnósticos; este archivo los une a un modelo real.
 # Cambiar de modelo/proveedor = editar aquí + tooling/build.sh.
 schema: foundry/profiles/models/v2
-updated: 2026-09-11
+updated: 2026-09-27
 
 # ── 1. Tiers abstractos (capacidad requerida, sin marcas) ──────────────────
 tiers:
@@ -138,36 +138,29 @@ providers:
     active: true
     models:
       luna:
-        id: openai/gpt-5.6-luna
+        id: openai/gpt-6-luna
         status: active
-        context: 272K
+        context: 1M
         vision: true
-        notes: Fallback económico para tareas de alto volumen cuando Terra no esté disponible.
-      terra:
-        id: openai/gpt-5.6-terra
-        status: active
-        context: 272K
-        vision: true
-        notes: Orquestación, arquitectura, seguridad, RCA y validación de valor alto.
+        notes: "v6 2026-09-22 — $0.10/$0.50 API (50% menos que 5.6). Orquestación y validación ligera vía ChatGPT Plus OAuth."
       sol:
-        id: openai/gpt-5.6-sol
+        id: openai/gpt-6-sol
         status: active
-        context: 272K
+        context: 1M
         vision: true
-        notes: Planificación y decisiones de máxima complejidad vía ChatGPT OAuth.
+        notes: "v6 2026-09-22 — $2/$10 API (50% menos que 5.6; mismo input que Terra 5.6). Arquitectura, planificación, seguridad, RCA y validación de valor alto. Sin Terra v6: absorbe todos sus slots."
     tier_bindings:
       orchestration:       [luna]
-      macro_architecture:  [terra]
-      patterns_logic:      [terra]
+      macro_architecture:  [sol]
+      patterns_logic:      [sol]
       planning_governance: [sol]
       spec_validation_critical: [sol]
-      sdd_validation:      [terra]
-      code_volume:         [terra]
-      code_heavy:          [terra]
-      ui_e2e:              [terra]
+      sdd_validation:      [sol]
+      code_volume:         [sol]
+      code_heavy:          [sol]
+      ui_e2e:              [sol]
     fallbacks:
-      sol: [terra]
-      terra: [luna]
+      sol: [luna]
       luna: []
 
   chatgpt:
@@ -272,6 +265,7 @@ providers:
 
 # ── 4. Bloqueados (nunca asignar) ──────────────────────────────────────────
 blocked:
+  - {id: openai/gpt-5.6-terra, reason: "Sin sucesor v6 (OpenAI solo lanzó Sol/Luna v6 el 2026-09-22); slots absorbidos por openai/gpt-6-sol al mismo costo de input. 2026-09-27."}
   - {id: opencode/muse-spark-1.2-contributor-free, reason: "Bloqueado: variante Contributor permite usar prompts y completions para entrenamiento. 2026-09-10."}
   - {id: opencode-go/muse-spark-1.2-contributor, reason: "Bloqueado: variante Contributor permite usar prompts y completions para entrenamiento. 2026-09-10."}
   - {id: opencode-go/muse-spark-1.3-contributor, reason: "Bloqueado: variante Contributor permite usar prompts y completions para entrenamiento. 2026-09-10."}

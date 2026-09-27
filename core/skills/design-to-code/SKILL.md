@@ -42,10 +42,9 @@ Tras implementar, antes de reportar done:
 
 1. Compila y pasa typecheck del stack.
 2. Levanta el dev server.
-3. Con Playwright MCP (o equivalente): navega cada pantalla implementada,
-   compara contra el artboard lado a lado (screenshot vs archivo local) usando
-   tu visión nativa. Si tu modelo no tuviera visión, usa el MCP `foundry-vision`
-   (`analyze_ui_screenshot`) como respaldo para la comparación.
+3. Con Playwright MCP (o equivalente): navega cada pantalla implementada
+   y compara contra el artboard lado a lado (screenshot vs archivo local)
+   usando tu visión nativa.
 4. Ejecuta los estados diseñados (vacío, error, hover) y confirma que existen.
 5. Reporta en el task board: archivos creados + screenshots de verificación.
 

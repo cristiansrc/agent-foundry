@@ -37,7 +37,7 @@ las specs y el task board.
 | Nivel | Modelo ChatGPT OAuth |
 |---|---|
 | `low` | Luna |
-| `medium` | Terra |
+| `medium` | Sol |
 | `high` | Sol |
 | `critical` | Sol |
 

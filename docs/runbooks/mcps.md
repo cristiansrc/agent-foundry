@@ -26,14 +26,13 @@ registra el qué y el por qué).
 
 ## Pendientes de decisión (no instalados)
 
-### Visión para modelos sin visión (local, gratis)
-**RESUELTO 2026-08-22**: implementado como MCP propio `foundry-vision` contra
-LM Studio (ver sección siguiente). Alternativas descartadas: vision-sidecar
-(solo API nativa Ollama) y repos de terceros (riesgo de procedencia).
-
-Requiere en LM Studio un modelo multimodal (qwen3-vl recomendado). Los Gemma
-E2B/E4B/12b-qat del catálogo actual NO exponen visión según LM Studio
-(`vision: false` en /api/v0/models).
+### Visión: modelos con visión nativa (MCP local retirado)
+**RETIRADO 2026-09-27**: el MCP propio `foundry-vision` (LM Studio) se eliminó
+(`adapters/lmstudio/` borrado) por falta de uso. Todos los agentes que necesitan
+ver imágenes usan modelos con visión nativa: `ui-designer` (Sol v6),
+`ui-executor` y `functional-tester-agent` (DeepSeek Vision), `reviewer`
+(MiMo v2.6). Si algún modelo sin visión necesitara ver capturas en el futuro,
+revaluar un puente local antes de reintroducirlo.
 
 ### Por proyecto (activar cuando aplique)
 - **Postgres MCP Pro** (Crystal DBA): EXPLAIN + índices hipotéticos, modo

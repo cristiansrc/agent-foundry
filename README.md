@@ -12,7 +12,6 @@ herramienta: **opencode**, **chatgpt** (Codex CLI) y **kiro**.
 - [Comandos](#comandos)
 - [MCPs (Model Context Protocol) en OpenCode](#mcps-model-context-protocol-en-opencode)
   - [Configuración de AWS](#configuración-de-aws)
-  - [¿Por qué visión local (qwen3-vl-8b) en vez de una API cloud?](#por-qué-visión-local-qwen3-vl-8b-en-vez-de-una-api-cloud)
 - [Agentes](#agentes)
   - [Ciclo de desarrollo de software (27)](#ciclo-de-desarrollo-de-software-27)
 - [Skills](#skills-75)
@@ -88,7 +87,7 @@ tooling/sync.sh           # instala las salidas generadas (~/.config/opencode, e
 
 ## MCPs (Model Context Protocol) en OpenCode
 
-Seis MCPs extienden las capacidades de los agentes. Se configuran en
+Cinco MCPs extienden las capacidades de los agentes. Se configuran en
 `~/.config/opencode/opencode.json` y se instalan con `tooling/sync.sh`.
 
 | MCP | Tipo | Propósito |
@@ -97,7 +96,6 @@ Seis MCPs extienden las capacidades de los agentes. Se configuran en
 | **playwright** | Local | Control de navegador headless — testing E2E, scraping web, screenshots para `ui-designer` y `functional-tester-agent`. |
 | **context7** | Remoto | Documentación actualizada de frameworks/librerías en tiempo real (override de conocimiento interno stale). |
 | **github** | Remoto + OAuth | Issues, PRs, repos, search y releases. Requiere autorización OAuth第一次 (un solo splash screen). |
-| **foundry-vision** | Local | Visión sobre imágenes (OCR, descripción de UI, análisis de capturas) corriendo en LM Studio con **qwen3-vl-8b**. Sin costo, sin salida de datos. |
 | **foundry-jev** | Local | Selector tipado de agente, nivel de razonamiento y aclaración humana mediante Jev. Vercel es el proveedor inicial; Jev oficial queda como alternativa. |
 
 La arquitectura, configuración, umbrales de confianza y procedimiento de
@@ -122,19 +120,12 @@ Las skills `signing-in-to-aws` y `aws-auth` guían el flujo completo (Cognito
 user pools, identity pools, tokens, Federación SAML/social). El MCP `aws-mcp`
 se encarga del transport y proxy; no necesitas instalar librerías adicionales.
 
-### ¿Por qué visión local (qwen3-vl-8b) en vez de una API cloud?
+### Visión: modelos con visión nativa (sin MCP local)
 
-| Razón | Cloud API | Local (qwen3-vl-8b) |
-|-------|-----------|----------------------|
-| **Privacidad** | Las imágenes viajan a servidores externos | Nunca salen de tu máquina |
-| **Costo** | $0.01-0.10/imagen | $0 — corre en tu RTX 4080 |
-| **Latencia** | 500ms-2s (red + cold start) | ~2-4s primera vez (carga a VRAM), <1s subsiguientes |
-| **Dependencia** | Necesita internet + API key | Funciona 100% offline |
-| **Calidad** | Depende del modelo cloud | qwen3-vl-8b: OCR 98%+ en pruebas internas |
-
-El MCP `foundry-vision` es una capa delgada (~150 líneas, `fastmcp`) que
-traduce el protocolo MCP a la API local de LM Studio. Se puede copiar a
-cualquier repo que use LM Studio — es independiente de agent-foundry.
+Retirado el MCP `foundry-vision` (2026-09-27): todos los agentes que necesitan
+ver imágenes usan modelos con visión nativa — `ui-designer` (Sol v6),
+`ui-executor` y `functional-tester-agent` (DeepSeek Vision), `reviewer`
+(MiMo v2.6). Sin costo extra de infraestructura ni VRAM local.
 
 *Estado del plan: ver [PLAN.md](PLAN.md).*
 

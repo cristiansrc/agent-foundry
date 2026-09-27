@@ -14,7 +14,10 @@ adapters/opencode/out/ la configuración nativa de OpenCode con paridad 1:1:
 Reglas de binding:
 - modelo  = tier del agente -> primer modelo de tier_bindings del proveedor activo
 - temp    = permissions.yaml (fuente única)
-- perms   = permissions.yaml (edit/bash/execute); se omiten si no hay ninguno
+- perms   = permissions.yaml (edit/bash/task) traducidos a reglas V2 ordenadas
+            [{action, resource, effect}]; renombres V1->V2: bash->shell,
+            task->subagent. `execute` no tiene equivalente V2 y se ignora
+            (shell lo gobierna `bash`).
 - vision  = si el agente exige vision, el modelo elegido debe soportarla
 """
 import json
@@ -91,6 +94,30 @@ def resolve_binding(agent: str, profiles: dict) -> dict:
     }
 
 
+def to_v2_permissions(p: dict) -> list[dict]:
+    """Traduce la sintaxis compacta de permissions.yaml a reglas OpenCode V2.
+
+    V2 exige `permissions:` como lista ordenada [{action, resource, effect}]
+    donde el último match gana (broad primero, excepciones después).
+    `execute` (legado V1) no tiene equivalente y se ignora: shell lo gobierna
+    la clave `bash`.
+    """
+    rules = []
+    edit = p.get("edit")
+    if isinstance(edit, dict):
+        for resource, effect in edit.items():
+            rules.append({"action": "edit", "resource": resource, "effect": effect})
+    elif edit in ("allow", "ask", "deny"):
+        rules.append({"action": "edit", "resource": "*", "effect": edit})
+    bash = p.get("bash")
+    if bash in ("allow", "ask", "deny"):
+        rules.append({"action": "shell", "resource": "*", "effect": bash})
+    task = p.get("task")
+    if task in ("allow", "ask", "deny"):
+        rules.append({"action": "subagent", "resource": "*", "effect": task})
+    return rules
+
+
 def render_agent(src: Path, binding: dict) -> str:
     fm, body = parse_frontmatter(src.read_text(encoding="utf-8"))
     lines = ["---"]
@@ -99,14 +126,13 @@ def render_agent(src: Path, binding: dict) -> str:
     lines.append(f"mode: {binding['mode'] or fm.get('mode', 'all')}")
     lines.append(f"model: {binding['model']}")
     lines.append(f"temperature: {binding['temperature']}")
-    if binding["permission"]:
-        lines.append("permission:")
-        for k, v in binding["permission"].items():
-            # `permission.<tool>` admite tanto una acción única como un mapa
-            # de patrones. Serializarlo con YAML evita frontmatter inválido
-            # para permisos acotados, p. ej. escritura solo en .working/.
-            dumped = yaml.safe_dump({k: v}, allow_unicode=True, sort_keys=False).rstrip()
-            lines.extend(f"  {line}" for line in dumped.splitlines())
+    rules = to_v2_permissions(binding["permission"])
+    if rules:
+        lines.append("permissions:")
+        for r in rules:
+            lines.append(f"  - action: {r['action']}")
+            lines.append(f"    resource: \"{r['resource']}\"")
+            lines.append(f"    effect: {r['effect']}")
     lines.append("---")
     return "\n".join(lines) + "\n\n" + body
 

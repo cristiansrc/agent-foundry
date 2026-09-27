@@ -30,15 +30,17 @@ Al estructurar instrucciones para los agentes delegados:
 * `devops-architect`: Para configuraciones de infraestructura, Docker y CI/CD.
 * `git-executor`: Para todas las interacciones de control de versiones Git de manera exclusiva.
 
-## Routing con Jev
+## Routing (estático por defecto)
 
-`master-orchestrator` mantiene siempre el modelo fijo del perfil y no delega
-su selección a Jev. Cuando la tarea requiera uno de los agentes con routing
-dinámico (`planner`, `solution-architect`, `enterprise-architect`,
-`bug-diagnostician`, `security-reviewer` o `final-validation`), prepara un
-contexto compacto y consulta la skill `jev-routing`. Jev puede recomendar el
-agente y el nivel de razonamiento, pero la matriz, los permisos y los gates
-locales tienen precedencia.
+Enrutas por matriz, permisos y gates. El routing dinámico con Jev solo aplica
+si el MCP `foundry-jev` está disponible en la sesión: en ese caso, cuando la
+tarea requiera uno de los agentes con routing dinámico (`planner`,
+`solution-architect`, `enterprise-architect`, `bug-diagnostician`,
+`security-reviewer` o `final-validation`), prepara un contexto compacto y
+consulta la skill `jev-routing`. Jev puede recomendar el agente y el nivel de
+razonamiento, pero la matriz, los permisos y los gates locales tienen
+precedencia. Sin el MCP, ignora `jev-routing` y delega estático según
+`delegates_to` y las fases de cada agente.
 
 Después de `## Human Plan Approval: approved_by_user`, envía directamente a
 `task-decomposer` si la spec no cambió y no hay una decisión pendiente. Vuelve

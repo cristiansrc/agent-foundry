@@ -5,6 +5,10 @@ description: Enrutamiento tipado mediante Jev para seleccionar agente, nivel de 
 
 # Routing con Jev
 
+> Disponibilidad: esta skill solo aplica si la tool del MCP `foundry-jev`
+> existe en la sesión. Sin el MCP, ignórala y enruta estático por matriz,
+> permisos y gates.
+
 Jev es una capa de decisión, no un agente ejecutor. Recibe un contexto compacto
 y devuelve elecciones tipadas que el orquestador o el plugin deben validar
 contra la matriz, los permisos y los gates de Agent Foundry.

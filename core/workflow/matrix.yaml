@@ -229,7 +229,7 @@ agents:
                    architect-executor, test-architect, spec-validator, final-validation,
                    git-executor, database-architect, devops-architect,
                    functional-tester-agent, bug-diagnostician]
-    skills: [jev-routing]   # mantiene contexto; Jev decide rutas permitidas
+    skills: [jev-routing]   # mantiene contexto; Jev solo si el MCP foundry-jev existe, si no routing estático
 
   general:
     role: guardrail

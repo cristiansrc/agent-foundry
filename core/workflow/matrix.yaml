@@ -96,10 +96,11 @@ agents:
     role: worker
     phases: [execution]
     gate_required: G1
-    reads_states: [awaiting-human-plan-approval, validated-not-executed]
-    writes_states: [in_progress]
-    consumes_artifacts: [docs/designs/<increment-name>/ (direccion elegida)]
-    skills: [springboot-stack, java-stack, kotlin-stack, golang-stack, fastapi-stack,
+    reads_states: [awaiting-human-plan-approval, validated-not-executed, odd-defined]
+    writes_states: [in_progress, escalated-to-sdd]
+    consumes_artifacts: [docs/designs/<increment-name>/ (direccion elegida),
+                         docs/specs/odd/<nombre>.md (carriles trivial/fix)]
+    skills: [outcome-observability-driven, springboot-stack, java-stack, kotlin-stack, golang-stack, fastapi-stack,
              nodejs-stack, react-stack, angular-stack, hexagonal-architecture,
              repository-dto-patterns, jpa-stack, flyway-migrations,
              postgresql-standard, mysql-standard, oracle-standard, sqlserver-standard,
@@ -158,9 +159,11 @@ agents:
 
   documentation:
     role: worker
-    phases: [execution, gitops]
+    phases: [execution, gitops, diagnosis]
     reads_states: [validated-not-executed]
-    skills: [documentation-lifecycle, documentation-standards, context-pinning,
+    writes_states: [odd-defined]
+    scribe_for: [bug-diagnostician, reviewer]   # transcribe literal odd-card y Reviewer Approval
+    skills: [outcome-observability-driven, documentation-lifecycle, documentation-standards, context-pinning,
              openapi-standard, secret-scanning]
 
   functional-tester-agent:
@@ -173,8 +176,10 @@ agents:
 
   bug-diagnostician:
     role: validator
+    phases: [diagnosis]
     triggers: [any-failure]
-    skills: [jev-routing, root-cause-analysis, bug-fixing-workflow, observability-standard,
+    writes_states: [diagnosis, escalated-to-sdd]
+    skills: [outcome-observability-driven, jev-routing, root-cause-analysis, bug-fixing-workflow, observability-standard,
              context-pinning, graphify]
 
   spec-remediator:
@@ -188,7 +193,8 @@ agents:
   reviewer:
     role: validator
     phases: [quality]
-    skills: [code-review-checklist, hexagonal-architecture, testing-strategy,
+    writes_results: ["review: approved", "review: changes-requested"]
+    skills: [outcome-observability-driven, code-review-checklist, hexagonal-architecture, testing-strategy,
              security-standards, keycloak-standard,
              springboot-stack, java-stack, kotlin-stack, python-stack, fastapi-stack,
              jpa-stack, mysql-standard, oracle-standard, sqlserver-standard]
@@ -228,8 +234,9 @@ agents:
     delegates_to: [requirements-analyst, context-curator, planner, task-decomposer, executor,
                    architect-executor, test-architect, spec-validator, final-validation,
                    git-executor, database-architect, devops-architect,
-                   functional-tester-agent, bug-diagnostician]
-    skills: [jev-routing]   # mantiene contexto; Jev solo si el MCP foundry-jev existe, si no routing estático
+                   functional-tester-agent, bug-diagnostician, reviewer, documentation]
+    classifies: lane
+    skills: [outcome-observability-driven, jev-routing]   # mantiene contexto; Jev solo si el MCP foundry-jev existe, si no routing estático
 
   general:
     role: guardrail
@@ -247,6 +254,39 @@ gates:
     name: awaiting-human-qa-approval
     signature: "## Human QA Approval: approved_by_user"
     blocks: [git-executor]
+    lanes: [feature, workspace, fix]
+
+# ── Carriles (skill outcome-observability-driven; states.md §1.1) ──────────
+# Definen el PROCESO (qué fases y gates). Los packs de abajo definen QUIÉN
+# participa dentro de un carril; nunca relajan los requisitos del carril.
+lanes:
+  trivial:
+    method: odd-outcome
+    flow: [odd-defined, in_progress, validation-review, quality-approved, merged]
+    agents: [master-orchestrator, documentation, executor, reviewer, git-executor]
+    approvals: ["## Reviewer Approval: approved"]
+    branch: chore/<nombre>
+  fix:
+    method: odd-outcome-observability
+    flow: [diagnosis, odd-defined, in_progress, validation-review, quality-approved,
+           awaiting-human-qa-approval, merged]
+    agents: [master-orchestrator, bug-diagnostician, documentation, executor,
+             reviewer, git-executor]
+    approvals: ["## Reviewer Approval: approved", "## Human QA Approval: approved_by_user"]
+    branch: fix/<nombre>
+  feature:
+    method: sdd
+    flow: lifecycle §3 completo
+    approvals: ["## Human Plan Approval: approved_by_user", "## Human QA Approval: approved_by_user"]
+    branch: feature/<nombre>
+  workspace:
+    method: sdd-enterprise
+    flow: lifecycle §3 + enterprise-spec-validator
+    approvals: ["## Human Plan Approval: approved_by_user", "## Human QA Approval: approved_by_user"]
+    branch: feature/<nombre>
+  escalation_triggers: [contrato-api-o-eventos, esquema-bd-o-migracion, auth-roles-permisos,
+                        modulo-servicio-dependencia-nueva, decision-de-negocio,
+                        boundaries-excedidos]
 
 # ── Restricciones estructurales (gate determinista: tooling/check_constraints.py) ──
 constraints:

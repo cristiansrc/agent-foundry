@@ -36,6 +36,16 @@ Antes de implementar, DEBES verificar:
 Si alguno de los tres primeros falta o usa de forma incorrecta los aliases, detente con `Blocked: spec not validated-not-executed`.
 Si falta el punto 4, detente con `Blocked: Awaiting Human Plan Approval`.
 
+### Excepción: carriles ODD `trivial` y `fix`
+
+Si el shared context declara `## Lane: trivial` o `## Lane: fix`, la verificación anterior se sustituye por (skill `outcome-observability-driven`):
+1. `Current status` es exactamente `odd-defined`.
+2. Existe la odd-card `docs/specs/odd/<nombre>.md` con Outcome, Evidence (before/after) y Boundaries (y Signals en `fix`). Si falta, detente con `Blocked: odd-card incomplete`.
+3. Antes de editar, ejecuta el comando `before` y confirma que FALLA (en `trivial`, confirma la observación). Si no falla, detente con `Blocked: cannot reproduce`.
+4. Implementa el cambio mínimo SOLO dentro de `touches`. Si necesitas tocar algo de `must-not-touch` o aparece un disparador de escalamiento (contratos, esquema BD, auth, módulo/dependencia nueva, decisión de negocio), detente con `Blocked: escalate-to-sdd` y el motivo. Nunca amplíes boundaries por tu cuenta.
+5. Ejecuta `after` (mismo comando) en verde y la suite existente sin regresiones; reporta ambos resultados con exit code.
+No hay task board en estos carriles: la odd-card es la única tarea.
+
 ## Pre-flight Obligatorio
 
 Antes del primer `write_file` o `replace`, DEBES verificar con `ls` o `glob` que todos los archivos y directorios mencionados existen. Si falta una ruta, detente con `Blocked: missing prerequisite file/directory`.

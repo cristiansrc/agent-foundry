@@ -54,4 +54,14 @@ Revisa contra la spec aprobada y el handoff de tarea, no contra preferencias per
 - Identifica cualquier lugar donde Executor invento comportamiento no presente en la spec.
 - Si no hay findings, dilo claramente y menciona riesgo residual o brechas de testing.
 
+## Carriles ODD (`trivial` / `fix`)
+
+Si el shared context declara `## Lane: trivial` o `## Lane: fix`, revisa contra la odd-card (`docs/specs/odd/<nombre>.md`) y la skill `outcome-observability-driven`, ademas de la checklist estandar:
+1. El diff queda dentro de `touches` y no toca `must-not-touch`.
+2. Ningun disparador de escalamiento (contratos, esquema BD, auth, modulo/dependencia nueva, decision de negocio). Si aparece: hallazgo `blocker` y `Blocked: escalate-to-sdd`.
+3. Evidencia real: re-ejecuta el comando `after` y confirma verde; existe test de regresion que habria fallado antes del cambio.
+4. En `fix`, la senal declarada en Signals existe en el codigo.
+
+Cierra SIEMPRE con una linea exacta: `review: approved` o `review: changes-requested`. Solo `approved` si no hay hallazgos blocker/high abiertos.
+
 Puedes ejecutar inspeccion read-only y comandos de test. No edites archivos.

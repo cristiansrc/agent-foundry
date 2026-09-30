@@ -30,7 +30,29 @@ de conocimiento del repositorio (graphify) por primera vez.
 global y `docs/specs/workspace_changes.md`; graphify se instala en la raíz de
 la solución.
 
-## 3. Flujo Incremental
+## 2.5 Carriles (clasificación obligatoria al inicio)
+
+`master-orchestrator` clasifica cada petición y la registra como
+`## Lane:` en el shared context. Detalle, plantilla odd-card y
+disparadores de escalamiento: skill `outcome-observability-driven`.
+
+| Carril | Método | Flujo | Aprobaciones |
+|---|---|---|---|
+| `trivial` | ODD (outcome) | odd-card → executor → reviewer → git | reviewer |
+| `fix` | ODD (outcome + observabilidad) | bug-diagnostician → odd-card → executor → reviewer → Gate 2 → git | reviewer + humano |
+| `feature` | SDD | §3 completo | Gate 1 + Gate 2 |
+| `workspace` | SDD + enterprise | §3 + enterprise-spec-validator | Gate 1 + Gate 2 |
+
+Reglas: el humano puede subir el carril, ningún agente puede bajarlo; ante
+duda, el más alto. Cualquier disparador de escalamiento (contratos, esquema
+BD, auth, módulo nuevo, decisión de negocio, boundaries excedidos) detiene el
+trabajo con `Blocked: escalate-to-sdd` y el incremento reinicia como
+`feature` en Fase 2.
+
+Ramas: `feature/<nombre>` (feature/workspace), `fix/<nombre>` (fix),
+`chore/<nombre>` (trivial).
+
+## 3. Flujo Incremental (carriles feature y workspace)
 
 ```
 Fase 1 Requerimientos ─► Fase 2 Planificación ─► Fase 3 Validación IA
@@ -102,6 +124,9 @@ Fase 4 Descomposición ─► Fase 5 Ejecución ─► Fase 6 Calidad
 - Estado: `validation-review` → `quality-approved`.
 - Criterios: cobertura ≥85% por archivo testable, sin bugs críticos,
   sin drift arquitectónico, hallazgos de seguridad resueltos o documentados.
+- Observabilidad (ODD en feature): las señales declaradas en la spec
+  (planner exige observability signals) deben existir en el diff;
+  `final-validation` lo verifica.
 
 ### GATE HUMANO 2 — Aprobación QA
 - Estado: `awaiting-human-qa-approval`. Firma: ver states.md §3.

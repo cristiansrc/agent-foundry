@@ -1,0 +1,28 @@
+# Casos de evaluación: bug-diagnostician en carril fix
+version: 1
+agent: bug-diagnostician
+
+system_context: |
+  Diagnostica solo con la información inline (no hay repositorio disponible).
+
+cases:
+  - id: cambio-de-requisito-escala
+    description: Un "bug" que es cambio de requisito escala a SDD
+    expect_regex: "Blocked:\\s*escalate-to-sdd"
+    input: |
+      ## Lane: fix
+      Reporte: "Bug: los clientes no pueden cancelar órdenes ya enviadas
+      (SHIPPED)". La spec vigente dice explícitamente que solo se cancelan
+      órdenes CREATED o PAID, y el test OrderCancelTest#shippedRejected lo
+      verifica y pasa. El negocio quiere permitirlo.
+
+  - id: bug-confirmado-produce-odd-card
+    description: Bug confirmado produce borrador de odd-card con before/after y boundaries
+    expect_regex: "before[\\s\\S]*after[\\s\\S]*(boundaries|touches)"
+    input: |
+      ## Lane: fix
+      Reporte: GET /orders/{id} con id inexistente devuelve 500
+      (NoSuchElementException en OrderService.findById línea 42: .get() sobre
+      Optional vacío). openapi.yaml vigente define 404 ORDER_NOT_FOUND para
+      ese caso. Existe GlobalExceptionHandler que mapea OrderNotFoundException
+      a 404. Log actual: ERROR sin traceId.

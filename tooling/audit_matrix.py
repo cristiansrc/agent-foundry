@@ -21,7 +21,7 @@ STATE_TOKENS = [
     "validated-not-executed", "awaiting-human-plan-approval", "decomposition-completed",
     "in_progress", "blocked", "validation-review", "quality-approved",
     "awaiting-human-qa-approval", "merged", "archived", "corrupted-state",
-    "ready", "todo", "done",
+    "ready", "todo", "done", "diagnosis", "odd-defined", "escalated-to-sdd",
 ]
 
 # Tokens que NO son skills aunque aparezcan entre backticks
@@ -35,6 +35,8 @@ NON_SKILL = set(STATE_TOKENS) | {
     # conceptos
     "increment-name", "active-repo", "technical-debt", "feat", "fix", "docs",
     "refactor", "chore", "reviewed_at", "verdict",
+    # carriles ODD
+    "trivial", "workspace", "feature",
 }
 
 SKILL_REF = re.compile(r"`([a-z0-9-]+)`")

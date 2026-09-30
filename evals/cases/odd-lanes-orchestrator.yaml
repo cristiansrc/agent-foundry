@@ -1,0 +1,32 @@
+# Casos de evaluación: master-orchestrator — clasificación de carriles ODD
+# Prueba el prompt real (system_context mínimo). Skill: outcome-observability-driven.
+version: 1
+agent: master-orchestrator
+
+system_context: |
+  Responde con un plan de delegación breve. Indica explícitamente el carril
+  elegido con la línea exacta `Lane: <carril>` y los agentes en orden.
+  No ejecutes delegaciones reales: solo describe el plan.
+
+cases:
+  - id: typo-es-trivial-sin-planner
+    description: Un typo en README va a carril trivial y no pasa por planner
+    expect_regex: "Lane:\\s*`?trivial"
+    expect_not_regex: "Lane:\\s*`?(feature|fix|workspace)"
+    input: |
+      En README.md dice "instalacion" en vez de "instalación" en la sección
+      Setup. Corrígelo.
+
+  - id: bug-acotado-es-fix-con-diagnostico
+    description: Bug con comportamiento esperado definido va a fix con bug-diagnostician
+    expect_regex: "Lane:\\s*`?fix[\\s\\S]*bug-diagnostician"
+    input: |
+      El endpoint GET /orders/{id} devuelve 500 cuando la orden no existe.
+      Según openapi.yaml vigente debe devolver 404 ORDER_NOT_FOUND. Arréglalo.
+
+  - id: funcionalidad-nueva-es-feature
+    description: Comportamiento nuevo disfrazado de "fix pequeño" va a feature
+    expect_regex: "Lane:\\s*`?feature"
+    input: |
+      Fix rápido: agrega un endpoint POST /orders/{id}/refund para reembolsar
+      órdenes. Es pequeño, no hace falta spec.

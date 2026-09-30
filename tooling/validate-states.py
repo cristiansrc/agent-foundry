@@ -13,6 +13,8 @@ Verifica por cada docs/specs/.working/<increment>-sdd-context.md:
 4. Ejecucion (in_progress) exige Gate 1 firmado.
 5. quality-approved / Gate 2 exigen validacion previa registrada.
 6. Promocion git (merged) exige firma del Gate 2.
+7. Carriles ODD (## Lane: trivial|fix): sin Gate 1; trivial exige
+   '## Reviewer Approval: approved'; fix exige esa firma Y Gate 2.
 """
 import re
 import sys
@@ -23,8 +25,12 @@ STATES = {
     "validated-not-executed", "awaiting-human-plan-approval",
     "decomposition-completed", "in_progress", "blocked", "validation-review",
     "quality-approved", "awaiting-human-qa-approval", "merged", "archived",
-    "corrupted-state",
+    "corrupted-state", "diagnosis", "odd-defined", "escalated-to-sdd",
 }
+LANES = {"trivial", "fix", "feature", "workspace"}
+ODD_STATES = {"diagnosis", "odd-defined", "escalated-to-sdd"}
+REVIEW_SIG = "## Reviewer Approval: approved"
+LANE_RE = re.compile(r"^#+\s*Lane\s*:\s*`?([a-z]+)`?\s*$", re.M | re.I)
 GATE1_SIG = "## Human Plan Approval: approved_by_user"
 GATE2_SIG = "## Human QA Approval: approved_by_user"
 STATUS_RE = re.compile(r"^#+\s*Current status\s*:?\s*$\n?\s*[-*]?\s*`?([a-z_-]+)`?",
@@ -46,6 +52,24 @@ def validate_file(path: Path) -> list[str]:
     has_gate1 = GATE1_SIG in text
     has_gate2 = GATE2_SIG in text
     has_ready = bool(VERDICT_READY.search(text))
+    has_review = REVIEW_SIG in text
+
+    lane_m = LANE_RE.search(text)
+    lane = lane_m.group(1).lower() if lane_m else "feature"
+    if lane not in LANES:
+        errors.append(f"{path.name}: carril NO canonico '{lane}'")
+        return errors
+    if lane in ("trivial", "fix"):
+        if status == "diagnosis" and lane != "fix":
+            errors.append(f"{path.name}: 'diagnosis' solo existe en carril fix")
+        if status in ("quality-approved", "awaiting-human-qa-approval", "merged",
+                      "archived") and not has_review:
+            errors.append(f"{path.name}: carril {lane} sin '{REVIEW_SIG}'")
+        if lane == "fix" and status in ("merged", "archived") and not has_gate2:
+            errors.append(f"{path.name}: carril fix promocionado sin firma del Gate 2")
+        return errors
+    if status in ODD_STATES - {"escalated-to-sdd"}:
+        errors.append(f"{path.name}: estado ODD '{status}' en carril {lane}")
 
     if status == "awaiting-human-plan-approval" and not has_ready:
         errors.append(f"{path.name}: Gate 1 sin 'Spec Validator Approval verdict: ready' previo")

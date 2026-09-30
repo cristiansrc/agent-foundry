@@ -43,6 +43,24 @@ merged                               ◄── git-executor: feature → develop
 archived                             ◄── shared context pasa a histórico
 ```
 
+### 1.1 Carriles ligeros ODD (skill `outcome-observability-driven`)
+
+El shared context declara `## Lane: trivial | fix | feature | workspace`
+(sin línea `Lane` = `feature`). Los carriles `trivial` y `fix` no pasan por
+planning/validación/Gate 1, pero comparten el resto del enum:
+
+```
+fix:     diagnosis ─► odd-defined ─► in_progress ─► validation-review
+            │              │               │                 │ (review: approved)
+            └──────────────┴───────────────┴─► escalated-to-sdd ─► planning (lane feature)
+                                                             ▼
+                          quality-approved ─► awaiting-human-qa-approval ─► merged
+                                                ◄═══ GATE HUMANO 2
+
+trivial: odd-defined ─► in_progress ─► validation-review ─► quality-approved ─► merged
+         (sin gates humanos; exige ## Reviewer Approval: approved)
+```
+
 ## 2. Enum Canónico
 
 | Estado | Dueño | Significado |
@@ -62,6 +80,21 @@ archived                             ◄── shared context pasa a histórico
 | `merged` | IA | integrado por git-executor tras el gate |
 | `archived` | IA | histórico |
 | `corrupted-state` | ERROR | manipulación ilegal de bloques de estado |
+| `diagnosis` | IA | carril fix: RCA y reproducción con bug-diagnostician |
+| `odd-defined` | IA | carriles fix/trivial: odd-card con outcome, evidencia y boundaries |
+| `escalated-to-sdd` | IA | ODD detectó disparador de escalamiento; reinicia como `feature` |
+
+### Carriles (`## Lane:`)
+
+- `trivial`
+- `fix`
+- `feature` (default)
+- `workspace`
+
+### Veredicto de Revisión (reviewer)
+
+- `review: approved`
+- `review: changes-requested`
 
 ### Veredictos de Validación (spec-validator)
 
@@ -84,6 +117,10 @@ archived                             ◄── shared context pasa a histórico
 ## Human QA Approval: approved_by_user
 ```
 
+Firma de IA transcrita (no humana): `## Reviewer Approval: approved`. La
+escribe `documentation` copiando literalmente el veredicto `review: approved`
+del reviewer; exigida en carriles `trivial` y `fix`.
+
 Cualquier otra edición humana sobre bloques `## Current status`,
 veredictos o auditorías = `corrupted-state`. Los agentes se detienen con
 `Blocked: State corruption detected`.
@@ -102,6 +139,7 @@ Fases canónicas (usadas por matrix.yaml):
 | `decomposition` | Descomposición en tareas | Fase 4 |
 | `execution` | Implementación con spec SDD | Fase 5 |
 | `execution-no-spec` | Implementación sin spec formal | Fase 5-alt |
+| `diagnosis` | RCA y reproducción (carril fix) | Carril fix |
 | `quality` | Validación de calidad | Fase 6 |
 | `gitops` | Integración y promoción | Fase 7 |
 | `transversal` | Actúa en cualquier fase | — |
@@ -119,9 +157,14 @@ Los gates G1/G2 NO son fases: son estados de espera definidos arriba.
 
 1. Los gates solo se liberan con la firma exacta (sin aliases).
 2. `task-decomposer` no inicia si falta el Gate 1; `git-executor` no promociona ramas si falta el Gate 2.
+   Excepción por carril: `trivial` no requiere gates humanos pero sí
+   `## Reviewer Approval: approved`; `fix` no requiere Gate 1 pero sí
+   `## Reviewer Approval: approved` **y** Gate 2.
 3. Un incremento solo puede estar en UN estado a la vez.
 4. Toda transición debe quedar registrada en el shared context con fecha y agente responsable.
 5. Self-healing: máximo 3 reintentos autónomos antes de pasar a `blocked` con escape-report.
+6. Ningún agente baja el carril declarado; solo el humano puede subirlo.
+   `escalated-to-sdd` es irreversible para ese incremento.
 
 ## 6. Handoff Compacto entre Agentes
 

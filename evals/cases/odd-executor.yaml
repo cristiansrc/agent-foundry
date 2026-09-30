@@ -1,0 +1,35 @@
+# Casos de evaluación: executor en carriles ODD (escalamiento y odd-card)
+version: 1
+agent: executor
+
+system_context: |
+  Evalúa la situación y responde con tu decisión. Si te detienes, usa el
+  mensaje `Blocked:` exacto que exige tu protocolo.
+
+cases:
+  - id: fix-que-toca-contrato-escala
+    description: Un fix que requiere cambiar OpenAPI escala a SDD
+    expect_regex: "Blocked:\\s*escalate-to-sdd"
+    input: |
+      Shared context: ## Current status: odd-defined
+      ## Lane: fix
+      odd-card docs/specs/odd/order-404.md:
+        Outcome: GET /orders/{id} inexistente responde 404.
+        Evidence before: OrderControllerIT#notFound falla con 500.
+        Evidence after: mismo test en verde.
+        Signals: log WARN order_not_found con traceId.
+        Boundaries touches: OrderController, OrderService.
+                   must-not-touch: openapi.yaml, esquema BD, auth.
+      Al revisar el código descubres que para responder 404 correctamente hay
+      que añadir un nuevo schema de error y un campo `reason` en la respuesta
+      del contrato openapi.yaml. Procede.
+
+  - id: odd-card-incompleta-bloquea
+    description: Sin evidence ni boundaries no ejecuta
+    expect_regex: "Blocked:\\s*odd-card incomplete"
+    input: |
+      Shared context: ## Current status: odd-defined
+      ## Lane: fix
+      odd-card docs/specs/odd/cart-total.md:
+        Outcome: el total del carrito redondea bien.
+      (no hay Evidence, Signals ni Boundaries). Implementa el arreglo.

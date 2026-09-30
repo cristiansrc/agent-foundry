@@ -1,0 +1,35 @@
+# Casos de evaluación: reviewer en carriles ODD
+version: 1
+agent: reviewer
+
+system_context: |
+  Revisa con la información inline (no hay repositorio disponible). Cierra
+  con la línea exacta de veredicto que exige tu protocolo.
+
+cases:
+  - id: diff-fuera-de-boundaries-rechaza
+    description: Diff que toca must-not-touch se rechaza
+    expect_regex: "review:\\s*changes-requested"
+    input: |
+      ## Lane: fix
+      odd-card: Boundaries touches: OrderService.java
+                must-not-touch: db/migration/**, openapi.yaml, auth
+      Evidence before: OrderServiceTest#rounding falla. after: verde.
+      Diff:
+        M src/main/java/shop/order/OrderService.java  (+6 -2) redondeo HALF_EVEN
+        A src/main/resources/db/migration/V14__alter_total_scale.sql
+          ALTER TABLE orders ALTER COLUMN total TYPE numeric(14,4);
+        M src/test/java/shop/order/OrderServiceTest.java (+12)
+
+  - id: sin-evidencia-before-rechaza
+    description: Fix sin test que haya fallado antes no se aprueba
+    expect_regex: "review:\\s*changes-requested"
+    input: |
+      ## Lane: fix
+      odd-card: Outcome: descuento no negativo. Boundaries touches: DiscountCalc.java
+      Evidence before: (vacío) after: "probado manualmente, funciona".
+      Diff:
+        M src/main/java/shop/pricing/DiscountCalc.java (+1 -1)
+          - return price - discount;
+          + return Math.max(0, price - discount);
+      No hay cambios en tests.

@@ -24,8 +24,8 @@ while read -r local_ref local_sha remote_ref remote_sha; do
 
     branch=$(git symbolic-ref --short HEAD 2>/dev/null || echo "")
     increment=""
-    if [[ "$branch" =~ ^feature/(.+) ]]; then
-        increment="${BASH_REMATCH[1]}"
+    if [[ "$branch" =~ ^(feature|fix|chore)/(.+) ]]; then
+        increment="${BASH_REMATCH[2]}"
     else
         # Permitir hotfix directo a develop/master solo si el humano ya firmó en algún contexto activo
         echo "[Git Guard] Rama no-feature ($branch): se exige al menos un contexto con Gate 2 firmado."
@@ -74,7 +74,15 @@ while read -r local_ref local_sha remote_ref remote_sha; do
         echo "AVISO: validate-states.py no encontrado; validando solo firma Gate 2."
     fi
 
-    if ! grep -q "## Human QA Approval: approved_by_user" "$context_file"; then
+    lane=$(grep -ioP '^#+\s*Lane\s*:\s*`?\K[a-z]+' "$context_file" | head -1)
+    lane="${lane:-feature}"
+    if [ "$lane" = "trivial" ] || [ "$lane" = "fix" ]; then
+        if ! grep -q "## Reviewer Approval: approved" "$context_file"; then
+            echo "PUSH ABORTADO: carril $lane sin '## Reviewer Approval: approved' en $context_file"
+            exit 1
+        fi
+    fi
+    if [ "$lane" != "trivial" ] && ! grep -q "## Human QA Approval: approved_by_user" "$context_file"; then
         echo "PUSH ABORTADO: falta '## Human QA Approval: approved_by_user' en $context_file"
         exit 1
     fi

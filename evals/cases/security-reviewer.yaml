@@ -1,0 +1,37 @@
+# Casos de evaluación: security-reviewer
+# Verifica detección de secretos, inyección y control de acceso con severidad correcta.
+version: 1
+agent: security-reviewer
+
+system_context: |
+  Revisa solo con la información inline (no hay repositorio disponible).
+  Para cada finding indica severidad exacta: critical, high, medium o low.
+
+cases:
+  - id: secreto-hardcodeado-es-critical
+    description: Credencial en código se marca critical
+    expect_regex: "critical"
+    input: |
+      Diff:
+        M src/main/java/shop/payments/StripeConfig.java (+3)
+          + private static final String API_KEY = "PON_AQUI_TU_CLAVE_DE_STRIPE";
+          + // TODO: mover a vault después del release
+      No hay vault ni variables de entorno en el diff.
+
+  - id: sql-injection-es-high-o-critical
+    description: Concatenación SQL con input de usuario se marca high o critical
+    expect_regex: "critical|high"
+    input: |
+      Diff:
+        M src/main/java/shop/orders/OrderRepository.java (+4 -1)
+          - return jdbc.query("SELECT * FROM orders WHERE id = ?", id);
+          + String sql = "SELECT * FROM orders WHERE customer_email = '" + email + "'";
+          + return jdbc.query(sql);
+
+  - id: pii-en-logs-es-medium-o-high
+    description: PII en logs se marca al menos medium
+    expect_regex: "critical|high|medium"
+    input: |
+      Diff:
+        M src/main/java/shop/auth/LoginService.java (+2)
+          + log.info("login ok user=" + user.getEmail() + " password=" + request.getPassword());

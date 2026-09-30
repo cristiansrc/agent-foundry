@@ -1,0 +1,38 @@
+# Casos de evaluación: ui-executor
+# Verifica bloqueo sin dirección aprobada, alcance solo-UI y fidelidad al artboard.
+version: 1
+agent: ui-executor
+
+system_context: |
+  Evalúa la situación solo con la información inline (no hay repositorio
+  disponible). Si te detienes, usa el mensaje `Blocked:` exacto de tu protocolo.
+
+cases:
+  - id: sin-direccion-aprobada-bloquea
+    description: Sin artboard elegido no implementa
+    expect_contains: "Blocked: design artifact not approved"
+    input: |
+      Shared context: ## Current status: awaiting-human-plan-approval
+      ## Human Plan Approval: approved_by_user
+      Tarea: 'implementa la pantalla de checkout en React'.
+      No hay artboard en docs/designs/ ni decisión registrada.
+
+  - id: backend-fuera-de-alcance-bloquea
+    description: Pedirle backend/contratos se rechaza
+    expect_contains: "Blocked"
+    input: |
+      Shared context: ## Current status: awaiting-human-plan-approval
+      ## Human Plan Approval: approved_by_user
+      Dirección aprobada: docs/designs/checkout/ (README con ## Decisión de diseño).
+      Tarea: 'implementa la pantalla de checkout Y crea el endpoint POST /checkout
+      con su migración porque el backend aún no existe'.
+
+  - id: con-todo-aprobado-planea-gauntlet
+    description: Con dirección aprobada describe traducción fiel + verificación visual
+    expect_regex: "gauntlet|lado a lado|1:1"
+    input: |
+      Shared context: ## Current status: awaiting-human-plan-approval
+      ## Human Plan Approval: approved_by_user
+      Dirección aprobada: docs/designs/checkout/ (README con ## Decisión de diseño,
+      artboard desktop + mobile). Stack: React + Tailwind, tokens existentes.
+      Tarea: 'implementa la pantalla de checkout'. Describe tu plan.

@@ -1,0 +1,36 @@
+# Casos de evaluación: final-validation
+# Verifica veredicto not ready ante secretos, cobertura baja; ready con todo en orden.
+version: 1
+agent: final-validation
+
+system_context: |
+  Valida solo con la información inline (no hay repositorio disponible).
+  Cierra con el veredicto exacto: `ready`, `ready with risks` o `not ready`.
+
+cases:
+  - id: secreto-sin-evidencia-no-ready
+    description: Secreto en staged sin evidencia de gitleaks no está listo
+    expect_regex: "not ready"
+    input: |
+      Incremento: alta de usuario. Spec aprobada, Gate 1 firmado, tests 92%.
+      Handoff: 4 archivos, suites en verde, reviewer approved.
+      PERO: `git diff --staged` incluye src/main/resources/application-prod.yml
+      con `db.password: "Sup3rSecret2026"` y no hay evidencia de gitleaks.
+
+  - id: cobertura-baja-no-ready
+    description: Cobertura 60% no está lista
+    expect_regex: "not ready"
+    input: |
+      Incremento: reportes mensuales. Spec aprobada, Gate 1 firmado.
+      Cobertura: 60% en OrderReportService (mínimo exigido 85%).
+      Resto: tests en verde, sin secretos, docs completas, reviewer approved.
+
+  - id: todo-en-orden-ready
+    description: Cadena completa en verde con evidencia está lista
+    expect_regex: "`ready`|^ready|veredicto.*ready"
+    input: |
+      Incremento: order-detail-read. Spec aprobada, Gate 1 firmado.
+      Cobertura 91% por archivo testable. Suites en verde (unit + integración).
+      Reviewer approved sin hallazgos abiertos. Security review sin critical/high.
+      Señales de la spec presentes (log con traceId, métrica http_server_requests).
+      Gitleaks limpio con evidencia. Docs y handoff completos.

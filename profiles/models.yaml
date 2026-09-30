@@ -19,7 +19,7 @@ tiers:
 
 # ── 2. Agente → tier ───────────────────────────────────────────────────────
 # (temperature y permisos viven en permissions.yaml)
-# `variant` opcional: sufijo de esfuerzo OpenCode (`modelo#variant`, ej. `#high`).
+# `variant` opcional: esfuerzo OpenCode, emitido como campo `variant:` del frontmatter.
 # Solo lo honra el adapter OpenCode; debe existir en el catálogo del modelo.
 agent_tiers:
   # OpenCode es el harness; `harness_provider` elige la suscripción que paga

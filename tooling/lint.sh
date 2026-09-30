@@ -32,6 +32,20 @@ else
   echo "OK"
 fi
 
+echo "== Frontmatter OpenCode generado: campos válidos"
+# En .md solo `permission:` (mapa) es válido; `permissions:` se filtra a las
+# options del modelo, no aplica denies y rompe proveedores estrictos (GLM).
+OUT_AGENTS="$ROOT/adapters/opencode/out/agents"
+if [ -d "$OUT_AGENTS" ]; then
+  BAD=$(awk '/^---$/{c++; next} c==1 && /^permissions:/ {print FILENAME}' "$OUT_AGENTS"/*.md)
+  if [ -n "$BAD" ]; then
+    echo "$BAD"
+    fail "frontmatter generado con 'permissions:' (usar 'permission:')"
+  else
+    echo "OK"
+  fi
+fi
+
 echo "== Frontmatter presente y role declarado"
 while IFS= read -r f; do
   head -1 "$f" | grep -q '^---$' || fail "sin frontmatter: $f"

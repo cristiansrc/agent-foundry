@@ -13,13 +13,11 @@ adapters/opencode/out/ la configuración nativa de OpenCode con paridad 1:1:
 
 Reglas de binding:
 - modelo  = tier del agente -> primer modelo de tier_bindings del proveedor activo
-              + `#variant` opcional de agent_tiers (esfuerzo OpenCode, ej. `#high`)
+              + `variant` opcional de agent_tiers (campo `variant:` del frontmatter)
               + `slot` opcional de agent_tiers (override de modelo dentro del proveedor)
 - temp    = permissions.yaml (fuente única)
-- perms   = permissions.yaml (edit/bash/task) traducidos a reglas V2 ordenadas
-            [{action, resource, effect}]; renombres V1->V2: bash->shell,
-            task->subagent. `execute` no tiene equivalente V2 y se ignora
-            (shell lo gobierna `bash`).
+- perms   = permissions.yaml (edit/bash/execute/task) como mapa `permission:`
+            (único formato válido en frontmatter .md; ver render_agent)
 - vision  = si el agente exige vision, el modelo elegido debe soportarla
 """
 import json
@@ -91,43 +89,21 @@ def resolve_binding(agent: str, profiles: dict) -> dict:
         break
     if primary_id is None:
         sys.exit(f"FAIL: sin modelo activo para {agent} (tier {tier})")
+    # `variant` va como campo propio del frontmatter: el sufijo `modelo#variant`
+    # no es un ID válido (Copilot responde UnknownError; el plugin lo
+    # propagaba como modelID). Verificado con OpenCode 1.18.31 el 2026-09-30.
     variant = info.get("variant")
-    if variant:
-        primary_id = f"{primary_id}#{variant}"
     p = pcfg["agents"].get(agent, {})
     perm_keys = [k for k in ("edit", "bash", "execute", "task") if k in p]
     return {
         "model": primary_id,
+        "variant": variant,
         "temperature": p.get("temp"),
         "permission": {k: p[k] for k in perm_keys},
         "mode": p.get("mode"),
         "tier": tier,
         "provider": provider_name,
     }
-
-
-def to_v2_permissions(p: dict) -> list[dict]:
-    """Traduce la sintaxis compacta de permissions.yaml a reglas OpenCode V2.
-
-    V2 exige `permissions:` como lista ordenada [{action, resource, effect}]
-    donde el último match gana (broad primero, excepciones después).
-    `execute` (legado V1) no tiene equivalente y se ignora: shell lo gobierna
-    la clave `bash`.
-    """
-    rules = []
-    edit = p.get("edit")
-    if isinstance(edit, dict):
-        for resource, effect in edit.items():
-            rules.append({"action": "edit", "resource": resource, "effect": effect})
-    elif edit in ("allow", "ask", "deny"):
-        rules.append({"action": "edit", "resource": "*", "effect": edit})
-    bash = p.get("bash")
-    if bash in ("allow", "ask", "deny"):
-        rules.append({"action": "shell", "resource": "*", "effect": bash})
-    task = p.get("task")
-    if task in ("allow", "ask", "deny"):
-        rules.append({"action": "subagent", "resource": "*", "effect": task})
-    return rules
 
 
 def render_agent(src: Path, binding: dict) -> str:
@@ -137,14 +113,19 @@ def render_agent(src: Path, binding: dict) -> str:
     lines.append(f"description: {desc}")
     lines.append(f"mode: {binding['mode'] or fm.get('mode', 'all')}")
     lines.append(f"model: {binding['model']}")
+    if binding.get("variant"):
+        lines.append(f"variant: {binding['variant']}")
     lines.append(f"temperature: {binding['temperature']}")
-    rules = to_v2_permissions(binding["permission"])
-    if rules:
-        lines.append("permissions:")
-        for r in rules:
-            lines.append(f"  - action: {r['action']}")
-            lines.append(f"    resource: \"{r['resource']}\"")
-            lines.append(f"    effect: {r['effect']}")
+    # Frontmatter de agentes .md: el campo válido es `permission` (mapa).
+    # `permissions:` (lista V2) solo existe en config JSON; en .md es campo
+    # desconocido -> se enruta a `options` del modelo: NO aplica denies y los
+    # proveedores estrictos (GLM) rechazan la petición. Verificado
+    # empíricamente con OpenCode 1.18.31 el 2026-09-30.
+    if binding["permission"]:
+        lines.append("permission:")
+        for k, v in binding["permission"].items():
+            dumped = yaml.safe_dump({k: v}, allow_unicode=True, sort_keys=False).rstrip()
+            lines.extend(f"  {line}" for line in dumped.splitlines())
     lines.append("---")
     return "\n".join(lines) + "\n\n" + body
 

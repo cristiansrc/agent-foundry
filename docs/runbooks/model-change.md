@@ -26,6 +26,8 @@ Exige ONLINE antes de continuar. Si el modelo falla aquí, no avances.
 Solo este archivo. Opciones:
 
 - **Cambiar binding de un tier**: reordena `tier_bindings.<tier>` (el primero activo gana).
+- **Forzar un modelo para un agente sin crear un tier**: `slot:` en `agent_tiers`
+  (el tier queda como respaldo si el slot falla; solo lo honra el adapter OpenCode).
 - **Añadir modelo nuevo**: entrada en `models:` con `status: active` + notas.
 - **Bloquear uno roto**: muévelo a la sección `blocked:` con razón y fecha.
 - **Fallbacks**: ajusta cadenas si el primario puede fallar intermitentemente.
@@ -46,6 +48,12 @@ python3 evals/run.py evals/cases/spec-validator.yaml --executor opencode --model
 python3 evals/run.py evals/cases/task-decomposer.yaml --executor opencode --model <nuevo-modelo>
 python3 evals/run.py evals/cases/executor-guardrails.yaml --executor opencode --model <nuevo-modelo>
 ```
+
+Flags útiles: `--repeat N` (los LLM no son deterministas; exige mayoría o
+`--threshold`), `--timeout` (default 900s; modelos de razonamiento pesado
+pueden necesitar más), `--show-output` (diagnóstico de fallos). Cada caso
+corre en un sandbox temporal (`opencode run --dir`), nunca en este repo.
+Detalle en [`docs/runbooks/evals.md`](evals.md).
 
 Si el agente cambia de comportamiento en los casos semilla → revisa si el
 modelo es apto para ese rol antes de instalar. Registra el resultado en el

@@ -28,6 +28,7 @@ ROLE_LABEL = {
 SKILL_CATEGORIES = [
     ("Arquitectura y Metodología", [
         "hexagonal-architecture", "spec-driven-development", "spec-remediation",
+        "outcome-observability-driven",
         "openapi-first", "requirements-gathering", "api-governance-linter",
         "design-patterns-standard", "enterprise-architecture-standard",
         "refactor-patterns", "refactor-hexagonal-bridge", "repository-dto-patterns",
@@ -82,12 +83,17 @@ def clean_desc(desc: str) -> str:
 
 def agents_tables() -> str:
     order = {"worker": 0, "consultant": 1, "validator": 2, "guardrail": 3}
+    matrix = yaml.safe_load((CORE / "workflow" / "matrix.yaml").read_text(encoding="utf-8"))
+    deprecated = {n: e.get("deprecated") for n, e in matrix.get("agents", {}).items()
+                  if e.get("deprecated")}
     sdlc, personal = [], []
     for src in sorted(CORE.glob("agents/**/*.md")):
         fm, _ = parse_fm(src)
         role = fm.get("role", "?")
-        row = (src.stem, ROLE_LABEL.get(role, role),
-               clean_desc(fm.get("description", "")))
+        desc = clean_desc(fm.get("description", ""))
+        if src.stem in deprecated:
+            desc += f" ⚠️ DEPRECADO: {deprecated[src.stem]}"
+        row = (src.stem, ROLE_LABEL.get(role, role), desc)
         if role == "personal":
             personal.append(row)
         else:

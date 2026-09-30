@@ -34,12 +34,17 @@ las specs y el task board.
 
 ## Niveles de razonamiento
 
-| Nivel | Modelo ChatGPT OAuth |
+| Nivel | Modelo GitHub Copilot |
 |---|---|
-| `low` | Luna |
-| `medium` | Sol |
-| `high` | Sol |
-| `critical` | Sol |
+| `low` | GPT-6 Luna |
+| `medium` | Claude Sonnet 5.5 |
+| `high` | GPT-6.1 Sol |
+| `critical` | Claude Opus 5.5 |
+
+Desde 2026-09-30 los niveles usan Copilot (`harness_copilot`);
+`harness_chatgpt` queda inactivo como rollback. `medium` es Sonnet y
+`critical` Opus para que el razonamiento delegado caiga en una familia
+distinta al planner (OpenAI) cuando aplique.
 
 La traducción se genera desde `profiles/jev.yaml` y `profiles/models.yaml`.
 Jev nunca devuelve ni selecciona directamente un `provider/model-id`.

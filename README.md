@@ -14,14 +14,13 @@ herramienta: **opencode**, **chatgpt** (Codex CLI) y **kiro**.
   - [Configuración de AWS](#configuración-de-aws)
 - [Agentes](#agentes)
   - [Ciclo de desarrollo de software (27)](#ciclo-de-desarrollo-de-software-27)
-- [Skills](#skills-75)
+- [Skills](#skills-76)
   - [Arquitectura y Metodología](#arquitectura-y-metodología)
   - [Backend y Lenguajes](#backend-y-lenguajes)
   - [Datos y Mensajería](#datos-y-mensajería)
   - [Frontend y Diseño UI/UX](#frontend-y-diseño-uiux)
   - [Seguridad y Calidad](#seguridad-y-calidad)
   - [Orquestación y Documentación](#orquestación-y-documentación)
-  - [Asistentes Personales](#asistentes-personales)
   - [Sistema Local (ambxst / Linux)](#sistema-local-ambxst--linux)
   - [Otras](#otras)
 - [Modelos por herramienta](#modelos-por-herramienta)
@@ -51,18 +50,35 @@ core/  ──►  profiles/  ──►  adapters/  ──►  configs instaladas
 
 ### OpenCode como harness
 
-OpenCode concentra el flujo, agentes y permisos. La inferencia puede venir de
-dos suscripciones: ChatGPT OAuth para Luna/Terra en razonamiento y validación
-de alto valor, y OpenCode Go para LongCat, DeepSeek, MiMo y Muse en volumen.
-Luna no se consume desde OpenCode Go. El routing y la política de privacidad
-(incluido el bloqueo de Omen Alpha) están en
+OpenCode concentra el flujo, agentes y permisos. La inferencia se reparte
+entre dos suscripciones:
+
+- **GitHub Copilot Pro+** (factura por tokens en AI Credits): solo
+  razonamiento que decide — orquestación (GPT-6 Luna), planificación y RCA
+  (GPT-6.1 Sol), patrones/seguridad/validación final (Claude Sonnet 5.5) y
+  validación crítica + macro-arquitectura (Claude Opus 5.5, en familia
+  distinta al planner).
+- **OpenCode Go** (topes de uso por modelo): volumen — código (DeepSeek),
+  tests (Kimi), planificación estructurada (LongCat/MiMo), revisión y trabajo
+  mecánico (GLM/MiMo).
+
+El detalle, la política de privacidad y los modelos bloqueados están en
 [`docs/runbooks/opencode-harness.md`](docs/runbooks/opencode-harness.md).
+
+### Carriles de trabajo
+
+Todo cambio se clasifica al inicio (`master-orchestrator`): `trivial`
+(docs/config), `fix` (bug acotado con ODD: outcome + observabilidad),
+`feature` (SDD completo) y `workspace` (SDD + enterprise). `fix` exige
+aprobación del reviewer **y** Gate 2 humano; cualquier decisión de negocio o
+arquitectura escala automáticamente a SDD. Skill:
+`outcome-observability-driven`; estados en `core/workflow/states.md`.
 
 ## Roles de agentes
 
 | Rol | Agentes |
 |-----|---------|
-| Workers (obreros) | executor, ui-executor, architect-executor, database-architect, devops-architect, refactor, documentation, spec-remediator, functional-tester-agent, git-executor |
+| Workers (obreros) | executor, ui-executor, database-architect, devops-architect, documentation, spec-remediator, functional-tester-agent, git-executor · deprecados: `architect-executor` (reemplazado por carriles ODD), `refactor` (integrado en `executor`) |
 | Consultants (consultores) | requirements-analyst, planner, enterprise-architect, solution-architect, test-architect, task-decomposer, context-curator, master-orchestrator |
 | Validators (validadores) | spec-validator, enterprise-spec-validator, api-governance-agent, bug-diagnostician, reviewer, security-reviewer, final-validation |
 | Guardrails | general |
@@ -80,10 +96,17 @@ Luna no se consume desde OpenCode Go. El routing y la política de privacidad
 ## Comandos
 
 ```bash
-tooling/build.sh          # genera salidas para las 3 herramientas
+tooling/build.sh          # lint + render de adapters + tablas del README
 tooling/lint.sh           # valida anti-drift y consistencia
 tooling/sync.sh           # instala las salidas generadas (~/.config/opencode, etc.)
+tooling/status.sh         # compara instalado vs generado
+python3 evals/run.py evals/cases/<suite>.yaml --executor opencode   # evals con modelos reales
+python3 tooling/audit_matrix.py   # coherencia agente-fase-skill (debe dar 0)
+python3 tooling/validate-states.py [repo]  # estados y gates de shared contexts
 ```
+Ver [`docs/runbooks/evals.md`](docs/runbooks/evals.md) para el flujo de
+evaluaciones y [`docs/runbooks/model-change.md`](docs/runbooks/model-change.md)
+para cambios de modelo.
 
 ## MCPs (Model Context Protocol) en OpenCode
 
@@ -95,7 +118,7 @@ Cinco MCPs extienden las capacidades de los agentes. Se configuran en
 | **aws-mcp** | Local | Proxy oficial de AWS — expone S3, Lambda, DynamoDB, IAM, CloudWatch, etc. a través de MCP. Usa perfil `merkee` via `AWS_MCP_PROXY_PROFILES`. |
 | **playwright** | Local | Control de navegador headless — testing E2E, scraping web, screenshots para `ui-designer` y `functional-tester-agent`. |
 | **context7** | Remoto | Documentación actualizada de frameworks/librerías en tiempo real (override de conocimiento interno stale). |
-| **github** | Remoto + OAuth | Issues, PRs, repos, search y releases. Requiere autorización OAuth第一次 (un solo splash screen). |
+| **github** | Remoto + OAuth | Issues, PRs, repos, search y releases. Requiere autorización OAuth (un solo splash screen). |
 | **foundry-jev** | Local | Selector tipado de agente, nivel de razonamiento y aclaración humana mediante Jev. Vercel es el proveedor inicial; Jev oficial queda como alternativa. |
 
 La arquitectura, configuración, umbrales de confianza y procedimiento de
@@ -123,9 +146,10 @@ se encarga del transport y proxy; no necesitas instalar librerías adicionales.
 ### Visión: modelos con visión nativa (sin MCP local)
 
 Retirado el MCP `foundry-vision` (2026-09-27): todos los agentes que necesitan
-ver imágenes usan modelos con visión nativa — `ui-designer` (Sol v6.1),
-`ui-executor` y `functional-tester-agent` (DeepSeek Vision), `reviewer`
-(MiMo v2.6). Sin costo extra de infraestructura ni VRAM local.
+ver imágenes usan modelos con visión nativa — `ui-designer` (Claude Sonnet
+5.5), `ui-executor` y `functional-tester-agent` (DeepSeek Vision Exp).
+`reviewer` (GLM-5.3) no tiene visión: si necesita capturas, delega en
+`functional-tester-agent`. Sin costo extra de infraestructura ni VRAM local.
 
 *Estado del plan: ver [PLAN.md](PLAN.md).*
 
@@ -137,13 +161,13 @@ ver imágenes usan modelos con visión nativa — `ui-designer` (Sol v6.1),
 
 | Agente | Rol | Descripción |
 |--------|-----|-------------|
-| `architect-executor` | Worker (obrero) | Implementa tareas complejas y código de arquitectura local cuando NO existe una especificación SDD completa o formal. |
+| `architect-executor` | Worker (obrero) | Implementa tareas complejas y código de arquitectura local cuando NO existe una especificación SDD completa o formal. ⚠️ DEPRECADO: superseded 2026-09-30 por carriles trivial/fix (odd-card) — ejecucion sin spec eliminada |
 | `database-architect` | Worker (obrero) | Diseña y valida esquemas de bases de datos relacionales, migraciones Flyway/Liquibase, índices, modelos DTO/Entidad y estrategias de migración sin inactividad (Zero-Downtime DB Migrations). |
 | `devops-architect` | Worker (obrero) | Especialista en Infraestructura como Codigo, Docker, CI/CD y Observabilidad. |
 | `documentation` | Worker (obrero) | Creates project documentation, README content, API docs, deployment notes, diagrams, and functional documentation. |
 | `executor` | Worker (obrero) | Implementa código a partir de especificaciones SDD aprobadas y descomposiciones de tareas. |
 | `git-executor` | Worker (obrero) | Agente exclusivo para operaciones de control de versiones con Git (ramas, commits, checkout, merges, push). |
-| `refactor` | Worker (obrero) | Refactors implemented code for maintainability, readability, modularity, and consistency without changing behavior. |
+| `refactor` | Worker (obrero) | Refactors implemented code for maintainability, readability, modularity, and consistency without changing behavior. ⚠️ DEPRECADO: integrado 2026-09-30 en executor (skills refactor-patterns, refactor-hexagonal-bridge) |
 | `spec-remediator` | Worker (obrero) | Corrige hallazgos de validación de forma iterativa siguiendo `spec-remediation`. |
 | `ui-executor` | Worker (obrero) | Implementa la dirección de diseño UI aprobada como componentes reales del stack destino con verificación visual — traduce el artboard elegido 1:1 sin reinterpretarlo y lo valida con gauntlet visual antes de reportar done. |
 | `context-curator` | Consultant (consultor) | Filtra y prepara el contexto de alta señal para evitar ruido a los Obreros y gestionar el ciclo de vida del SDD context. |
@@ -165,7 +189,7 @@ ver imágenes usan modelos con visión nativa — `ui-designer` (Sol v6.1),
 | `spec-validator` | Validator (validador) | Valida specs SDD contra ambiguedad, inconsistencia, riesgo arquitectonico, restricciones faltantes y readiness de implementacion. |
 | `general` | Guardrail | Guardrail para llamadas accidentales al subagente general integrado de la herramienta anfitriona. Bloquea validaciones SDD ejecutadas por el agente equivocado. |
 
-## Skills (75)
+## Skills (76)
 
 ### Arquitectura y Metodología
 
@@ -176,6 +200,7 @@ ver imágenes usan modelos con visión nativa — `ui-designer` (Sol v6.1),
 | `enterprise-architecture-standard` | Criterios para macro-arquitectura, system landscape, bounded contexts, integraciones, ownership y workspace multi-repos. |
 | `hexagonal-architecture` | Implementación de Puertos y Adaptadores (Clean Architecture) con dominio puro, boundaries explícitos, estructura de directorios por tecnología y desacoplamiento total de frameworks. |
 | `openapi-first` | Flujo API Design First para mantener specs, OpenAPI, implementación, clientes, tests y copias runtime sincronizados antes de escribir código. |
+| `outcome-observability-driven` | Carriles ligeros trivial y fix que complementan SDD — Outcome-Driven (resultado verificable) + Observability-Driven (reproducción y señales) con odd-card de una página, límites explícitos y escalamiento obligatorio a SDD ante cualquier decisión de negocio o arquitectura. |
 | `project-context-files` | Patrón de archivos de contexto jerárquicos (.md) heredado de Claude Code/AGENTS.md — cómo estructurar memoria por capas en repositorios activos para que los agentes hereden contexto correcto sin inflar prompts. |
 | `refactor-hexagonal-bridge` | Skill especializada para la transición de sistemas monolíticos o con lógica dispersa hacia Arquitectura Hexagonal de forma segura. |
 | `refactor-patterns` | Patrones de refactorización segura. |
@@ -305,28 +330,28 @@ La skill `agent-foundry-reader` se instala mediante
 
 | Agente | Modelo de ejecución |
 |--------|--------------------|
-| `api-governance-agent` | opencode-go/longcat-2.0 |
-| `bug-diagnostician` | openai/gpt-6.1-sol |
+| `api-governance-agent` | opencode-go/mimo-v2.6-pro |
+| `bug-diagnostician` | github-copilot/gpt-6.1-sol |
 | `context-curator` | opencode-go/mimo-v2.6-flash |
-| `database-architect` | opencode-go/deepseek-v4.1-flash |
+| `database-architect` | opencode-go/deepseek-v4-pro |
 | `devops-architect` | opencode-go/deepseek-v4.1-flash |
 | `documentation` | opencode-go/mimo-v2.6-flash |
-| `enterprise-architect` | openai/gpt-6.1-sol |
-| `enterprise-spec-validator` | opencode-go/mimo-v2.6-pro |
+| `enterprise-architect` | github-copilot/claude-opus-5.5 |
+| `enterprise-spec-validator` | opencode-go/kimi-k3 |
 | `executor` | opencode-go/deepseek-v4.1-flash |
-| `final-validation` | openai/gpt-6.1-sol |
+| `final-validation` | github-copilot/claude-sonnet-5.5 |
 | `functional-tester-agent` | opencode-go/deepseek-v4-flash-vision-exp |
 | `git-executor` | opencode-go/mimo-v2.6-flash |
-| `master-orchestrator` | openai/gpt-6-luna |
-| `planner` | openai/gpt-6.1-sol#high |
-| `reviewer` | opencode-go/mimo-v2.6-flash |
-| `security-reviewer` | openai/gpt-6.1-sol |
-| `solution-architect` | openai/gpt-6.1-sol |
-| `spec-remediator` | opencode-go/mimo-v2.6-flash |
-| `spec-validator` | opencode-go/mimo-v2.6-pro |
-| `task-decomposer` | opencode-go/longcat-2.0 |
-| `test-architect` | opencode-go/deepseek-v4.1-flash |
-| `ui-designer` | openai/gpt-6.1-sol |
+| `master-orchestrator` | github-copilot/gpt-6-luna |
+| `planner` | github-copilot/gpt-6.1-sol |
+| `reviewer` | opencode-go/glm-5.3 |
+| `security-reviewer` | github-copilot/claude-sonnet-5.5 |
+| `solution-architect` | github-copilot/claude-sonnet-5.5 |
+| `spec-remediator` | opencode-go/mimo-v2.6-pro |
+| `spec-validator` | github-copilot/claude-opus-5.5 |
+| `task-decomposer` | opencode-go/mimo-v2.6-pro |
+| `test-architect` | opencode-go/kimi-k2.7-code |
+| `ui-designer` | github-copilot/claude-sonnet-5.5 |
 | `ui-executor` | opencode-go/deepseek-v4-flash-vision-exp |
 
 ### ChatGPT (Codex CLI) — bindings activos

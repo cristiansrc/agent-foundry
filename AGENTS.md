@@ -38,6 +38,8 @@ core/ (fuente de verdad) -> profiles/ (bindings modelo+permisos)
 | `profiles/*.yaml` | Bindings de ejecución (lo único tool-específico) |
 | `plugins/opencode/model-router/` | Template del plugin de routing (placeholder `__ROUTING_JSON__`, sin IDs) |
 | `adapters/*/render.py` | Generadores nativos por herramienta (opencode también renderiza `out/plugin/`) |
+| `evals/cases/*.yaml` | Suites de regresión de comportamiento (ver `docs/runbooks/evals.md`) |
+| `docs/runbooks/` | Procedimientos operativos (model-change, evals, harness, MCPs, Jev) |
 | `evals/cases/*.yaml` | Suites de regresión de comportamiento |
 
 ## Verificación antes de cerrar una tarea aquí

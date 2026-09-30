@@ -19,4 +19,8 @@ echo "== Build: kiro =="
 python3 "$ROOT/adapters/kiro/render.py"
 
 echo ""
+echo "== README: tablas generadas =="
+python3 "$ROOT/tooling/gen-readme.py"
+
+echo ""
 echo "BUILD OK"

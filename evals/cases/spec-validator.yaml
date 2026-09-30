@@ -12,14 +12,57 @@ cases:
   - id: spec-completa-aprueba
     description: Spec con contratos, esquemas y estados completos debe aprobarse
     expect_contains: "verdict: ready"
+    # Caso autocontenido: todo lo que el validador necesita está inline
+    # (no hay repo en el sandbox). Corregido 2026-09-30: la versión previa
+    # tenía placeholder V{n}, sin 400/401/403, ownership sin claim e índice
+    # inútil — el rechazo de los modelos era correcto.
     input: |
-      Incremento: agregar endpoint GET /orders/{id}
-      - Request: path param id: uuid v4.
-      - Response 200: {id: uuid, status: enum(CREATED|PAID|SHIPPED), total: decimal(12,2)}.
-      - Response 404: ApiErrorResponse estándar con code ORDER_NOT_FOUND.
-      - Auth: Bearer JWT, rol customer dueño de la orden o admin.
-      - Estados del pedido documentados y consistentes con openapi.yaml vigente.
-      - Migración Flyway V{n}__add_orders_status_index.sql incluida.
+      ## Status: validator-review
+      ## Canonical artifacts (inline para esta evaluación; no hay repo en disco
+      ## y NO debe exigirse verificación en disco):
+      - Spec: docs/specs/increments/order-detail-read.md (este texto)
+      - Contrato: openapi.yaml (fragmento nuevo incluido abajo)
+      ## Decomposition Contract: 1 endpoint, 1 servicio, tests; sin migraciones.
+
+      Incremento: order-detail-read (solo lectura, sin cambios de esquema BD).
+      Stack: Spring Boot 3 + PostgreSQL 16 + Keycloak. Sin migraciones.
+      Esquema existente orders: id uuid PK, customer_id uuid NOT NULL,
+      status varchar CHECK (status IN ('CREATED','PAID','SHIPPED')) NOT NULL,
+      total numeric(12,2) NOT NULL, created_at timestamptz NOT NULL.
+
+      Endpoint: GET /api/v1/orders/{id}
+      - Path param id: string format uuid. Si no es UUID válido -> 400.
+      - Auth: Bearer JWT emitido por Keycloak realm "shop".
+        Roles de realm: "customer", "admin".
+        Roles se leen de realm_access.roles con el converter existente
+        KeycloakRealmRoleConverter (prefijo ROLE_). Se valida iss del realm.
+        Ownership: orders.customer_id == UUID.fromString(claim `sub`).
+        Si tiene rol admin, prevalece admin.
+        Token válido sin rol customer ni admin -> 403 FORBIDDEN.
+      - 200 (customer dueño o admin): schema OrderDetail
+          {id: uuid, status: OrderStatus, total: string decimal "12.34" (2 decimales),
+           createdAt: string date-time UTC}
+        OrderStatus (enum, ya existe en openapi.yaml#/components/schemas/OrderStatus):
+          CREATED | PAID | SHIPPED  — se reutiliza sin cambios.
+      - OpenAPI nuevo: path /api/v1/orders/{id} get, operationId getOrderById,
+        tag Orders, security bearerAuth (ya existente); schema nuevo OrderDetail
+        con required [id,status,total,createdAt], total pattern ^\\d+\\.\\d{2}$.
+      - Header Cache-Control: no-store en 200.
+      - 400: ApiErrorResponse code INVALID_ORDER_ID.
+      - 403: ApiErrorResponse code FORBIDDEN (token sin rol permitido).
+      - 500: ApiErrorResponse code INTERNAL_ERROR (log ERROR con traceId).
+      - 401: ApiErrorResponse code UNAUTHORIZED (token ausente/inválido).
+      - 404: ApiErrorResponse code ORDER_NOT_FOUND. Si la orden existe pero el
+        customer no es dueño, también 404 ORDER_NOT_FOUND (anti-enumeración).
+      - ApiErrorResponse: {code: string, message: string, traceId: string}
+        (schema ya existente, reutilizado).
+      - Lectura por PK orders.id; no requiere índices nuevos.
+      - Observabilidad: log INFO con traceId y orderId (sin PII); métrica
+        http_server_requests por status.
+      - Tests: unitarios del servicio (dueño, admin, ajeno, inexistente) y
+        de integración del controller para 200/400/401/403/404 (incluye
+        orden ajena -> 404, admin sobre inexistente -> 404, formato de total
+        y createdAt, y ausencia de PII en logs).
 
   - id: schema-faltante-rechaza
     description: Sin response schema definido debe rechazarse

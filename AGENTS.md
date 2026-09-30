@@ -40,6 +40,7 @@ core/ (fuente de verdad) -> profiles/ (bindings modelo+permisos)
 | `adapters/*/render.py` | Generadores nativos por herramienta (opencode también renderiza `out/plugin/`) |
 | `evals/cases/*.yaml` | Suites de regresión de comportamiento (ver `docs/runbooks/evals.md`) |
 | `docs/runbooks/` | Procedimientos operativos (model-change, evals, harness, MCPs, Jev) |
+| `docs/investigations/` | Investigaciones previas a implementar (no son runbooks) |
 | `evals/cases/*.yaml` | Suites de regresión de comportamiento |
 
 ## Verificación antes de cerrar una tarea aquí

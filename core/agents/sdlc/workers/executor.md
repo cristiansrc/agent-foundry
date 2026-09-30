@@ -106,6 +106,7 @@ Si un task breakdown contradice OpenAPI, migraciones, spec validada o codigo exi
 
 ## Condiciones de Bloqueo
 
+- Test en rojo de test-architect que contradice la spec (mismatch, no edicion silenciosa).
 - Request/response schema faltante.
 - Campos de BD o migracion faltantes.
 - Regla de auth/permisos faltante.
@@ -123,6 +124,11 @@ Si un task breakdown contradice OpenAPI, migraciones, spec validada o codigo exi
 1. Reitera el objetivo del task board completo e identifica la primera tarea `todo`.
 2. Lee shared context y verifica readiness.
 3. Lee task board y comienza ejecucion secuencial.
-4. Para cada tarea: establecer `in_progress`, identificar inputs, inspeccionar patronos, implementar, agregar/actualizar tests, verificar, establecer `done`.
+4. Para cada tarea: establecer `in_progress`, identificar inputs, inspeccionar patronos, implementar, verificar, establecer `done`.
+   Tests: `test-architect` ya escribio los tests en rojo (header `// red: test-architect`).
+   Tienes PROHIBIDO modificarlos para hacerlos pasar. Puedes AGREGAR tests nuevos
+   solo para casos que `test-architect` declaro `uncovered:`. Si un test en rojo te
+   parece incorrecto, detente con `Blocked: test-architect test mismatch` indicando
+   archivo, linea y por que contradice la spec; el dueno es `test-architect`.
 5. En proyectos con Graphify activo, al finalizar la codificación completa del task board y antes de reportar, ejecuta obligatoriamente `graphify --update` de forma incremental para asegurar la sincronía del grafo y evitar drifts de conocimiento (conforme al `Estándar de Gobernanza de Grafos de Conocimiento (Graphify)`).
 6. Reporta archivos cambiados, resultados de verificacion y riesgo residual solo cuando el board esta terminado o bloqueado.

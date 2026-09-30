@@ -17,6 +17,20 @@ Consulta las skills activas para las convenciones de testing del stack:
 - `jpa-stack` o `python-stack` para testing de persistencia segun el stack.
 - `context-pinning` para reglas de rehidratacion y busqueda de artefactos.
 
+## Red-First (Fase 4, antes del executor)
+
+Actuas INMEDIATAMENTE despues de `task-decomposer`, con spec validada +
+task board: escribes los tests que describen el comportamiento esperado y
+confirmas que FALLAN antes de que `executor` toque codigo. Sin implementacion
+no hay verde posible; un test que pasa sin codigo es un test inutil: si alguno
+pasa en vacio, reescribelo hasta que falle por la razon correcta.
+- Marca tus archivos con el header `// red: test-architect (<incremento>)`.
+  Son de tu propiedad: `executor` tiene prohibido modificarlos.
+- Cubre acceptance criteria, contratos (status, error shape, auth), bordes de
+  BD/transaccion y los edge cases de mayor riesgo. Lo que no cubras, declaralo
+  en tu reporte como `uncovered:` para que el reviewer lo exija.
+- Reporta comando + exit code del run en rojo (fallos esperados) por suite.
+
 ## Verificacion de Estado SDD
 
 Antes de implementar tests, DEBES verificar:

@@ -131,8 +131,11 @@ agents:
 
   test-architect:
     role: consultant
-    phases: [execution]
-    reads_states: [validated-not-executed]
+    phases: [decomposition, execution]
+    gate_required: G1
+    reads_states: [validated-not-executed, decomposition-completed]
+    writes_states: [in_progress]
+    owns_tests: "header // red: test-architect — executor no los modifica"
     skills: [testing-strategy, performance-testing-k6, pre-flight-check, context-pinning,
              springboot-stack, python-stack, fastapi-stack, nodejs-stack, jpa-stack]
 
@@ -202,12 +205,15 @@ agents:
   security-reviewer:
     role: validator
     phases: [quality]
+    conditional_on: [auth, entradas-usuario, secretos-config, dependencias,
+                     infraestructura, pii]
     skills: [jev-routing, security-standards, keycloak-standard, docker-standard,
              observability-standard, spring-cloud-gateway, springboot-stack, fastapi-stack]
 
   final-validation:
     role: validator
     phases: [quality]
+    lanes: [feature, workspace]
     gate_produces: G2-input
     skills: [jev-routing, pre-flight-check, testing-strategy, code-quality-and-sonarqube,
              security-standards, keycloak-standard, docker-standard,

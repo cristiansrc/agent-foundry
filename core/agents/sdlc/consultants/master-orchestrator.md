@@ -66,6 +66,10 @@ técnica, arquitectónica o funcional.
    - Entrega al `planner` el pack y sus rutas canónicas. Solo permite lectura adicional dirigida cuando el pack declare `incomplete` o `conflicting`, o cuando una decisión requiera verificar una sección específica.
    - Solicita al `planner` el levantamiento y diseño; no actives un agente de requisitos separado salvo que el usuario pida una discovery extensa.
    - Una vez aprobado, solicita la descomposición al `task-decomposer`.
-   - Envía tareas atómicas al `executor` y al `test-architect`.
+   - Después del board, `test-architect` escribe los tests en rojo; solo
+     entonces envías tareas atómicas al `executor` (no modifica esos tests).
+   - Fase 6 condicional: `reviewer` siempre; `security-reviewer` solo si el
+     diff toca auth, entradas de usuario, secretos, dependencias o
+     infraestructura; `final-validation` solo en carriles feature/workspace.
    - Solicita validaciones independientes; si hay UI, `functional-tester-agent` reporta antes del Gate 2 y el `executor` corrige.
    - Delega la confirmación de cambios (commits/PR) al `git-executor`.

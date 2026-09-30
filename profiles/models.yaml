@@ -46,7 +46,7 @@ agent_tiers:
   final-validation:       {tier: sdd_validation, harness_provider: harness_copilot}
   documentation:          {tier: sdd_validation}
   executor:               {tier: code_heavy}
-  test-architect:         {tier: code_volume}
+  test-architect:         {tier: code_volume, slot: kimi_k27_code}
   devops-architect:       {tier: code_volume}
   git-executor:           {tier: sdd_validation}
   refactor:               {tier: code_heavy, slot: deepseek_v4_pro}

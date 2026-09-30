@@ -1,0 +1,29 @@
+# Casos de evaluación: master-orchestrator — Fase 6 condicional
+# reviewer siempre; security-reviewer solo ante superficie sensible;
+# final-validation solo en carriles feature/workspace.
+version: 1
+agent: master-orchestrator
+
+system_context: |
+  Responde UNICAMENTE con la lista de agentes de Fase 6 que convocarias,
+  uno por linea con el formato exacto `- <nombre-agente>`, sin explicaciones,
+  sin justificaciones y sin mencionar agentes que NO convocas.
+
+cases:
+  - id: cambio-docs-solo-reviewer
+    description: Cambio solo-docs convoca reviewer y omite security y final
+    expect_regex: "reviewer"
+    expect_not_regex: "security-reviewer|final-validation"
+    input: |
+      ## Lane: trivial
+      ## Reviewer Approval: pendiente
+      Cambio: corregir typos y reordenar secciones del README. Sin código.
+
+  - id: cambio-auth-convoca-security
+    description: Cambio en login convoca reviewer y security-reviewer
+    expect_regex: "reviewer[\\s\\S]*security-reviewer|security-reviewer[\\s\\S]*reviewer"
+    input: |
+      ## Lane: feature
+      ## Human Plan Approval: approved_by_user
+      Cambio: nuevo flujo de refresh tokens en LoginService + endpoint
+      POST /auth/refresh. Fase 6 pendiente.

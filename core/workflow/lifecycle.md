@@ -103,12 +103,16 @@ Fase 4 Descomposición ─► Fase 5 Ejecución ─► Fase 6 Calidad
 ### GATE HUMANO 1 — Aprobación de Plan
 - Estado: `awaiting-human-plan-approval`. Firma: ver states.md §3.
 
-### Fase 4 — Descomposición
+### Fase 4 — Descomposición + tests en rojo
 - Agente: `task-decomposer`. Estado: `decomposition-completed`.
 - Entregable: `docs/specs/tasks/<increment-name>-task-board.md` en `todo`.
+- Inmediatamente después, `test-architect` escribe los tests del board desde
+  la spec validada y confirma que FALLAN (red-first). Sin tests en rojo no
+  hay Fase 5.
 
 ### Fase 5 — Ejecución
-- Agentes: `executor` (con spec SDD validada) o `architect-executor` (sin spec),
+- Agentes: `executor` (con spec SDD validada; implementa hasta poner en verde
+  los tests de `test-architect` SIN modificarlos) o `architect-executor` (sin spec),
   `ui-executor` (superficie UI con dirección aprobada),
   con soporte de `test-architect`, `database-architect`, `devops-architect`,
   `refactor` y `documentation`.
@@ -117,10 +121,16 @@ Fase 4 Descomposición ─► Fase 5 Ejecución ─► Fase 6 Calidad
 - Deuda técnica: registrarla en `technical_debt.md`, nunca ocultarla.
 - Self-healing: máximo 3 reintentos antes de `blocked` + escape-report.
 
-### Fase 6 — Validación de Calidad
-- Agentes: `reviewer`, `security-reviewer`, `final-validation` y, cuando hay UI,
-  `functional-tester-agent` antes del Gate 2. Los validadores reportan; no corrigen
-  el mismo cambio que certifican.
+### Fase 6 — Validación de Calidad (condicional)
+- `reviewer`: siempre, contra spec + odd-card si aplica.
+- `security-reviewer`: SOLO si el diff toca autenticación, autorización,
+  entradas de usuario, secretos/config sensible, dependencias, infraestructura
+  o datos PII. Un cambio de docs, estilos o refactor interno no lo convoca.
+- `final-validation`: SOLO en carriles `feature` y `workspace`, como checklist
+  contra la spec (no como segunda revisión completa): acceptance criteria,
+  cobertura ≥85%, señales de observabilidad presentes, gitleaks limpio.
+- Cuando hay UI, `functional-tester-agent` reporta antes del Gate 2.
+- Los validadores reportan; no corrigen el mismo cambio que certifican.
 - Estado: `validation-review` → `quality-approved`.
 - Criterios: cobertura ≥85% por archivo testable, sin bugs críticos,
   sin drift arquitectónico, hallazgos de seguridad resueltos o documentados.

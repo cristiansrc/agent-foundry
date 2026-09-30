@@ -123,7 +123,7 @@ se encarga del transport y proxy; no necesitas instalar librerías adicionales.
 ### Visión: modelos con visión nativa (sin MCP local)
 
 Retirado el MCP `foundry-vision` (2026-09-27): todos los agentes que necesitan
-ver imágenes usan modelos con visión nativa — `ui-designer` (Sol v6),
+ver imágenes usan modelos con visión nativa — `ui-designer` (Sol v6.1),
 `ui-executor` y `functional-tester-agent` (DeepSeek Vision), `reviewer`
 (MiMo v2.6). Sin costo extra de infraestructura ni VRAM local.
 
@@ -306,27 +306,27 @@ La skill `agent-foundry-reader` se instala mediante
 | Agente | Modelo de ejecución |
 |--------|--------------------|
 | `api-governance-agent` | opencode-go/longcat-2.0 |
-| `bug-diagnostician` | openai/gpt-6-sol |
+| `bug-diagnostician` | openai/gpt-6.1-sol |
 | `context-curator` | opencode-go/mimo-v2.6-flash |
 | `database-architect` | opencode-go/deepseek-v4.1-flash |
 | `devops-architect` | opencode-go/deepseek-v4.1-flash |
 | `documentation` | opencode-go/mimo-v2.6-flash |
-| `enterprise-architect` | openai/gpt-6-sol |
+| `enterprise-architect` | openai/gpt-6.1-sol |
 | `enterprise-spec-validator` | opencode-go/mimo-v2.6-pro |
 | `executor` | opencode-go/deepseek-v4.1-flash |
-| `final-validation` | openai/gpt-6-sol |
+| `final-validation` | openai/gpt-6.1-sol |
 | `functional-tester-agent` | opencode-go/deepseek-v4-flash-vision-exp |
 | `git-executor` | opencode-go/mimo-v2.6-flash |
 | `master-orchestrator` | openai/gpt-6-luna |
-| `planner` | openai/gpt-6-sol |
+| `planner` | openai/gpt-6.1-sol#high |
 | `reviewer` | opencode-go/mimo-v2.6-flash |
-| `security-reviewer` | openai/gpt-6-sol |
-| `solution-architect` | openai/gpt-6-sol |
+| `security-reviewer` | openai/gpt-6.1-sol |
+| `solution-architect` | openai/gpt-6.1-sol |
 | `spec-remediator` | opencode-go/mimo-v2.6-flash |
 | `spec-validator` | opencode-go/mimo-v2.6-pro |
 | `task-decomposer` | opencode-go/longcat-2.0 |
 | `test-architect` | opencode-go/deepseek-v4.1-flash |
-| `ui-designer` | openai/gpt-6-sol |
+| `ui-designer` | openai/gpt-6.1-sol |
 | `ui-executor` | opencode-go/deepseek-v4-flash-vision-exp |
 
 ### ChatGPT (Codex CLI) — bindings activos

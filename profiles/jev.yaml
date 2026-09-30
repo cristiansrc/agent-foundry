@@ -29,8 +29,8 @@ dynamic_agents:
   - final-validation
 
 reasoning_bindings:
-  harness_chatgpt:
+  harness_copilot:
     low: luna
-    medium: sol # sin Terra v6 (2026-09-22): medium colapsa a sol, mismo costo que Terra 5.6
+    medium: sonnet55
     high: sol
-    critical: sol
+    critical: opus55

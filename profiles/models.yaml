@@ -3,7 +3,7 @@
 # Los agentes viven en core/ agnósticos; este archivo los une a un modelo real.
 # Cambiar de modelo/proveedor = editar aquí + tooling/build.sh.
 schema: foundry/profiles/models/v2
-updated: 2026-09-27
+updated: 2026-09-30
 
 # ── 1. Tiers abstractos (capacidad requerida, sin marcas) ──────────────────
 tiers:
@@ -19,39 +19,48 @@ tiers:
 
 # ── 2. Agente → tier ───────────────────────────────────────────────────────
 # (temperature y permisos viven en permissions.yaml)
+# `variant` opcional: sufijo de esfuerzo OpenCode (`modelo#variant`, ej. `#high`).
+# Solo lo honra el adapter OpenCode; debe existir en el catálogo del modelo.
 agent_tiers:
   # OpenCode es el harness; `harness_provider` elige la suscripción que paga
-  # la inferencia. Luna jamás se consume desde OpenCode Go.
-  master-orchestrator:    {tier: orchestration, harness_provider: harness_chatgpt}
-  general:                {tier: orchestration}
-  enterprise-architect:   {tier: macro_architecture, harness_provider: harness_chatgpt}
-  solution-architect:     {tier: patterns_logic, harness_provider: harness_chatgpt}
-  ui-designer:            {tier: patterns_logic, harness_provider: harness_chatgpt}
-  planner:                {tier: planning_governance, harness_provider: harness_chatgpt}
-  api-governance-agent:   {tier: planning_governance}
-  task-decomposer:        {tier: planning_governance}
-  spec-validator:         {tier: spec_validation_critical, harness_provider: opencode, locked: true}
-  enterprise-spec-validator: {tier: spec_validation_critical, harness_provider: opencode}
-  spec-remediator:        {tier: sdd_validation}
+  # la inferencia. `slot` opcional fuerza un modelo concreto del proveedor
+  # (el tier queda como respaldo).
+  # Estrategia 2026-09-30: Copilot Pro+ (AI Credits por token, ~$70/mes) solo
+  # para razonamiento que decide; OpenCode Go (topes por modelo) para volumen.
+  # Validadores críticos en familia distinta al planner (Anthropic vs OpenAI).
+  master-orchestrator:    {tier: orchestration, harness_provider: harness_copilot}
+  general:                {tier: orchestration, harness_provider: harness_copilot}
+  enterprise-architect:   {tier: macro_architecture, harness_provider: harness_copilot}
+  solution-architect:     {tier: patterns_logic, harness_provider: harness_copilot}
+  ui-designer:            {tier: patterns_logic, harness_provider: harness_copilot}
+  planner:                {tier: planning_governance, harness_provider: harness_copilot, variant: high}
+  api-governance-agent:   {tier: planning_governance, slot: mimo_v26_pro}
+  task-decomposer:        {tier: planning_governance, slot: mimo_v26_pro}
+  spec-validator:         {tier: spec_validation_critical, harness_provider: harness_copilot, locked: true}
+  enterprise-spec-validator: {tier: spec_validation_critical}
+  spec-remediator:        {tier: sdd_validation, slot: mimo_v26_pro}
   context-curator:        {tier: sdd_validation}
-  reviewer:               {tier: sdd_validation}
-  security-reviewer:      {tier: sdd_validation, harness_provider: harness_chatgpt}
-  requirements-analyst:   {tier: sdd_validation, harness_provider: harness_chatgpt}
-  final-validation:       {tier: sdd_validation, harness_provider: harness_chatgpt}
+  reviewer:               {tier: sdd_validation, slot: glm_reasoning}
+  security-reviewer:      {tier: sdd_validation, harness_provider: harness_copilot}
+  requirements-analyst:   {tier: sdd_validation, harness_provider: harness_copilot, slot: sol}
+  final-validation:       {tier: sdd_validation, harness_provider: harness_copilot}
   documentation:          {tier: sdd_validation}
   executor:               {tier: code_heavy}
   test-architect:         {tier: code_volume}
   devops-architect:       {tier: code_volume}
   git-executor:           {tier: sdd_validation}
-  refactor:               {tier: code_heavy}
-  database-architect:     {tier: code_heavy}
-  bug-diagnostician:      {tier: code_heavy, harness_provider: harness_chatgpt}
+  refactor:               {tier: code_heavy, slot: deepseek_v4_pro}
+  database-architect:     {tier: code_heavy, slot: deepseek_v4_pro}
+  bug-diagnostician:      {tier: code_heavy, harness_provider: harness_copilot}
   architect-executor:     {tier: code_heavy}
   functional-tester-agent: {tier: ui_e2e}
   ui-executor:            {tier: ui_e2e}
 
 # ── 3. Bindings por proveedor/herramienta ──────────────────────────────────
 providers:
+  # OpenCode Go: topes POR MODELO (5h = 20%, semana = 50% del mensual de cada
+  # modelo). Repartir agentes entre modelos multiplica el margen. Precios y
+  # privacidad verificados en opencode.ai/docs/go 2026-09-30.
   opencode:
     active: true
     models:
@@ -60,94 +69,197 @@ providers:
         status: active
         context: 1M
         vision: true
-        cost: 0.075/0.25
-        notes: Ganga 2026-08 — 0.075 input, fuerte en specs y arquitectura. macro_architecture.
+        cost: 0.15/0.50
+        cap: 60
+        notes: Curación de contexto. Sin entrenamiento, retención 0.
       glm_reasoning:
         id: opencode-go/glm-5.3
         status: active
         context: 1M
         vision: false
         cost: 1.40/4.40
-        notes: Validador crítico de specs. Sin entrenamiento ni retención según la tabla de privacidad de OpenCode Go (verificado 2026-09-10).
+        cap: 15
+        notes: Reviewer con razonamiento; familia distinta a DeepSeek (quien codifica). Sin entrenamiento, retención 0.
       deepseek_v41_flash:
         id: opencode-go/deepseek-v4.1-flash
         status: active
         context: 1M
         vision: false
-        cost: 0.15/0.60
-        notes: Código de alto volumen. Sin entrenamiento ni retención según la tabla de privacidad de OpenCode Go (verificado 2026-09-10).
+        cost: 0.15/0.60 off-peak, 0.30/1.20 peak
+        cap: 60
+        notes: "Código de volumen. Pico L-V 01-04 y 06-10 UTC (x2). ZDR renovado mensualmente — vigente hasta 2026-10-31, re-verificar."
+      deepseek_v4_pro:
+        id: opencode-go/deepseek-v4-pro
+        status: active
+        context: 1M
+        vision: false
+        cost: 0.66/1.98 off-peak, 1.32/3.96 peak
+        cap: 15
+        notes: "Desbloqueado 2026-09-30 (hay margen en Go). Refactor y DB — código delicado. ZDR vigente hasta 2026-10-31."
       deepseek_flash_vision:
         id: opencode-go/deepseek-v4-flash-vision-exp
         status: active
         context: 1M
         vision: true
-        cost: 0.15/0.60
-        notes: UI/E2E con visión. Sin entrenamiento ni retención según la tabla de privacidad de OpenCode Go (verificado 2026-09-10).
+        cost: 0.15/0.60 off-peak, 0.30/1.20 peak
+        cap: 15
+        notes: "EXCEPCIÓN DOCUMENTADA a la regla 'nada en pruebas' (sufijo Exp), aprobada 2026-09-30 para UI/E2E. Fallback estable: mimo_v26_flash."
       longcat:
         id: opencode-go/longcat-2.0
         status: active
         context: 1M
         vision: false
         cost: 0.30/1.20
-        notes: Plan Go económico-mid. Planning/gobernanza estructurada, descomposición determinista.
+        cap: 60
+        notes: Respaldo de planning/gobernanza estructurada.
       mimo_v26_flash:
         id: opencode-go/mimo-v2.6-flash
         status: active
         context: 1M
         vision: true
         cost: 0.14/0.28
-        notes: "v2.6 2026-09-22 — mismo precio que v2.5, más inteligente y multimodal. Verificado ONLINE vía `opencode run` 2026-09-27. Patrones GoF y validación SDD."
+        cap: 60
+        notes: El más barato estable. Docs, git, fallback con visión.
       mimo_v26_pro:
         id: opencode-go/mimo-v2.6-pro
         status: active
         context: 1M
         vision: true
         cost: 0.435/0.87
-        notes: "v2.6 2026-09-22 — top open-weights (AA Index 46). Verificado ONLINE vía `opencode run` 2026-09-27. Validador crítico de specs y macro-arquitectura."
+        cap: 15
+        notes: Descomposición de tareas, gobernanza API y remediación de specs.
+      kimi_k3:
+        id: opencode-go/kimi-k3
+        status: active
+        context: 256K
+        vision: false
+        cost: 3.00/15.00
+        cap: 15
+        notes: Validador enterprise en Go (familia Moonshot, distinta al planner). Sin entrenamiento, retención 0.
+      kimi_k27_code:
+        id: opencode-go/kimi-k2.7-code
+        status: active
+        context: 256K
+        vision: false
+        cost: 0.95/4.00
+        cap: 60
+        notes: Fallback de código con contador independiente de DeepSeek.
+      qwen38_max:
+        id: opencode-go/qwen3.8-max
+        status: active
+        context: 256K
+        vision: false
+        cost: 2.00/6.00
+        cap: 15
+        notes: Fallback de razonamiento en Go.
       hy3:
         id: opencode-go/hy3
         status: active
         context: 256k
         vision: false
-        cost: 0.0175/0.0725
-        notes: Más barato Go (0.017 input). Sin vision — no apto para ui_e2e con captura.
+        cost: 0.14/0.58
+        cap: 60
+        notes: Precio corregido 2026-09-30 (antes figuraba 0.0175). Sin vision.
     tier_bindings:
       orchestration:       [mimo_v26_flash]
       macro_architecture:  [mimo_v26_pro]
       patterns_logic:      [mimo_v26_flash]
       planning_governance: [longcat]
-      spec_validation_critical: [mimo_v26_pro]
+      spec_validation_critical: [kimi_k3, mimo_v26_pro]
       sdd_validation:      [mimo_v26_flash]
       code_volume:         [deepseek_v41_flash]
       code_heavy:          [deepseek_v41_flash]
-      ui_e2e:              [deepseek_flash_vision]
+      ui_e2e:              [deepseek_flash_vision, mimo_v26_flash]
     fallbacks:
-      deepseek_v41_flash: [glm_flash]
-      deepseek_flash_vision: [glm_flash]
-      hy3:           [glm_flash]
+      deepseek_v41_flash: [kimi_k27_code]
+      deepseek_v4_pro:    [deepseek_v41_flash, kimi_k27_code]
+      deepseek_flash_vision: [mimo_v26_flash]
+      hy3:           [mimo_v26_flash]
       mimo_v26_flash: [glm_flash]
-      mimo_v26_pro:  [mimo_v26_flash]
+      mimo_v26_pro:  [qwen38_max, mimo_v26_flash]
+      glm_reasoning: [qwen38_max, mimo_v26_pro]
+      kimi_k3:       [qwen38_max, mimo_v26_pro]
+      qwen38_max:    [mimo_v26_pro]
       longcat:       [mimo_v26_flash]
-      glm_flash:     [deepseek_v41_flash]
-      # Luna se consume exclusivamente a través de OAuth de ChatGPT.
+      glm_flash:     [mimo_v26_flash]
+      kimi_k27_code: [deepseek_v41_flash]
 
-  # Usado únicamente por el adapter OpenCode para modelos autenticados con
-  # ChatGPT Plus/Pro. Los IDs requieren verificar `/models` tras `/connect`.
-  harness_chatgpt:
+  # GitHub Copilot Pro+ vía OAuth en OpenCode (/connect github-copilot).
+  # Facturación por tokens en AI Credits (1 crédito = $0.01; Pro+ = 7000/mes).
+  # Precios verificados en docs.github.com (models-and-pricing) 2026-09-30.
+  # Privacidad: plan individual puede entrenar por defecto — opt-out en
+  # Copilot settings; Business/Enterprise protegido por DPA.
+  harness_copilot:
     active: true
+    models:
+      luna:
+        id: github-copilot/gpt-6-luna
+        status: active
+        context: 272K
+        vision: true
+        cost: 0.10/0.50
+        notes: Orquestación — muchas llamadas, costo casi nulo.
+      sol:
+        id: github-copilot/gpt-6.1-sol
+        status: active
+        context: 272K
+        vision: true
+        cost: 2.00/10.00
+        notes: Planner, requisitos, RCA. Familia OpenAI.
+      sonnet55:
+        id: github-copilot/claude-sonnet-5.5
+        status: active
+        context: 1M
+        vision: true
+        cost: 2.00/10.00
+        notes: Patrones, UI, seguridad, validación final. Familia Anthropic.
+      opus55:
+        id: github-copilot/claude-opus-5.5
+        status: active
+        context: 1M
+        vision: true
+        cost: 4.00/20.00
+        notes: Solo spec-validator y enterprise-architect (pocas llamadas, alto impacto).
+      codex:
+        id: github-copilot/gpt-5.3-codex
+        status: active
+        context: 272K
+        vision: false
+        cost: 1.75/14.00
+        notes: Válvula de escape de código si Go se agota.
+    tier_bindings:
+      orchestration:       [luna]
+      macro_architecture:  [opus55]
+      patterns_logic:      [sonnet55]
+      planning_governance: [sol]
+      spec_validation_critical: [opus55]
+      sdd_validation:      [sonnet55]
+      code_volume:         [codex]
+      code_heavy:          [sol]
+      ui_e2e:              [sonnet55]
+    fallbacks:
+      opus55:   [sonnet55]
+      sonnet55: [sol]
+      sol:      [sonnet55]
+      luna:     []
+      codex:    [sol]
+
+  # Reemplazado por harness_copilot 2026-09-30 (se cancela ChatGPT en OpenCode).
+  harness_chatgpt:
+    active: false
     models:
       luna:
         id: openai/gpt-6-luna
         status: active
         context: 1M
         vision: true
-        notes: "v6 2026-09-22 — $0.10/$0.50 API (50% menos que 5.6). Orquestación y validación ligera vía ChatGPT Plus OAuth."
+        notes: Histórico — rollback manual.
       sol:
-        id: openai/gpt-6-sol
+        id: openai/gpt-6.1-sol
         status: active
         context: 1M
         vision: true
-        notes: "v6 2026-09-22 — $2/$10 API (50% menos que 5.6; mismo input que Terra 5.6). Arquitectura, planificación, seguridad, RCA y validación de valor alto. Sin Terra v6: absorbe todos sus slots."
+        notes: Histórico — rollback manual.
     tier_bindings:
       orchestration:       [luna]
       macro_architecture:  [sol]
@@ -264,7 +376,11 @@ providers:
 
 # ── 4. Bloqueados (nunca asignar) ──────────────────────────────────────────
 blocked:
-  - {id: openai/gpt-5.6-terra, reason: "Sin sucesor v6 (OpenAI solo lanzó Sol/Luna v6 el 2026-09-22); slots absorbidos por openai/gpt-6-sol al mismo costo de input. 2026-09-27."}
+  - {id: github-copilot/gpt-6-astra, reason: "Coste 5x Sol 6.1 ($10/$50 por 1M) — consumiría los AI Credits de Pro+. 2026-09-30."}
+  - {id: opencode-go/hy4-preview, reason: "Preview — política de no usar modelos en pruebas. 2026-09-30."}
+  - {id: opencode-go/longcat-2.5-preview-free, reason: "Preview gratuito temporal — no usar modelos en pruebas. 2026-09-30."}
+  - {id: openai/gpt-6-sol, reason: "Superseded por openai/gpt-6.1-sol. Mantener como rollback manual. 2026-09-29."}
+  - {id: openai/gpt-5.6-terra, reason: "Sin sucesor v6 (OpenAI solo lanzó Sol/Luna v6 el 2026-09-22); slots absorbidos por openai/gpt-6.1-sol al mismo costo de input. 2026-09-29."}
   - {id: opencode-go/mimo-v2.5, reason: "Superseded por mimo-v2.6-flash al mismo precio ($0.14/$0.28), verificado ONLINE 2026-09-27. Mantener como rollback manual."}
   - {id: opencode-go/mimo-v2.5-pro, reason: "Superseded por mimo-v2.6-pro ($0.435/$0.87), verificado ONLINE 2026-09-27. Mantener como rollback manual."}
   - {id: opencode/muse-spark-1.2-contributor-free, reason: "Bloqueado: variante Contributor permite usar prompts y completions para entrenamiento. 2026-09-10."}
@@ -273,7 +389,6 @@ blocked:
   - {id: opencode/mimo-v2.5-free, reason: Reemplazado por opencode-go/mimo-v2.5 (paid, 0.14/0.28, 1M ctx) 2026-08-29.}
   - {id: opencode-go/minimax-m3, reason: Reemplazado por longcat-2.0 (0.30) + glm-5.3-flash (0.075) — mejor coste/calidad 2026-08-29. Mantener como rollback manual si longcat falla.}
   - {id: opencode-go/omen-alpha, reason: Excluido por política de privacidad hasta verificar retención y entrenamiento.}
-  - {id: opencode-go/deepseek-v4-pro, reason: Eliminado por coste — reemplazado por deepseek-v4-flash (0.22/0.66) 2026-08-29.}
   - {id: opencode-go/deepseek-v4-flash, reason: "Superseded por DeepSeek V4.1 Flash; DeepSeek retiró V4 Flash y enruta la ID antigua a V4.1. 2026-09-10."}
   - {id: opencode/deepseek-v4-flash-free, reason: 503, respuestas vacías, bucles de compactación.}
   - {id: opencode-go/qwen3.7-plus, reason: Inestabilidad ~70%, timeouts Cloudflare 524.}

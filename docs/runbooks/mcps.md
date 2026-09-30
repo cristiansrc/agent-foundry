@@ -29,9 +29,9 @@ registra el qué y el por qué).
 ### Visión: modelos con visión nativa (MCP local retirado)
 **RETIRADO 2026-09-27**: el MCP propio `foundry-vision` (LM Studio) se eliminó
 (`adapters/lmstudio/` borrado) por falta de uso. Todos los agentes que necesitan
-ver imágenes usan modelos con visión nativa: `ui-designer` (Sol v6),
+ver imágenes usan modelos con visión nativa: `ui-designer` (Claude Sonnet 5.5),
 `ui-executor` y `functional-tester-agent` (DeepSeek Vision), `reviewer`
-(MiMo v2.6). Si algún modelo sin visión necesitara ver capturas en el futuro,
+(GLM-5.3, sin visión: si necesita capturas, delegar en functional-tester-agent). Si algún modelo sin visión necesitara ver capturas en el futuro,
 revaluar un puente local antes de reintroducirlo.
 
 ### Por proyecto (activar cuando aplique)

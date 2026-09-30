@@ -13,6 +13,8 @@ adapters/opencode/out/ la configuración nativa de OpenCode con paridad 1:1:
 
 Reglas de binding:
 - modelo  = tier del agente -> primer modelo de tier_bindings del proveedor activo
+              + `#variant` opcional de agent_tiers (esfuerzo OpenCode, ej. `#high`)
+              + `slot` opcional de agent_tiers (override de modelo dentro del proveedor)
 - temp    = permissions.yaml (fuente única)
 - perms   = permissions.yaml (edit/bash/task) traducidos a reglas V2 ordenadas
             [{action, resource, effect}]; renombres V1->V2: bash->shell,
@@ -70,7 +72,14 @@ def resolve_binding(agent: str, profiles: dict) -> dict:
     if not provider.get("active"):
         sys.exit(f"FAIL: proveedor {provider_name} inactivo en models.yaml")
     tier = info["tier"]
-    candidates = provider["tier_bindings"][tier]
+    candidates = list(provider["tier_bindings"][tier])
+    # `slot` opcional: override por agente dentro del proveedor (el tier
+    # sigue como respaldo si el slot no está activo o no cumple visión).
+    slot_override = info.get("slot")
+    if slot_override:
+        if slot_override not in provider["models"]:
+            sys.exit(f"FAIL: slot {slot_override} inexistente en {provider_name} para {agent}")
+        candidates = [slot_override] + [s for s in candidates if s != slot_override]
     primary_id = None
     for slot in candidates:
         model = provider["models"][slot]
@@ -82,6 +91,9 @@ def resolve_binding(agent: str, profiles: dict) -> dict:
         break
     if primary_id is None:
         sys.exit(f"FAIL: sin modelo activo para {agent} (tier {tier})")
+    variant = info.get("variant")
+    if variant:
+        primary_id = f"{primary_id}#{variant}"
     p = pcfg["agents"].get(agent, {})
     perm_keys = [k for k in ("edit", "bash", "execute", "task") if k in p]
     return {
@@ -152,12 +164,15 @@ def render_plugin(manifest: list[dict], profiles: dict) -> Path:
     routing = {entry["agent"]: entry["model"] for entry in manifest}
     jev_cfg = yaml.safe_load((PROFILES / "jev.yaml").read_text(encoding="utf-8")) \
         if (PROFILES / "jev.yaml").exists() else {}
-    harness = profiles["models"]["providers"].get("harness_chatgpt", {})
-    harness_models = harness.get("models", {})
     reasoning = {}
-    for level, slot in jev_cfg.get("reasoning_bindings", {}).get("harness_chatgpt", {}).items():
-        if slot in harness_models:
-            reasoning[level] = harness_models[slot]["id"]
+    for prov_name, levels in jev_cfg.get("reasoning_bindings", {}).items():
+        prov = profiles["models"]["providers"].get(prov_name, {})
+        if not prov.get("active"):
+            continue
+        harness_models = prov.get("models", {})
+        for level, slot in levels.items():
+            if slot in harness_models:
+                reasoning[level] = harness_models[slot]["id"]
     jev_payload = {
         "provider": jev_cfg.get("active_provider", "vercel"),
         "providers": jev_cfg.get("providers", {}),

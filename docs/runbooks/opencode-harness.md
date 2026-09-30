@@ -6,35 +6,38 @@ trabajo distintos.
 
 ## Conexiones requeridas
 
-1. En OpenCode, ejecutar `/connect` y autenticar **OpenAI → ChatGPT Plus/Pro**.
-2. Confirmar con `/models` que aparecen los IDs configurados para `openai`.
+1. En OpenCode, ejecutar `/connect` y autenticar **GitHub Copilot** (Pro+).
+2. Confirmar con `/models` que aparecen los IDs `github-copilot/...` configurados.
 3. Conectar o conservar **OpenCode Go** y confirmar sus modelos con `/models`.
 4. Solo después instalar con `tooling/sync.sh`.
 
-Los IDs `openai/gpt-6-sol` y `openai/gpt-6-luna` son nombres de binding
-esperados (OpenAI no lanzó GPT-6 Terra; sus slots los absorbe Sol v6).
-Si `/models` muestra un ID diferente, se actualiza
-`profiles/models.yaml` antes de usar agentes que dependan de ChatGPT OAuth.
+Desde 2026-09-30 Copilot Pro+ reemplaza a ChatGPT OAuth (`harness_chatgpt`
+queda inactivo como rollback). Copilot factura por tokens en AI Credits
+(Pro+ = 7000/mes ≈ $70); OpenCode Go aplica topes **por modelo** (5h = 20% del
+mensual). Por eso Copilot solo carga razonamiento que decide y Go el volumen.
+
+Privacidad: Copilot individual puede usar datos para entrenamiento salvo
+opt-out en *Copilot settings*; Business/Enterprise está cubierto por DPA.
 
 ## Política de routing
 
-| Capacidad | Suscripción | Modelo principal | Uso |
+| Capacidad | Suscripción | Modelo | Agentes |
 |---|---|---|---|
-| Orquestación | ChatGPT OAuth | Luna v6 | master-orchestrator; decisiones y delegación con contexto global |
-| Planificación compleja | ChatGPT OAuth | Sol v6 | planner y decisiones de alto impacto |
-| Razonamiento crítico | ChatGPT OAuth | Sol v6 | arquitectura, seguridad y RCA complejos |
-| Validación crítica de specs | OpenCode Go | MiMo-V2.5 Pro | spec-validator y enterprise-spec-validator; proveedor independiente del planner |
-| Validación de valor alto | ChatGPT OAuth | Sol v6 | validación final, seguridad y RCA |
-| Plan estructurado | OpenCode Go | LongCat 2.0 | task decomposition y gobernanza API normal |
-| Código | OpenCode Go | DeepSeek V4.1 Flash | executor y migraciones de datos |
-| Trabajo mecánico | OpenCode Go | MiMo-V2.5 | orquestación ligera, Git, docs y review normal |
-| Código de volumen | OpenCode Go | DeepSeek V4.1 Flash | testing y plataforma |
-| UI/E2E | OpenCode Go | DeepSeek V4 Flash Vision Exp | pruebas funcionales con captura |
+| Orquestación | Copilot | GPT-6 Luna | master-orchestrator, general |
+| Planificación | Copilot | GPT-6.1 Sol (high) | planner |
+| Requisitos / RCA | Copilot | GPT-6.1 Sol | requirements-analyst, bug-diagnostician |
+| Validación crítica / macro-arquitectura | Copilot | Claude Opus 5.5 | spec-validator, enterprise-architect (familia distinta al planner) |
+| Patrones / UI / seguridad / validación final | Copilot | Claude Sonnet 5.5 | solution-architect, ui-designer, security-reviewer, final-validation |
+| Validación enterprise | OpenCode Go | Kimi K3 | enterprise-spec-validator |
+| Plan estructurado / remediación | OpenCode Go | MiMo-V2.6 Pro | task-decomposer, api-governance-agent, spec-remediator |
+| Review | OpenCode Go | GLM-5.3 | reviewer (familia distinta a quien codifica) |
+| Código delicado | OpenCode Go | DeepSeek V4 Pro | refactor, database-architect |
+| Código | OpenCode Go | DeepSeek V4.1 Flash | executor, architect-executor, test-architect, devops-architect |
+| Trabajo mecánico | OpenCode Go | MiMo-V2.6 Flash | git-executor, documentation, context-curator |
+| UI/E2E | OpenCode Go | DeepSeek V4 Flash Vision Exp (excepción documentada) | functional-tester-agent, ui-executor |
 
-`Omen Alpha` y las variantes Muse Spark Contributor están bloqueados por
-política de privacidad. Estas últimas permiten usar prompts y completions para
-entrenar modelos. Luna no se consume desde OpenCode Go: entra únicamente por
-la conexión OAuth de ChatGPT.
+Bloqueados: GPT-6 Astra (coste), modelos preview, `Omen Alpha` y variantes
+Muse Spark Contributor (entrenan con prompts).
 
 ## Agentes desplegados
 

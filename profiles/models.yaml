@@ -274,8 +274,13 @@ providers:
       sol: [luna]
       luna: []
 
+  # RECOMENDACIÓN (2026-09-30) — sin evals en Codex CLI: replica la
+  # estrategia validada en OpenCode (barato para volumen/orquestación,
+  # flagship para decidir). Harness primario recomendado: OpenCode, donde las
+  # suscripciones se combinan (Copilot para razonar + Go para volumen).
   chatgpt:
     active: true
+    verified: false
     models:
       sol:
         id: gpt-5.6-sol
@@ -283,26 +288,27 @@ providers:
         context: 272K
         vision: true
         cost: 2.4x
-        notes: Flagship. Orquestación superior, vision, tareas que requieren razonamiento denso.
+        notes: Flagship. Planificación, validación crítica, código pesado y RCA.
       terra:
         id: gpt-5.6-terra
         status: active
         context: 272K
         vision: true
         cost: 1.0x
-        notes: Equilibrado. Arquitectura, código pesado, validación SDD.
+        notes: Equilibrado. Patrones, arquitectura y código pesado alternativo.
       luna:
         id: gpt-5.6-luna
         status: active
         context: 272K
         vision: true
         cost: 0.1x
-        notes: Rápido y barato. Ejecución SDD, review, docs, curación, gobernanza.
+        notes: Rápido y barato (0.1x). Orquestación (muchas llamadas), volumen, review, docs, UI/E2E.
     tier_bindings:
-      orchestration:       [sol]
-      macro_architecture:  [terra]
-      patterns_logic:      [terra]
-      planning_governance: [luna]
+      orchestration:       [luna]
+      macro_architecture:  [sol]
+      patterns_logic:      [sol]
+      planning_governance: [sol]
+      spec_validation_critical: [sol]
       sdd_validation:      [luna]
       code_volume:         [luna]
       code_heavy:          [terra]
@@ -312,8 +318,12 @@ providers:
       terra: [luna]
       luna: []
 
+  # RECOMENDACIÓN (2026-09-30) — sin evals en Kiro: replica la estrategia
+  # validada en OpenCode. Harness primario recomendado: OpenCode, donde las
+  # suscripciones se combinan (Copilot para razonar + Go para volumen).
   kiro:
     active: true
+    verified: false
     models:
       opus5:
         id: claude-opus-5
@@ -342,7 +352,7 @@ providers:
         context: 256K
         vision: false
         cost: 0.05x
-        notes: Feb 2026. Solo us-east-1. 26x más barato que Sonnet; ideal con SDD — sigue specs al pie de la letra.
+        notes: Feb 2026. Solo us-east-1. Especialista en código pero experimental y sin visión — solo fallback.
       gpt56_luna:
         id: gpt-5.6-luna
         status: experimental
@@ -358,20 +368,21 @@ providers:
         cost: 1.0x
         notes: Jul 2026. Balance en Kiro. Alternativa a Sonnet para código pesado si Qwen falla.
     tier_bindings:
-      orchestration:       [opus5]
+      orchestration:       [haiku45]
       macro_architecture:  [sonnet5]
       patterns_logic:      [sonnet5]
-      planning_governance: [gpt56_luna]
+      planning_governance: [sonnet5]
+      spec_validation_critical: [opus5]
       sdd_validation:      [haiku45]
-      code_volume:         [qwen3_coder]
-      code_heavy:          [gpt56_terra]
-      ui_e2e:              [qwen3_coder]
+      code_volume:         [haiku45]
+      code_heavy:          [sonnet5]
+      ui_e2e:              [sonnet5]   # exige visión: qwen3_coder no sirve
     fallbacks:
       opus5:       [sonnet5]
-      sonnet5:     [haiku45, gpt56_terra]
+      sonnet5:     [haiku45]
       gpt56_luna:  [haiku45]
-      haiku45:     [gpt56_luna]
-      qwen3_coder: [haiku45, gpt56_terra]
+      haiku45:     [sonnet5]
+      qwen3_coder: [haiku45, sonnet5]
       gpt56_terra: [sonnet5]
 
 # ── 4. Bloqueados (nunca asignar) ──────────────────────────────────────────

@@ -65,6 +65,13 @@ entre dos suscripciones:
 El detalle, la política de privacidad y los modelos bloqueados están en
 [`docs/runbooks/opencode-harness.md`](docs/runbooks/opencode-harness.md).
 
+> **Harness recomendado: OpenCode.** Es el único harness con evals ejecutadas
+> (12 suites en `evals/cases/`) y el único donde se combinan suscripciones:
+> una paga el razonamiento y otra el volumen. Los bindings de ChatGPT y Kiro
+> son recomendaciones sin certificar en esos harnesses — si los usas, corre
+> primero las evals allí siguiendo
+> [`docs/runbooks/evals.md`](docs/runbooks/evals.md).
+
 ### Carriles de trabajo
 
 Todo cambio se clasifica al inicio (`master-orchestrator`): `trivial`
@@ -354,68 +361,68 @@ La skill `agent-foundry-reader` se instala mediante
 | `ui-designer` | github-copilot/claude-sonnet-5.5 |
 | `ui-executor` | opencode-go/deepseek-v4-flash-vision-exp |
 
-### ChatGPT (Codex CLI) — bindings activos
+### ChatGPT (Codex CLI) — bindings recomendados (sin evals en este harness)
 
 | Agente | Modelo de ejecución |
 |--------|--------------------|
-| `api-governance-agent` | `gpt-5.6-luna` |
+| `api-governance-agent` | `gpt-5.6-sol` |
 | `architect-executor` | `gpt-5.6-terra` |
 | `bug-diagnostician` | `gpt-5.6-terra` |
 | `context-curator` | `gpt-5.6-luna` |
 | `database-architect` | `gpt-5.6-terra` |
 | `devops-architect` | `gpt-5.6-luna` |
 | `documentation` | `gpt-5.6-luna` |
-| `enterprise-architect` | `gpt-5.6-terra` |
-| `enterprise-spec-validator` | default del proveedor |
+| `enterprise-architect` | `gpt-5.6-sol` |
+| `enterprise-spec-validator` | `gpt-5.6-sol` |
 | `executor` | `gpt-5.6-terra` |
 | `final-validation` | `gpt-5.6-luna` |
 | `functional-tester-agent` | `gpt-5.6-luna` |
-| `general` | `gpt-5.6-sol` |
+| `general` | `gpt-5.6-luna` |
 | `git-executor` | `gpt-5.6-luna` |
-| `master-orchestrator` | `gpt-5.6-sol` |
-| `planner` | `gpt-5.6-luna` |
+| `master-orchestrator` | `gpt-5.6-luna` |
+| `planner` | `gpt-5.6-sol` |
 | `refactor` | `gpt-5.6-terra` |
 | `requirements-analyst` | `gpt-5.6-luna` |
 | `reviewer` | `gpt-5.6-luna` |
 | `security-reviewer` | `gpt-5.6-luna` |
-| `solution-architect` | `gpt-5.6-terra` |
+| `solution-architect` | `gpt-5.6-sol` |
 | `spec-remediator` | `gpt-5.6-luna` |
-| `spec-validator` | default del proveedor |
-| `task-decomposer` | `gpt-5.6-luna` |
+| `spec-validator` | `gpt-5.6-sol` |
+| `task-decomposer` | `gpt-5.6-sol` |
 | `test-architect` | `gpt-5.6-luna` |
-| `ui-designer` | `gpt-5.6-terra` |
+| `ui-designer` | `gpt-5.6-sol` |
 | `ui-executor` | `gpt-5.6-luna` |
 
-### Kiro — bindings activos
+### Kiro — bindings recomendados (sin evals en este harness)
 
 | Agente | Modelo de ejecución |
 |--------|--------------------|
-| `api-governance-agent` | `gpt-5.6-luna` |
-| `architect-executor` | `gpt-5.6-terra` |
-| `bug-diagnostician` | `gpt-5.6-terra` |
+| `api-governance-agent` | `claude-sonnet-5` |
+| `architect-executor` | `claude-sonnet-5` |
+| `bug-diagnostician` | `claude-sonnet-5` |
 | `context-curator` | `claude-haiku-4.5` |
-| `database-architect` | `gpt-5.6-terra` |
-| `devops-architect` | `qwen3-coder-next` |
+| `database-architect` | `claude-sonnet-5` |
+| `devops-architect` | `claude-haiku-4.5` |
 | `documentation` | `claude-haiku-4.5` |
 | `enterprise-architect` | `claude-sonnet-5` |
-| `enterprise-spec-validator` | default del proveedor |
-| `executor` | `gpt-5.6-terra` |
+| `enterprise-spec-validator` | `claude-opus-5` |
+| `executor` | `claude-sonnet-5` |
 | `final-validation` | `claude-haiku-4.5` |
-| `functional-tester-agent` | `qwen3-coder-next` |
-| `general` | `claude-opus-5` |
+| `functional-tester-agent` | `claude-sonnet-5` |
+| `general` | `claude-haiku-4.5` |
 | `git-executor` | `claude-haiku-4.5` |
-| `master-orchestrator` | `claude-opus-5` |
-| `planner` | `gpt-5.6-luna` |
-| `refactor` | `gpt-5.6-terra` |
+| `master-orchestrator` | `claude-haiku-4.5` |
+| `planner` | `claude-sonnet-5` |
+| `refactor` | `claude-sonnet-5` |
 | `requirements-analyst` | `claude-haiku-4.5` |
 | `reviewer` | `claude-haiku-4.5` |
 | `security-reviewer` | `claude-haiku-4.5` |
 | `solution-architect` | `claude-sonnet-5` |
 | `spec-remediator` | `claude-haiku-4.5` |
-| `spec-validator` | default del proveedor |
-| `task-decomposer` | `gpt-5.6-luna` |
-| `test-architect` | `qwen3-coder-next` |
+| `spec-validator` | `claude-opus-5` |
+| `task-decomposer` | `claude-sonnet-5` |
+| `test-architect` | `claude-haiku-4.5` |
 | `ui-designer` | `claude-sonnet-5` |
-| `ui-executor` | `qwen3-coder-next` |
+| `ui-executor` | `claude-sonnet-5` |
 
 <!-- END:GENERATED-TABLES -->

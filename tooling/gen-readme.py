@@ -205,8 +205,14 @@ def models_tables() -> str:
     for provider, label in [("opencode", "OpenCode"),
                             ("chatgpt", "ChatGPT (Codex CLI)"),
                             ("kiro", "Kiro")]:
-        active = cfg["providers"][provider].get("active")
-        state = "bindings activos" if active else "**sin bindings** (usa default del proveedor)"
+        prov = cfg["providers"][provider]
+        active = prov.get("active")
+        if not active:
+            state = "**sin bindings** (usa default del proveedor)"
+        elif prov.get("verified") is False:
+            state = "bindings recomendados (sin evals en este harness)"
+        else:
+            state = "bindings activos"
         lines += [f"### {label} — {state}", "",
                   "| Agente | Modelo de ejecución |", "|--------|--------------------|"]
         if provider == "opencode":

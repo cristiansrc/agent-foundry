@@ -53,6 +53,30 @@ while IFS= read -r f; do
 done < <(find "$CORE/agents" -name '*.md')
 echo "OK"
 
+echo "== Permisos con scope: patrones anclados a worktree"
+# Un patrón `allow` relativo (ej. `docs/**`) jamás matchea: OpenCode evalúa
+# contra la ruta relativa al worktree git (o a `/` sin repo). Solo `**/...`,
+# `/...` o `~/...` son válidos. Verificado el 2026-09-30 (context-curator).
+BAD_SCOPE=$(python3 - "$ROOT/profiles/permissions.yaml" <<'EOF'
+import sys, yaml
+p = yaml.safe_load(open(sys.argv[1]))["agents"]
+bad = []
+for agent, cfg in p.items():
+    edit = (cfg or {}).get("edit")
+    if isinstance(edit, dict):
+        for pattern, effect in edit.items():
+            if effect == "allow" and not pattern.startswith(("**/", "/", "~/")) and pattern != "*":
+                bad.append(f"{agent}: {pattern}")
+print("\n".join(bad))
+EOF
+)
+if [ -n "$BAD_SCOPE" ]; then
+  echo "$BAD_SCOPE"
+  fail "patrón allow relativo (usar **/, / o ~/, ver profiles/permissions.yaml)"
+else
+  echo "OK"
+fi
+
 echo "== YAML válido en workflow/ y profiles/"
 if command -v python3 >/dev/null && python3 -c 'import yaml' 2>/dev/null; then
   find "$ROOT/workflow" "$CORE/workflow" "$ROOT/profiles" -name '*.yaml' 2>/dev/null | while IFS= read -r f; do

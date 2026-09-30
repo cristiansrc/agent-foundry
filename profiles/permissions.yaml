@@ -45,7 +45,11 @@ agents:
   test-architect:         {edit: allow, bash: allow, temp: "0.2"}
   task-decomposer:        {edit: allow, bash: deny, temp: "0.2"}
   context-curator:
-    edit: {"*": deny, "docs/specs/.working/**": allow}
+    # El prefijo `**/` es obligatorio: OpenCode evalúa los patrones contra la
+    # ruta relativa al worktree git, y sin repo git el worktree es `/` (el
+    # patrón evaluado es `mnt/...`). Un patrón relativo nunca haría match y el
+    # deny ganaría. Verificado empíricamente con OpenCode 1.18.31 el 2026-09-30.
+    edit: {"*": deny, "**/docs/specs/.working/**": allow}
     bash: deny
     temp: "0.10"
   master-orchestrator:    {mode: primary, edit: deny, bash: deny, execute: allow, task: allow, temp: "0.15"}

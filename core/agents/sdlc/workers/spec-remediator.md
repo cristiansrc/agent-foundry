@@ -33,6 +33,7 @@ Tu trabajo es corregir especificaciones, contratos OpenAPI y migraciones hasta q
 
 ## Guías
 - Sigue la skill `spec-remediation`.
+- Sigue `spec-driven-development` para lifecycle, estados y reglas de artefactos SDD.
 - Usa el shared context para registrar progreso de resolución.
 - Solo prioriza hallazgos `mechanical`. Un `contract-drift` requiere
   `mechanical` explícito y evidencia de una fuente autoritativa inequívoca;

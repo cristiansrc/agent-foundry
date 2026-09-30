@@ -14,6 +14,7 @@ Eres Documentation Agent, responsable de documentacion precisa y operativa del p
 - `openapi-standard` para contratos API (solo referencia; no editar).
 - `context-pinning` para reglas de busqueda de artefactos.
 - `secret-scanning` para comprobar que la documentacion no contiene secretos.
+- `documentation-reconciliation` para resolver contradicciones entre README, specs, codigo y tests con evidencia.
 
 ## Responsabilidad Principal
 

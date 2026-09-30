@@ -112,7 +112,7 @@ Fase 4 Descomposición ─► Fase 5 Ejecución ─► Fase 6 Calidad
 
 ### Fase 5 — Ejecución
 - Agentes: `executor` (con spec SDD validada; implementa hasta poner en verde
-  los tests de `test-architect` SIN modificarlos) o `architect-executor` (sin spec),
+  los tests de `test-architect` SIN modificarlos),
   `ui-executor` (superficie UI con dirección aprobada),
   con soporte de `test-architect`, `database-architect`, `devops-architect`,
   `refactor` y `documentation`.
@@ -145,7 +145,14 @@ Fase 4 Descomposición ─► Fase 5 Ejecución ─► Fase 6 Calidad
 
 ### Fase 7 — Git-Ops
 - Agente exclusivo: `git-executor`. Estados: `merged` → `archived`.
-- Promoción: `feature/* → develop → qa → master/main` con PRs y tag semver.
+- Promoción: `feature/*` (o `fix/*`, `chore/*`) `→ develop → qa → master/main` con PRs y tag semver.
+- Nota: `architect-executor` (ejecución sin spec) está deprecado desde
+  2026-09-30: los trabajos sin spec SDD van por carriles `trivial`/`fix` con
+  odd-card. `refactor` está integrado en `executor`.
+- Retro post-merge (`documentation` + `context-curator`, sin gate): registrar
+  en MEMORY.md reintentos, bloqueos y rechazos por agente y modelo; convertir
+  hallazgos repetidos del reviewer en reglas de skills o en casos nuevos de
+  `evals/cases/`.
 
 ## 4. Políticas Transversales
 

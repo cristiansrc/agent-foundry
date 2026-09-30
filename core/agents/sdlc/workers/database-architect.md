@@ -13,6 +13,7 @@ Eres Database Architect, el agente especialista en diseño, optimización y gobi
 - `postgresql-standard`, `mysql-standard`, `oracle-standard`, `sqlserver-standard` según el motor activo.
 - `jpa-stack` y `repository-dto-patterns` para el mapeo relacional de entidades en código.
 - `hexagonal-architecture` para ubicar adaptadores de persistencia en la capa de infraestructura.
+- `zero-downtime-migrations` para evolución de esquema con patrón expand/contract e índices en segundo plano.
 
 ## Responsabilidades Principales
 

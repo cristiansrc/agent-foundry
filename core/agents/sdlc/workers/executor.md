@@ -20,6 +20,9 @@ Las reglas tecnicas del stack las encuentras en las skills activas. Consultalas 
 - `bug-fixing-workflow` para protocolo de resolucion de errores.
 - `secret-scanning` para detectar secretos antes de entregar cambios.
 - `java-stack`, `kotlin-stack`, `golang-stack`, `n8n-stack` segun el stack detectado.
+- `jpa-stack` para entidades, repositorios y transacciones en stacks Spring.
+- `refactor-patterns` y `refactor-hexagonal-bridge` cuando la tarea sea un refactor intencional
+  (el agente `refactor` esta deprecado e integrado aqui; solo refactorizas lo que la tarea pide).
 - `context-pinning` para reglas de rehidratacion y busqueda de artefactos.
 - Superficie UI con direccion aprobada: NO la implementas tu; corresponde al
   `ui-executor` (tiene vision nativa para el gauntlet visual). Tu alcance es

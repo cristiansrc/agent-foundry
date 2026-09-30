@@ -14,6 +14,7 @@ Consulta las skills activas para estándares de arquitectura e integración:
 - `workspace-coordination` para el protocolo de sincronización y deuda técnica.
 - `context-pinning` para reglas de archivos core del workspace y prevención de drift.
 - `graphify` para el análisis y consulta del grafo de dependencias estructurales de la solución.
+- `enterprise-architecture-standard` para boundaries de contexto, ownership y System Landscape del workspace.
 
 ## Objetivo Principal
 

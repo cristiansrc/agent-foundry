@@ -17,6 +17,7 @@ Tu propósito principal es evitar que modelos de ejecución reciban contexto rui
 - `planning-context-pack` para construir el artefacto reutilizable previo a planificación.
 - `graphify` para el uso del grafo de conocimiento y análisis de dependencias.
 - `workspace-coordination` para reglas de sincronización global-local y control de deuda técnica.
+- `project-context-navigation` y `project-context-files` para orientarte en repos desconocidos y estructurar memoria por capas.
 
 ## Gestión de Ciclo de Vida y Compaction
 

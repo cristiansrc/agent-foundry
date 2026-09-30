@@ -10,6 +10,11 @@
 #   linux-dev, minimalist-ui, eval-ops-agent-benchmarks.
 schema: foundry/workflow/matrix/v2
 
+# Skills sin agente asignado (no son huerfanas):
+meta_skills: [eval-ops-agent-benchmarks]   # la usan humanos/CI, no agentes
+personal_skills: [ambxst-shell-dev, ambxst-plugins, ambxst-theming,   # perfil personal
+                  ambxst-packaging, linux-dev]
+
 agents:
   requirements-analyst:
     role: consultant
@@ -106,7 +111,7 @@ agents:
              postgresql-standard, mysql-standard, oracle-standard, sqlserver-standard,
              n8n-stack, security-standards, keycloak-standard, testing-strategy,
              pre-flight-check, context-pinning, bug-fixing-workflow,
-             secret-scanning]
+             refactor-patterns, refactor-hexagonal-bridge, secret-scanning]
 
   ui-executor:
     role: worker
@@ -122,7 +127,8 @@ agents:
 
   architect-executor:
     role: worker
-    phases: [execution-no-spec]
+    deprecated: "superseded 2026-09-30 por carriles trivial/fix (odd-card) — ejecucion sin spec eliminada"
+    phases: []
     skills: [hexagonal-architecture, springboot-stack, fastapi-stack, nodejs-stack,
              react-stack, angular-stack, golang-stack, java-stack, kotlin-stack,
              repository-dto-patterns, testing-strategy, pre-flight-check,
@@ -154,7 +160,8 @@ agents:
 
   refactor:
     role: worker
-    phases: [execution]
+    deprecated: "integrado 2026-09-30 en executor (skills refactor-patterns, refactor-hexagonal-bridge)"
+    phases: []
     reads_states: [validated-not-executed]
     skills: [refactor-patterns, refactor-hexagonal-bridge, hexagonal-architecture,
              design-patterns-standard, testing-strategy, context-pinning,
@@ -166,14 +173,16 @@ agents:
     reads_states: [validated-not-executed]
     writes_states: [odd-defined]
     scribe_for: [bug-diagnostician, reviewer]   # transcribe literal odd-card y Reviewer Approval
-    skills: [outcome-observability-driven, documentation-lifecycle, documentation-standards, context-pinning,
+    post_merge: [retrospective]   # Fase 7-retro: alimenta MEMORY.md y propone casos de eval
+    skills: [outcome-observability-driven, documentation-reconciliation,
+             documentation-lifecycle, documentation-standards, context-pinning,
              openapi-standard, secret-scanning]
 
   functional-tester-agent:
     role: validator
     phases: [quality]
     triggers: [pre-gate2-regression]
-    skills: [functional-testing-standard, performance-testing-k6, testing-strategy,
+    skills: [functional-testing-standard, testing-strategy,
              accessibility-standard, frontend-architecture, react-stack, angular-stack,
              context-pinning, bug-fixing-workflow]
 
@@ -232,13 +241,14 @@ agents:
     phases: [transversal]
     reads_states: [awaiting-human-plan-approval, awaiting-human-qa-approval]
     skills: [context-curation, context-pinning, spec-driven-development,
-             workspace-coordination, graphify, planning-context-pack]
+             workspace-coordination, graphify, planning-context-pack,
+             project-context-navigation, project-context-files]
 
   master-orchestrator:
     role: consultant
     phases: [transversal]
     delegates_to: [requirements-analyst, context-curator, planner, task-decomposer, executor,
-                   architect-executor, test-architect, spec-validator, final-validation,
+                   test-architect, spec-validator, final-validation,
                    git-executor, database-architect, devops-architect,
                    functional-tester-agent, bug-diagnostician, reviewer, documentation]
     classifies: lane
@@ -255,7 +265,7 @@ gates:
     signature: "## Human Plan Approval: approved_by_user"
     includes: decision de diseño (si el incremento tiene UI, la dirección elegida
       queda registrada en docs/designs/<increment-name>/README.md)
-    blocks: [task-decomposer, executor, ui-executor, architect-executor]
+    blocks: [task-decomposer, executor, ui-executor]
   G2:
     name: awaiting-human-qa-approval
     signature: "## Human QA Approval: approved_by_user"
@@ -304,7 +314,6 @@ constraints:
     forbidden_pairs:
       executor: [reviewer, security-reviewer, final-validation]
       ui-executor: [reviewer, security-reviewer, final-validation]
-      architect-executor: [reviewer, security-reviewer, final-validation]
       refactor: [final-validation]
     invariants:
       - los validadores no escriben estados de ejecucion (in_progress) ni de

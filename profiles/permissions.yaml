@@ -31,7 +31,7 @@ agents:
   database-architect:     {edit: allow, bash: allow, temp: "0.10"}
   devops-architect:       {edit: allow, bash: allow, temp: "0.2"}
   refactor:               {edit: allow, bash: allow, temp: "0.2"}
-  documentation:          {edit: allow, bash: deny, temp: "0.25"}
+  documentation:          {edit: allow, bash: allow, temp: "0.25"}
   spec-remediator:        {edit: allow, bash: deny, temp: "0.1"}
   functional-tester-agent: {mode: subagent, edit: deny, bash: allow, temp: "0.2"}
   git-executor:           {edit: allow, bash: allow, temp: "0.1"}

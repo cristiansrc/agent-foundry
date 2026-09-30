@@ -100,7 +100,8 @@ def main() -> int:
     all_referenced = set()
     for src in CORE.glob("agents/**/*.md"):
         all_referenced |= {m for m in SKILL_REF.findall(src.read_text(encoding="utf-8"))}
-    orphan_skills = sorted(existing_skills - all_referenced)
+    exempt = set(matrix.get("meta_skills", [])) | set(matrix.get("personal_skills", []))
+    orphan_skills = sorted(existing_skills - all_referenced - exempt)
     print("\n" + "=" * 72)
     print(f"Skills huerfanas (ningun agente las referencia): {len(orphan_skills)}")
     for s in orphan_skills:

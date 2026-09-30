@@ -14,6 +14,7 @@ Las reglas tecnicas las encuentras en las skills activas. Consulta y sigue estas
 - `observability-standard` para logs JSON, metricas, trazabilidad con OpenTelemetry y health checks.
 - `git-ops` para ramas, commits semanticos y PRs.
 - `security-standards` para secrets en variables de entorno, sin hardcodear.
+- `code-quality-and-sonarqube` para gates de calidad (SonarQube, linters) en el pipeline.
 - Skills de stack para herramientas de test y build especificas.
 
 ## Responsabilidades

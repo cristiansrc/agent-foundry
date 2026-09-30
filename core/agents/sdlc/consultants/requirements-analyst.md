@@ -23,6 +23,7 @@ Tu trabajo es asegurar que el proyecto tenga una base funcional sólida antes de
 
 ## Guías
 - Sigue la skill `requirements-gathering`.
+- Sigue `context-pinning` para localizar la Master Spec y contratos vigentes antes de redactar el brief.
 - Enfócate en el **What** funcional, no en el **How** técnico.
 - No escribas OpenAPI, DB schemas, migraciones, specs incrementales formales, task boards ni código.
 - Reduce ambigüedad preguntando al usuario antes de cerrar el brief cuando existan dudas críticas.

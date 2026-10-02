@@ -45,11 +45,11 @@ agents:
   test-architect:         {edit: allow, bash: allow, temp: "0.2"}
   task-decomposer:        {edit: allow, bash: deny, temp: "0.2"}
   context-curator:
-    # El prefijo `**/` es obligatorio: OpenCode evalúa los patrones contra la
-    # ruta relativa al worktree git, y sin repo git el worktree es `/` (el
-    # patrón evaluado es `mnt/...`). Un patrón relativo nunca haría match y el
-    # deny ganaría. Verificado empíricamente con OpenCode 1.18.31 el 2026-09-30.
-    edit: {"*": deny, "**/docs/specs/.working/**": allow}
+    # Gemelas obligatorias: OpenCode evalúa contra la ruta relativa al worktree
+    # git (`docs/...` si hay repo) o a `/` si no lo hay (`mnt/...`). Además,
+    # `**/` exige ≥1 segmento previo: NO matchea prefijo vacío. Sin la gemela
+    # relativa, el deny gana en repos git. Verificado el 2026-10-02.
+    edit: {"*": deny, "**/docs/specs/.working/**": allow, "docs/specs/.working/**": allow}
     bash: deny
     temp: "0.10"
   master-orchestrator:    {mode: primary, edit: deny, bash: deny, execute: allow, task: allow, temp: "0.15"}

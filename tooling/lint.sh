@@ -53,10 +53,10 @@ while IFS= read -r f; do
 done < <(find "$CORE/agents" -name '*.md')
 echo "OK"
 
-echo "== Permisos con scope: patrones anclados a worktree"
-# Un patrón `allow` relativo (ej. `docs/**`) jamás matchea: OpenCode evalúa
-# contra la ruta relativa al worktree git (o a `/` sin repo). Solo `**/...`,
-# `/...` o `~/...` son válidos. Verificado el 2026-09-30 (context-curator).
+echo "== Permisos con scope: gemelas de worktree"
+# OpenCode evalúa contra la ruta al worktree git (`docs/...`) o a `/` sin repo
+# (`mnt/...`), y `**/` exige ≥1 segmento previo. Por eso cada allow con scope
+# necesita sus DOS gemelas: `X` y `**/X`. Verificado el 2026-10-02.
 BAD_SCOPE=$(python3 - "$ROOT/profiles/permissions.yaml" <<'EOF'
 import sys, yaml
 p = yaml.safe_load(open(sys.argv[1]))["agents"]
@@ -64,15 +64,19 @@ bad = []
 for agent, cfg in p.items():
     edit = (cfg or {}).get("edit")
     if isinstance(edit, dict):
-        for pattern, effect in edit.items():
-            if effect == "allow" and not pattern.startswith(("**/", "/", "~/")) and pattern != "*":
-                bad.append(f"{agent}: {pattern}")
+        allows = {pt for pt, ef in edit.items() if ef == "allow"}
+        for pt in sorted(allows):
+            if pt == "*" or pt.startswith(("/", "~/")):
+                continue
+            twin = pt[3:] if pt.startswith("**/") else f"**/{pt}"
+            if twin not in allows:
+                bad.append(f"{agent}: falta gemela de '{pt}' (se exige '{twin}')")
 print("\n".join(bad))
 EOF
 )
 if [ -n "$BAD_SCOPE" ]; then
   echo "$BAD_SCOPE"
-  fail "patrón allow relativo (usar **/, / o ~/, ver profiles/permissions.yaml)"
+  fail "allow con scope sin gemela (ver profiles/permissions.yaml)"
 else
   echo "OK"
 fi

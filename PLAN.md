@@ -91,9 +91,13 @@ Ver `docs/migration-notes.md` para decisiones detalladas de migración.
   codifica (DeepSeek)—. Coste de esa elección: `security-reviewer` y
   `final-validation` bajan de Sonnet 5.5 a GLM-5.3; se acepta a cambio de no
   gastar el allowance de Plus en puertas de calidad. `harness_copilot` queda
-  inactivo como rollback. Evals: spec-validator 4/4 (mejor que el 3/4 de Opus
-  5.5), security-reviewer 3/3 y final-validation 3/3 con `--repeat 2`; los
-  agentes de Plus sin certificar hasta que se conecte el OAuth.
+  inactivo como rollback. Con el OAuth conectado: evals en verde para
+  planner 1/1, master-orchestrator 1/1, carriles ODD 3/3, bug-diagnostician
+  2/2 y ui-executor 3/3 (`--repeat 2`), más los de Go del commit anterior —
+  spec-validator 4/4 (mejor que el 3/4 de Opus 5.5), security-reviewer 3/3 y
+  final-validation 3/3. `enterprise-architect`, `solution-architect` y
+  `ui-designer` no tienen suite: sin certificar por evals, sí verificados en
+  el harness real (responden con el modelo asignado).
 - **Caps de OpenCode Go corregidos a Go Plus, 2026-10-03**: los `cap:` de
   `profiles/models.yaml` estaban copiados de la tabla de Go $10 (15/60) y no
   del plan de $40 que está pagado (60/120/180/240). El diseño estaba
@@ -104,6 +108,14 @@ Ver `docs/migration-notes.md` para decisiones detalladas de migración.
   `ERRORS`), y un slot colgante en `tier_bindings` mataba el build de Codex con
   un `KeyError` desnudo. Corregido el `while` y añadido
   `validate_bindings()` en `adapters/shared/foundry.py`, invocado desde lint.
+- **`fallbacks` es config muerta, 2026-10-03**: ningún adapter lo consume —
+  `render.py` resuelve un único primario y el plugin enruta agente→modelo 1:1.
+  Si se agota la ventana de Sol en Plus, el agente falla; no degrada a Luna
+  como suggestía el bloque. Implementar el encadenado real exige detectar el
+  error de cuota en runtime y reintentar: decisión pendiente, no config.
+  Los `cap:` de 272K en los modelos gpt-6* también eran el umbral de tariff de
+  Copilot/Go, no la ventana de contexto: el catálogo (models.dev) reporta
+  1.050.000 para openai y github-copilot. Corregido.
 
 ## Mejoras de coordinación pendientes de discutir (Fase 7)
 

@@ -284,14 +284,14 @@ providers:
       luna:
         id: openai/gpt-6-luna
         status: active
-        context: 272K
+        context: 1M
         vision: true
         cost: 0.10/0.50
         notes: "Abundante en Plus (350-3.000 msgs/5h). Orquestación (muchas llamadas) y UI iterativa. Sustituye al volumen dentro de Plus; el volumen mecánico barato sigue siendo MiMo/DeepSeek en Go."
       sol:
         id: openai/gpt-6.1-sol
         status: active
-        context: 272K
+        context: 1M
         vision: true
         cost: 50/250 creditos
         notes: "Flagship. Escaso en Plus (15-160 msgs/5h) y con tope semanal encima: solo razonamiento que decide. planner (effort high), solution-architect y bug-diagnostician. NO para volumen."
@@ -308,8 +308,12 @@ providers:
       code_heavy:          [sol]
       ui_e2e:              [luna]
     fallbacks:
-      # Degradar a Luna mantiene el flujo si se agota la ventana de Sol, a costa
-      # de calidad en planificación. Vaciar la lista haría fallar en seco.
+      # DECLARATIVO, NO CONSUMIDO: ningún adapter lee `fallbacks` (verificado
+      # 2026-10-03). render.py resuelve un único primario y el plugin enruta
+      # agente->modelo 1:1, así que si se agota la ventana de Sol el agente
+      # falla; no hay degradación automática a Luna. Implementar el encadenado
+      # requiere detectar el error de cuota en runtime y reintentar: decisión
+      # pendiente, no config. Hasta entonces, cambiar el binding a mano.
       sol:  [luna]
       luna: []
 
@@ -325,14 +329,14 @@ providers:
       sol:
         id: gpt-6.1-sol
         status: active
-        context: 272K
+        context: 1M
         vision: true
         cost: 50/250 creditos
         notes: "Flagship. Escaso en Plus (15-160 msgs/5h): solo decidir."
       luna:
         id: gpt-6-luna
         status: active
-        context: 272K
+        context: 1M
         vision: true
         cost: 0.10/0.50
         notes: Abundante en Plus (350-3.000 msgs/5h). Orquestación, volumen, review, docs, UI/E2E.

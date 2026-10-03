@@ -53,9 +53,13 @@ de calidad que estaban en Sonnet 5.5, que no existe en Plus). Su tope mensual
 en Go Plus es de $120 —unos $0.015 por request— así que da de sobra para
 validadores; si aun así se aprieta, reparte con `qwen38_max` o `kimi_k3`.
 
-### Si el tope semanal de Plus aprieta
+### Si se agota el allowance de Plus
 
-Orden de 선호 para recortar sin romper la independencia de validadores:
+No hay degradación automática: `fallbacks` en `profiles/models.yaml` es
+declarativo y ningún adapter lo consume. Si un agente de Plus falla por cuota,
+el error llega al orquestador y hay que cambiar el binding a mano.
+
+Orden de preferencia para recortar sin romper la independencia de validadores:
 
 1. Mueve `ui-designer` a `mimo_v26_flash` en Go (ahorra Luna, no Sol).
 2. Mueve `solution-architect` a `glm_reasoning` —pierdes el modelo más fuerte

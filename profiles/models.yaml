@@ -23,27 +23,41 @@ tiers:
 # Solo lo honra el adapter OpenCode; debe existir en el catálogo del modelo.
 agent_tiers:
   # OpenCode es el harness; `harness_provider` elige la suscripción que paga
-  # la inferencia. `slot` opcional fuerza un modelo concreto del proveedor
+  # la inferencia. `slot` opcional: fuerza un modelo concreto del proveedor
   # (el tier queda como respaldo).
-  # Estrategia 2026-09-30: Copilot Pro+ (AI Credits por token, ~$70/mes) solo
-  # para razonamiento que decide; OpenCode Go (topes por modelo) para volumen.
-  # Validadores críticos en familia distinta al planner (Anthropic vs OpenAI).
-  master-orchestrator:    {tier: orchestration, harness_provider: harness_copilot}
-  general:                {tier: orchestration, harness_provider: harness_copilot}
-  enterprise-architect:   {tier: macro_architecture, harness_provider: harness_copilot}
-  solution-architect:     {tier: patterns_logic, harness_provider: harness_copilot}
-  ui-designer:            {tier: patterns_logic, harness_provider: harness_copilot}
-  planner:                {tier: planning_governance, harness_provider: harness_copilot, variant: high}
+  # Estrategia 2026-10-03: ChatGPT Plus (allowance de Codex con medidores de
+  # 5h y semanal) SOLO para razonamiento que decide con Sol; el volumen y las
+  # puertas de calidad van a OpenCode Go Plus, que topa por modelo y no
+  # comparte contador con la otra suscripción.
+  # Sol es el recurso escaso de Plus (15-160 msgs/5h); Luna es el abundante
+  # (350-3.000/5h). Ningún agente de volumen (executor, docs, git) toca Sol.
+  # Validadores críticos en familia distinta al planner: Z.ai (GLM) y Moonshot
+  # (Kimi) frente a OpenAI del planner. SUSTITUYE a Copilot Pro+ del 2026-09-30.
+  master-orchestrator:    {tier: orchestration, harness_provider: harness_chatgpt}
+  general:                {tier: orchestration, harness_provider: harness_chatgpt}
+  # Opus 5.5 -> GLM-5.3 (era harness_copilot/opus55). Slot explicito para dejar
+  # constando el mapeo; el tier ya lo resuelve igual.
+  enterprise-architect:   {tier: macro_architecture, slot: glm_reasoning}
+  solution-architect:     {tier: patterns_logic, harness_provider: harness_chatgpt}
+  # Era Sonnet 5.5. ui-designer es iterativo (3-4 direcciones HTML) -> Luna,
+  # que en Plus es plentiful y con visión.
+  ui-designer:            {tier: patterns_logic, harness_provider: harness_chatgpt, slot: luna}
+  planner:                {tier: planning_governance, harness_provider: harness_chatgpt, variant: high}
   api-governance-agent:   {tier: planning_governance, slot: mimo_v26_pro}
   task-decomposer:        {tier: planning_governance, slot: mimo_v26_pro}
-  spec-validator:         {tier: spec_validation_critical, harness_provider: harness_copilot, locked: true}
+  # Opus 5.5 -> GLM-5.3. Familia Z.ai vs OpenAI del planner: independencia.
+  spec-validator:         {tier: spec_validation_critical, slot: glm_reasoning, locked: true}
+  # Sin slot: kimi_k3 (Moonshot), familia distinta a la del spec-validator.
   enterprise-spec-validator: {tier: spec_validation_critical}
   spec-remediator:        {tier: sdd_validation, slot: mimo_v26_pro}
   context-curator:        {tier: sdd_validation}
   reviewer:               {tier: sdd_validation, slot: glm_reasoning}
-  security-reviewer:      {tier: sdd_validation, harness_provider: harness_copilot}
-  requirements-analyst:   {tier: sdd_validation, harness_provider: harness_copilot, slot: sol}
-  final-validation:       {tier: sdd_validation, harness_provider: harness_copilot}
+  # security-reviewer y final-validation estaban en Sonnet 5.5, que no existe
+  # en ChatGPT Plus. A GLM-5.3: son las dos puertas approve/block y el tope de
+  # $120/mes de Go Plus aguanta las 5aprox. requests/semana por agente de sobra.
+  security-reviewer:      {tier: sdd_validation, slot: glm_reasoning}
+  requirements-analyst:   {tier: sdd_validation, harness_provider: harness_chatgpt, slot: sol}
+  final-validation:       {tier: sdd_validation, slot: glm_reasoning}
   documentation:          {tier: sdd_validation}
   executor:               {tier: code_heavy}
   test-architect:         {tier: code_volume, slot: kimi_k27_code}
@@ -51,16 +65,20 @@ agent_tiers:
   git-executor:           {tier: sdd_validation}
   refactor:               {tier: code_heavy, slot: deepseek_v4_pro}
   database-architect:     {tier: code_heavy, slot: deepseek_v4_pro}
-  bug-diagnostician:      {tier: code_heavy, harness_provider: harness_copilot}
+  bug-diagnostician:      {tier: code_heavy, harness_provider: harness_chatgpt}
   architect-executor:     {tier: code_heavy}
   functional-tester-agent: {tier: ui_e2e}
   ui-executor:            {tier: ui_e2e}
 
 # ── 3. Bindings por proveedor/herramienta ──────────────────────────────────
 providers:
-  # OpenCode Go: topes POR MODELO (5h = 20%, semana = 50% del mensual de cada
-  # modelo). Repartir agentes entre modelos multiplica el margen. Precios y
-  # privacidad verificados en opencode.ai/docs/go 2026-09-30.
+  # OpenCode Go Plus ($40/mes): topes POR MODELO (5h = 20% del mensual de cada
+  # modelo, semana = 50%, mes = 100%). Cada modelo lleva SU propio contador, así
+  # que repartir agentes entre modelos multiplica el margen y nada compite con
+  # la suscripción de ChatGPT.
+  # Los `cap:` son los límites MENSUALES de Go Plus, no los de Go $10: corregido
+  # 2026-10-03 contra opencode.ai/docs/go (venían 3-8x bajos, tomados de la
+  # tabla de Go $10, y el diseño se restringía por un límite que no existía).
   opencode:
     active: true
     models:
@@ -70,23 +88,23 @@ providers:
         context: 1M
         vision: true
         cost: 0.15/0.50
-        cap: 60
-        notes: Curación de contexto. Sin entrenamiento, retención 0.
+        cap: 180
+        notes: Curación de contexto y respaldo barato. Sin entrenamiento, retención 0.
       glm_reasoning:
         id: opencode-go/glm-5.3
         status: active
         context: 1M
         vision: false
         cost: 1.40/4.40
-        cap: 15
-        notes: Reviewer con razonamiento; familia distinta a DeepSeek (quien codifica). Sin entrenamiento, retención 0.
+        cap: 120
+        notes: "Sustituye a Opus 5.5 el 2026-10-03: spec-validator, enterprise-architect, reviewer, security-reviewer y final-validation. ~$0.015 por request (700 in + 52k cached + 150 out) contra un tope semanal de $60 -> ~3.950 requests/semana para los 5 agentes. Familia Z.ai: distinta del planner (OpenAI) y de quien codifica (DeepSeek). Sin entrenamiento, retención 0."
       deepseek_v41_flash:
         id: opencode-go/deepseek-v4.1-flash
         status: active
         context: 1M
         vision: false
         cost: 0.15/0.60 off-peak, 0.30/1.20 peak
-        cap: 60
+        cap: 120
         notes: "Código de volumen. Pico L-V 01-04 y 06-10 UTC (x2). ZDR renovado mensualmente — vigente hasta 2026-10-31, re-verificar."
       deepseek_v4_pro:
         id: opencode-go/deepseek-v4-pro
@@ -94,15 +112,15 @@ providers:
         context: 1M
         vision: false
         cost: 0.66/1.98 off-peak, 1.32/3.96 peak
-        cap: 15
-        notes: "Desbloqueado 2026-09-30 (hay margen en Go). Refactor y DB — código delicado. ZDR vigente hasta 2026-10-31."
+        cap: 60
+        notes: "Desbloqueado 2026-09-30. Refactor y DB — código delicado. ZDR vigente hasta 2026-10-31."
       deepseek_flash_vision:
         id: opencode-go/deepseek-v4-flash-vision-exp
         status: active
         context: 1M
         vision: true
         cost: 0.15/0.60 off-peak, 0.30/1.20 peak
-        cap: 15
+        cap: 60
         notes: "EXCEPCIÓN DOCUMENTADA a la regla 'nada en pruebas' (sufijo Exp), aprobada 2026-09-30 para UI/E2E. Fallback estable: mimo_v26_flash."
       longcat:
         id: opencode-go/longcat-2.0
@@ -110,7 +128,7 @@ providers:
         context: 1M
         vision: false
         cost: 0.30/1.20
-        cap: 60
+        cap: 240
         notes: Respaldo de planning/gobernanza estructurada.
       mimo_v26_flash:
         id: opencode-go/mimo-v2.6-flash
@@ -118,7 +136,7 @@ providers:
         context: 1M
         vision: true
         cost: 0.14/0.28
-        cap: 60
+        cap: 120
         notes: El más barato estable. Docs, git, fallback con visión.
       mimo_v26_pro:
         id: opencode-go/mimo-v2.6-pro
@@ -126,7 +144,7 @@ providers:
         context: 1M
         vision: true
         cost: 0.435/0.87
-        cap: 15
+        cap: 60
         notes: Descomposición de tareas, gobernanza API y remediación de specs.
       kimi_k3:
         id: opencode-go/kimi-k3
@@ -134,23 +152,23 @@ providers:
         context: 256K
         vision: false
         cost: 3.00/15.00
-        cap: 15
-        notes: Validador enterprise en Go (familia Moonshot, distinta al planner). Sin entrenamiento, retención 0.
+        cap: 60
+        notes: Validador enterprise (familia Moonshot, distinta al planner y al spec-validator). Sin entrenamiento, retención 0.
       kimi_k27_code:
         id: opencode-go/kimi-k2.7-code
         status: active
         context: 256K
         vision: false
         cost: 0.95/4.00
-        cap: 60
-        notes: Fallback de código con contador independiente de DeepSeek.
+        cap: 180
+        notes: Tests de test-architect; contador independiente de DeepSeek.
       qwen38_max:
         id: opencode-go/qwen3.8-max
         status: active
         context: 256K
         vision: false
         cost: 2.00/6.00
-        cap: 15
+        cap: 60
         notes: Fallback de razonamiento en Go.
       hy3:
         id: opencode-go/hy3
@@ -158,13 +176,17 @@ providers:
         context: 256k
         vision: false
         cost: 0.14/0.58
-        cap: 60
+        cap: 240
         notes: Precio corregido 2026-09-30 (antes figuraba 0.0175). Sin vision.
     tier_bindings:
       orchestration:       [mimo_v26_flash]
-      macro_architecture:  [mimo_v26_pro]
+      # macro_architecture era mimo_v26_pro; el 2026-10-03 pasa a GLM-5.3 para
+      # sustituir a Opus 5.5 en enterprise-architect.
+      macro_architecture:  [glm_reasoning]
       patterns_logic:      [mimo_v26_flash]
       planning_governance: [longcat]
+      # Default = enterprise-spec-validator (Kimi K3, Moonshot). spec-validator
+      # fuerza GLM-5.3 con `slot` para no compartir familia con su verificador.
       spec_validation_critical: [kimi_k3, mimo_v26_pro]
       sdd_validation:      [mimo_v26_flash]
       code_volume:         [deepseek_v41_flash]
@@ -185,12 +207,11 @@ providers:
       kimi_k27_code: [deepseek_v41_flash]
 
   # GitHub Copilot Pro+ vía OAuth en OpenCode (/connect github-copilot).
-  # Facturación por tokens en AI Credits (1 crédito = $0.01; Pro+ = 7000/mes).
-  # Precios verificados en docs.github.com (models-and-pricing) 2026-09-30.
-  # Privacidad: plan individual puede entrenar por defecto — opt-out en
-  # Copilot settings; Business/Enterprise protegido por DPA.
+  # INACTIVO desde 2026-10-03: se vuelve a ChatGPT Plus porque Pro+ factura
+  # por tokens en AI Credits (1 crédito = $0.01; Pro+ = 7000/mes) y se consumió
+  # el 90% en una semana. Se conserva íntegro como rollback.
   harness_copilot:
-    active: true
+    active: false
     models:
       luna:
         id: github-copilot/gpt-6-luna
@@ -244,65 +265,77 @@ providers:
       luna:     []
       codex:    [sol]
 
-  # Reemplazado por harness_copilot 2026-09-30 (se cancela ChatGPT en OpenCode).
+  # ChatGPT Plus vía OAuth en OpenCode (/connect → OpenAI → ChatGPT Plus/Pro).
+  # ACTIVO desde 2026-10-03, sustituye a harness_copilot.
+  # Facturación por allowance de Codex, NO por token: dos medidores —ventana de
+  # 5h y tope semanal— y ambos deben tener saldo. Work y Codex comparten el
+  # mismo allowance. Estimaciones oficiales para Plus (chatgpt.com/codex/pricing,
+  # leídas 2026-10-03): 15-160 mensajes de Sol y 350-3.000 de Luna por 5h.
+  # Consecuencia de diseño: Sol es el recurso ESCASO y Luna el ABUNDANTE, así
+  # que el volumen de Plus (orquestación, UI) va a Luna y Sol queda solo para
+  # decidir (planner, solution-architect, RCA). Ningún agente de volumen toca
+  # Sol. Plus incluye effort medium/high — por eso `variant: high` del planner
+  # sigue siendo válido— pero NO extra-high ni Pro (Astra).
+  # Privacidad: los planes personales pueden entrenar por defecto; opt-out en
+  # los ajustes de la cuenta. Para código sensible, OpenCode Go tiene ZDR.
   harness_chatgpt:
-    active: false
+    active: true
     models:
       luna:
         id: openai/gpt-6-luna
         status: active
-        context: 1M
+        context: 272K
         vision: true
-        notes: Histórico — rollback manual.
+        cost: 0.10/0.50
+        notes: "Abundante en Plus (350-3.000 msgs/5h). Orquestación (muchas llamadas) y UI iterativa. Sustituye al volumen dentro de Plus; el volumen mecánico barato sigue siendo MiMo/DeepSeek en Go."
       sol:
         id: openai/gpt-6.1-sol
         status: active
-        context: 1M
+        context: 272K
         vision: true
-        notes: Histórico — rollback manual.
+        cost: 50/250 creditos
+        notes: "Flagship. Escaso en Plus (15-160 msgs/5h) y con tope semanal encima: solo razonamiento que decide. planner (effort high), solution-architect y bug-diagnostician. NO para volumen."
     tier_bindings:
       orchestration:       [luna]
       macro_architecture:  [sol]
       patterns_logic:      [sol]
       planning_governance: [sol]
+      # Solo respaldo: los validadores críticos viven en Go para no compartir
+      # familia con el planner (sería el mismo modelo que certifica su propia spec).
       spec_validation_critical: [sol]
-      sdd_validation:      [sol]
-      code_volume:         [sol]
+      sdd_validation:      [luna]
+      code_volume:         [luna]
       code_heavy:          [sol]
-      ui_e2e:              [sol]
+      ui_e2e:              [luna]
     fallbacks:
-      sol: [luna]
+      # Degradar a Luna mantiene el flujo si se agota la ventana de Sol, a costa
+      # de calidad en planificación. Vaciar la lista haría fallar en seco.
+      sol:  [luna]
       luna: []
 
-  # RECOMENDACIÓN (2026-09-30) — sin evals en Codex CLI: replica la
-  # estrategia validada en OpenCode (barato para volumen/orquestación,
-  # flagship para decidir). Harness primario recomendado: OpenCode, donde las
-  # suscripciones se combinan (Copilot para razonar + Go para volumen).
+  # RECOMENDACIÓN (2026-10-03) — sin evals en Codex CLI: replica la
+  # estrategia validada en OpenCode (Luna para volumen/orquestación, Sol para
+  # decidir). Harness primario recomendado: OpenCode, donde las suscripciones
+  # se combinan (ChatGPT Plus para razonar + Go Plus para volumen) y cada una
+  # lleva contador propio.
   chatgpt:
     active: true
     verified: false
     models:
       sol:
-        id: gpt-5.6-sol
+        id: gpt-6.1-sol
         status: active
         context: 272K
         vision: true
-        cost: 2.4x
-        notes: Flagship. Planificación, validación crítica, código pesado y RCA.
-      terra:
-        id: gpt-5.6-terra
-        status: active
-        context: 272K
-        vision: true
-        cost: 1.0x
-        notes: Equilibrado. Patrones, arquitectura y código pesado alternativo.
+        cost: 50/250 creditos
+        notes: "Flagship. Escaso en Plus (15-160 msgs/5h): solo decidir."
       luna:
-        id: gpt-5.6-luna
+        id: gpt-6-luna
         status: active
         context: 272K
         vision: true
-        cost: 0.1x
-        notes: Rápido y barato (0.1x). Orquestación (muchas llamadas), volumen, review, docs, UI/E2E.
+        cost: 0.10/0.50
+        notes: Abundante en Plus (350-3.000 msgs/5h). Orquestación, volumen, review, docs, UI/E2E.
     tier_bindings:
       orchestration:       [luna]
       macro_architecture:  [sol]
@@ -311,16 +344,15 @@ providers:
       spec_validation_critical: [sol]
       sdd_validation:      [luna]
       code_volume:         [luna]
-      code_heavy:          [terra]
+      code_heavy:          [sol]
       ui_e2e:              [luna]
     fallbacks:
-      sol:  [terra]
-      terra: [luna]
+      sol:  [luna]
       luna: []
 
-  # RECOMENDACIÓN (2026-09-30) — sin evals en Kiro: replica la estrategia
+  # RECOMENDACIÓN (2026-10-03) — sin evals en Kiro: replica la estrategia
   # validada en OpenCode. Harness primario recomendado: OpenCode, donde las
-  # suscripciones se combinan (Copilot para razonar + Go para volumen).
+  # suscripciones se combinan (ChatGPT Plus para razonar + Go Plus para volumen).
   kiro:
     active: true
     verified: false
@@ -387,6 +419,7 @@ providers:
 
 # ── 4. Bloqueados (nunca asignar) ──────────────────────────────────────────
 blocked:
+  - {id: openai/gpt-6-astra, reason: "Astra es la opción Pro del Codex (5-45 msgs/5h) y ChatGPT Plus no incluye Pro ni extra-high. 2026-10-03."}
   - {id: github-copilot/gpt-6-astra, reason: "Coste 5x Sol 6.1 ($10/$50 por 1M) — consumiría los AI Credits de Pro+. 2026-09-30."}
   - {id: opencode-go/hy4-preview, reason: "Preview — política de no usar modelos en pruebas. 2026-09-30."}
   - {id: opencode-go/longcat-2.5-preview-free, reason: "Preview gratuito temporal — no usar modelos en pruebas. 2026-09-30."}

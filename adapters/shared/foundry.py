@@ -57,6 +57,37 @@ def require_active(models_cfg: dict, provider: str) -> None:
               f"se genera sin campo model (default del proveedor).")
 
 
+def validate_bindings(models_cfg: dict) -> list[str]:
+    """Slots colgantes en models.yaml -> lista de errores legibles.
+
+    Un tier o un fallback que nombran un slot inexistente reventaba con un
+    KeyError desnudo en los renders (kiro/chatgpt) o, peor, caía al segundo
+    candidato sin avisar (opencode). Verificado 2026-10-03 al quitar `terra`
+    del bloque `chatgpt`: el build de Codex moría en `p["models"][slot]`.
+    """
+    errors: list[str] = []
+    tiers = set(models_cfg.get("tiers") or {})
+    for pname, provider in (models_cfg.get("providers") or {}).items():
+        models = provider.get("models") or {}
+        bindings = provider.get("tier_bindings") or {}
+        for tier, slots in bindings.items():
+            if tiers and tier not in tiers:
+                errors.append(f"{pname}: tier_bindings declara tier desconocido: {tier}")
+            for slot in slots or []:
+                if slot not in models:
+                    errors.append(f"{pname}.{tier}: slot '{slot}' no existe en models")
+        for slot, chain in (provider.get("fallbacks") or {}).items():
+            if slot not in models:
+                errors.append(f"{pname}.fallbacks: origen '{slot}' no existe en models")
+            for fb in chain or []:
+                if fb not in models:
+                    errors.append(f"{pname}.fallbacks[{slot}]: destino '{fb}' no existe en models")
+    for agent, info in (models_cfg.get("agent_tiers") or {}).items():
+        if info.get("tier") not in tiers:
+            errors.append(f"agent_tiers.{agent}: tier desconocido: {info.get('tier')}")
+    return errors
+
+
 # Mapeo permisos abstractos -> herramientas Kiro
 KIRO_TOOLS_BY_PERMS = {
     (True, True): ["read", "write", "shell"],

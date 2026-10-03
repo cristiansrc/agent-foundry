@@ -36,8 +36,9 @@ python3 evals/run.py evals/cases/<suite>.yaml --executor opencode --timeout 1200
 
 - `--repeat N`: los LLM no son deterministas; por defecto gana la mayoría.
 - `--timeout`: segundos por caso (default 900). El razonamiento pesado
-  (Opus 5.5 explorando el repo) puede necesitar más; si expira de forma
-  sistemática, primero prueba el caso a mano antes de culpar al modelo.
+  (GLM-5.3 en `spec-validator` o `enterprise-architect`, que exploran el repo
+  entero) puede necesitar más; si expira de forma sistemática, primero prueba
+  el caso a mano antes de culpar al modelo.
 - `--show-output`: imprime la respuesta del agente en los casos FAIL.
 - Cada caso corre en un **sandbox temporal** (`opencode run --dir`): las
   evals nunca escriben artefactos en este repo.

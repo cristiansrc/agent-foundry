@@ -6,38 +6,67 @@ trabajo distintos.
 
 ## Conexiones requeridas
 
-1. En OpenCode, ejecutar `/connect` y autenticar **GitHub Copilot** (Pro+).
-2. Confirmar con `/models` que aparecen los IDs `github-copilot/...` configurados.
+1. En OpenCode, ejecutar `/connect` y autenticar **OpenAI → ChatGPT
+   Plus/Pro**.
+2. Confirmar con `/models` que aparecen `openai/gpt-6-luna` y
+   `openai/gpt-6.1-sol`. Si no aparecen, la suscripción no cubre el modelo.
 3. Conectar o conservar **OpenCode Go** y confirmar sus modelos con `/models`.
 4. Solo después instalar con `tooling/sync.sh`.
 
-Desde 2026-09-30 Copilot Pro+ reemplaza a ChatGPT OAuth (`harness_chatgpt`
-queda inactivo como rollback). Copilot factura por tokens en AI Credits
-(Pro+ = 7000/mes ≈ $70); OpenCode Go aplica topes **por modelo** (5h = 20% del
-mensual). Por eso Copilot solo carga razonamiento que decide y Go el volumen.
+Desde 2026-10-03 ChatGPT Plus reemplaza a Copilot Pro+ (`harness_copilot`
+queda inactivo como rollback). El motivo es la forma de facturar: Copilot Pro+
+cobra **por token** en AI Credits (Pro+ = 7000/mes ≈ $70) y se consumió el 90%
+en una semana; ChatGPT Plus da un **allowance de Codex** con dos medidores —
+ventana de 5h y tope semanal— compartido entre Work y Codex.
 
-Privacidad: Copilot individual puede usar datos para entrenamiento salvo
-opt-out en *Copilot settings*; Business/Enterprise está cubierto por DPA.
+Privacidad: los planes personales de ChatGPT pueden entrenar con tus prompts
+por defecto (opt-out en los ajustes de la cuenta); OpenCode Go tiene ZDR en los
+modelos donde importa. Si eso es unacceptable, mueve el agente sensible a Go.
 
 ## Política de routing
 
+Regla que decide cada caso: **Sol es el recurso escaso de Plus y Luna el
+abundante** (15-160 vs 350-3.000 mensajes por 5h). Sol queda solo para
+razonamiento que decide; el volumen nunca lo toca. OpenCode Go topa **por
+modelo**, así que cada familia tiene contador propio y no compite con Plus.
+
 | Capacidad | Suscripción | Modelo | Agentes |
 |---|---|---|---|
-| Orquestación | Copilot | GPT-6 Luna | master-orchestrator, general |
-| Planificación | Copilot | GPT-6.1 Sol (high) | planner |
-| Requisitos / RCA | Copilot | GPT-6.1 Sol | requirements-analyst, bug-diagnostician |
-| Validación crítica / macro-arquitectura | Copilot | Claude Opus 5.5 | spec-validator, enterprise-architect (familia distinta al planner) |
-| Patrones / UI / seguridad / validación final | Copilot | Claude Sonnet 5.5 | solution-architect, ui-designer, security-reviewer, final-validation |
-| Validación enterprise | OpenCode Go | Kimi K3 | enterprise-spec-validator |
+| Orquestación | ChatGPT Plus | GPT-6 Luna | master-orchestrator, general |
+| UI / diseño | ChatGPT Plus | GPT-6 Luna | ui-designer (iterativo y con visión) |
+| Planificación | ChatGPT Plus | GPT-6.1 Sol (effort high) | planner |
+| Patrones / diseño técnico | ChatGPT Plus | GPT-6.1 Sol | solution-architect |
+| RCA | ChatGPT Plus | GPT-6.1 Sol | bug-diagnostician, requirements-analyst |
+| Validación crítica | OpenCode Go | GLM-5.3 | spec-validator (familia Z.ai, distinta al planner) |
+| Macro-arquitectura | OpenCode Go | GLM-5.3 | enterprise-architect |
+| Review / seguridad / QA final | OpenCode Go | GLM-5.3 | reviewer, security-reviewer, final-validation |
+| Validación enterprise | OpenCode Go | Kimi K3 | enterprise-spec-validator (familia Moonshot) |
 | Plan estructurado / remediación | OpenCode Go | MiMo-V2.6 Pro | task-decomposer, api-governance-agent, spec-remediator |
-| Review | OpenCode Go | GLM-5.3 | reviewer (familia distinta a quien codifica) |
 | Código delicado | OpenCode Go | DeepSeek V4 Pro | refactor, database-architect |
-| Código | OpenCode Go | DeepSeek V4.1 Flash | executor, architect-executor, test-architect, devops-architect |
+| Código | OpenCode Go | DeepSeek V4.1 Flash | executor, architect-executor, devops-architect |
+| Tests | OpenCode Go | Kimi K2.7 Code | test-architect (contador propio) |
 | Trabajo mecánico | OpenCode Go | MiMo-V2.6 Flash | git-executor, documentation, context-curator |
 | UI/E2E | OpenCode Go | DeepSeek V4 Flash Vision Exp (excepción documentada) | functional-tester-agent, ui-executor |
 
-Bloqueados: GPT-6 Astra (coste), modelos preview, `Omen Alpha` y variantes
-Muse Spark Contributor (entrenan con prompts).
+GLM-5.3 absorbe cinco agentes (los dos que usaban Opus 5.5 más las tres puertas
+de calidad que estaban en Sonnet 5.5, que no existe en Plus). Su tope mensual
+en Go Plus es de $120 —unos $0.015 por request— así que da de sobra para
+validadores; si aun así se aprieta, reparte con `qwen38_max` o `kimi_k3`.
+
+### Si el tope semanal de Plus aprieta
+
+Orden de 선호 para recortar sin romper la independencia de validadores:
+
+1. Mueve `ui-designer` a `mimo_v26_flash` en Go (ahorra Luna, no Sol).
+2. Mueve `solution-architect` a `glm_reasoning` —pierdes el modelo más fuerte
+   en diseño técnico.
+3. Como último recurso, baja el `variant` del `planner` de `high` a `medium`.
+
+No bajes `spec-validator`: es la única garantía de que el planner no certifica
+su propia spec, y depende de que sea otra familia de modelo.
+
+Bloqueados: GPT-6 Astra (opción Pro, no incluida en Plus), modelos preview,
+`Omen Alpha` y variantes Muse Spark Contributor (entrenan con prompts).
 
 ## Agentes desplegados
 

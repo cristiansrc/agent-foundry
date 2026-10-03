@@ -83,9 +83,15 @@ fi
 
 echo "== YAML válido en workflow/ y profiles/"
 if command -v python3 >/dev/null && python3 -c 'import yaml' 2>/dev/null; then
-  find "$ROOT/workflow" "$CORE/workflow" "$ROOT/profiles" -name '*.yaml' 2>/dev/null | while IFS= read -r f; do
-    python3 -c "import yaml,sys; yaml.safe_load(open('$f'))" || echo "YAML inválido: $f"
-  done
+  # `for` y no `while` en una tubería: el while corre en subshell y su
+  # `fail` no propagaba ERRORS — un profiles/ roto pasaba el lint y solo
+  # reventaba más tarde en el render. Verificado 2026-10-03.
+  while IFS= read -r f; do
+    [ -n "$f" ] || continue
+    if ! python3 -c "import yaml,sys; yaml.safe_load(open('$f'))" 2>/dev/null; then
+      fail "YAML inválido: $f"
+    fi
+  done < <(find "$ROOT/workflow" "$CORE/workflow" "$ROOT/profiles" -name '*.yaml' 2>/dev/null)
   echo "OK"
 else
   echo "SKIP (pyyaml no disponible)"
@@ -113,6 +119,28 @@ if [ -f "$ROOT/adapters/opencode/out/plugin/foundry-model-router.ts" ]; then
   fi
 else
   echo "SKIP (out/plugin aún no generado; corre build.sh)"
+fi
+
+echo "== Bindings de models.yaml: slots y tiers resolubles"
+if python3 -c 'import yaml' 2>/dev/null; then
+  BAD_BINDINGS=$(python3 - "$ROOT" <<'EOF'
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(sys.argv[1]) / "adapters" / "shared"))
+import yaml
+from foundry import validate_bindings
+cfg = yaml.safe_load((Path(sys.argv[1]) / "profiles" / "models.yaml").read_text(encoding="utf-8"))
+print("\n".join(validate_bindings(cfg)))
+EOF
+)
+  if [ -n "$BAD_BINDINGS" ]; then
+    echo "$BAD_BINDINGS"
+    fail "bindings colgantes en profiles/models.yaml"
+  else
+    echo "OK"
+  fi
+else
+  echo "SKIP (pyyaml no disponible)"
 fi
 
 echo "== Constraints: independencia verifier/implementer y packs =="

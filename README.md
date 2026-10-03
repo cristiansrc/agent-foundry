@@ -51,18 +51,21 @@ core/  ──►  profiles/  ──►  adapters/  ──►  configs instaladas
 ### OpenCode como harness
 
 OpenCode concentra el flujo, agentes y permisos. La inferencia se reparte
-entre dos suscripciones:
+entre dos suscripciones, elegidas por **forma de facturar**:
 
-- **GitHub Copilot Pro+** (factura por tokens en AI Credits): solo
-  razonamiento que decide — orquestación (GPT-6 Luna), planificación y RCA
-  (GPT-6.1 Sol), patrones/seguridad/validación final (Claude Sonnet 5.5) y
-  validación crítica + macro-arquitectura (Claude Opus 5.5, en familia
-  distinta al planner).
-- **OpenCode Go** (topes de uso por modelo): volumen — código (DeepSeek),
-  tests (Kimi), planificación estructurada (LongCat/MiMo), revisión y trabajo
-  mecánico (GLM/MiMo).
+- **ChatGPT Plus** (allowance de Codex con medidores de 5h y semanal): solo
+  razonamiento que decide. GPT-6.1 Sol para planificación, diseño técnico y RCA;
+  GPT-6 Luna para orquestación y UI, que son las llamadas numerosas.
+  Sol es el recurso escaso (15-160 mensajes por 5h), Luna el abundante
+  (350-3.000) — por eso el volumen nunca toca Sol.
+- **OpenCode Go Plus** (topes de uso por modelo, $40/mes): volumen, código y
+  las puertas de calidad. DeepSeek para código, Kimi para tests y validación
+  enterprise, MiMo para trabajo mecánico, y GLM-5.3 como validador
+  independiente del planner (familia Z.ai frente a OpenAI).
 
-El detalle, la política de privacidad y los modelos bloqueados están en
+Cada suscripción lleva sus propios contadores, así que agotar una no afecta a
+la otra. El detalle, la política de privacidad, el reparto por proveedor y los
+modelos bloqueados están en
 [`docs/runbooks/opencode-harness.md`](docs/runbooks/opencode-harness.md).
 
 > **Harness recomendado: OpenCode.** Es el único harness con evals ejecutadas
@@ -338,60 +341,60 @@ La skill `agent-foundry-reader` se instala mediante
 | Agente | Modelo de ejecución |
 |--------|--------------------|
 | `api-governance-agent` | opencode-go/mimo-v2.6-pro |
-| `bug-diagnostician` | github-copilot/gpt-6.1-sol |
+| `bug-diagnostician` | openai/gpt-6.1-sol |
 | `context-curator` | opencode-go/mimo-v2.6-flash |
 | `database-architect` | opencode-go/deepseek-v4-pro |
 | `devops-architect` | opencode-go/deepseek-v4.1-flash |
 | `documentation` | opencode-go/mimo-v2.6-flash |
-| `enterprise-architect` | github-copilot/claude-opus-5.5 |
+| `enterprise-architect` | opencode-go/glm-5.3 |
 | `enterprise-spec-validator` | opencode-go/kimi-k3 |
 | `executor` | opencode-go/deepseek-v4.1-flash |
-| `final-validation` | github-copilot/claude-sonnet-5.5 |
+| `final-validation` | opencode-go/glm-5.3 |
 | `functional-tester-agent` | opencode-go/deepseek-v4-flash-vision-exp |
 | `git-executor` | opencode-go/mimo-v2.6-flash |
-| `master-orchestrator` | github-copilot/gpt-6-luna |
-| `planner` | github-copilot/gpt-6.1-sol |
+| `master-orchestrator` | openai/gpt-6-luna |
+| `planner` | openai/gpt-6.1-sol |
 | `reviewer` | opencode-go/glm-5.3 |
-| `security-reviewer` | github-copilot/claude-sonnet-5.5 |
-| `solution-architect` | github-copilot/claude-sonnet-5.5 |
+| `security-reviewer` | opencode-go/glm-5.3 |
+| `solution-architect` | openai/gpt-6.1-sol |
 | `spec-remediator` | opencode-go/mimo-v2.6-pro |
-| `spec-validator` | github-copilot/claude-opus-5.5 |
+| `spec-validator` | opencode-go/glm-5.3 |
 | `task-decomposer` | opencode-go/mimo-v2.6-pro |
 | `test-architect` | opencode-go/kimi-k2.7-code |
-| `ui-designer` | github-copilot/claude-sonnet-5.5 |
+| `ui-designer` | openai/gpt-6-luna |
 | `ui-executor` | opencode-go/deepseek-v4-flash-vision-exp |
 
 ### ChatGPT (Codex CLI) — bindings recomendados (sin evals en este harness)
 
 | Agente | Modelo de ejecución |
 |--------|--------------------|
-| `api-governance-agent` | `gpt-5.6-sol` |
-| `architect-executor` | `gpt-5.6-terra` |
-| `bug-diagnostician` | `gpt-5.6-terra` |
-| `context-curator` | `gpt-5.6-luna` |
-| `database-architect` | `gpt-5.6-terra` |
-| `devops-architect` | `gpt-5.6-luna` |
-| `documentation` | `gpt-5.6-luna` |
-| `enterprise-architect` | `gpt-5.6-sol` |
-| `enterprise-spec-validator` | `gpt-5.6-sol` |
-| `executor` | `gpt-5.6-terra` |
-| `final-validation` | `gpt-5.6-luna` |
-| `functional-tester-agent` | `gpt-5.6-luna` |
-| `general` | `gpt-5.6-luna` |
-| `git-executor` | `gpt-5.6-luna` |
-| `master-orchestrator` | `gpt-5.6-luna` |
-| `planner` | `gpt-5.6-sol` |
-| `refactor` | `gpt-5.6-terra` |
-| `requirements-analyst` | `gpt-5.6-luna` |
-| `reviewer` | `gpt-5.6-luna` |
-| `security-reviewer` | `gpt-5.6-luna` |
-| `solution-architect` | `gpt-5.6-sol` |
-| `spec-remediator` | `gpt-5.6-luna` |
-| `spec-validator` | `gpt-5.6-sol` |
-| `task-decomposer` | `gpt-5.6-sol` |
-| `test-architect` | `gpt-5.6-luna` |
-| `ui-designer` | `gpt-5.6-sol` |
-| `ui-executor` | `gpt-5.6-luna` |
+| `api-governance-agent` | `gpt-6.1-sol` |
+| `architect-executor` | `gpt-6.1-sol` |
+| `bug-diagnostician` | `gpt-6.1-sol` |
+| `context-curator` | `gpt-6-luna` |
+| `database-architect` | `gpt-6.1-sol` |
+| `devops-architect` | `gpt-6-luna` |
+| `documentation` | `gpt-6-luna` |
+| `enterprise-architect` | `gpt-6.1-sol` |
+| `enterprise-spec-validator` | `gpt-6.1-sol` |
+| `executor` | `gpt-6.1-sol` |
+| `final-validation` | `gpt-6-luna` |
+| `functional-tester-agent` | `gpt-6-luna` |
+| `general` | `gpt-6-luna` |
+| `git-executor` | `gpt-6-luna` |
+| `master-orchestrator` | `gpt-6-luna` |
+| `planner` | `gpt-6.1-sol` |
+| `refactor` | `gpt-6.1-sol` |
+| `requirements-analyst` | `gpt-6-luna` |
+| `reviewer` | `gpt-6-luna` |
+| `security-reviewer` | `gpt-6-luna` |
+| `solution-architect` | `gpt-6.1-sol` |
+| `spec-remediator` | `gpt-6-luna` |
+| `spec-validator` | `gpt-6.1-sol` |
+| `task-decomposer` | `gpt-6.1-sol` |
+| `test-architect` | `gpt-6-luna` |
+| `ui-designer` | `gpt-6.1-sol` |
+| `ui-executor` | `gpt-6-luna` |
 
 ### Kiro — bindings recomendados (sin evals en este harness)
 

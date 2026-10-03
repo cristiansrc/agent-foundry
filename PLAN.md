@@ -78,6 +78,32 @@ Ver `docs/migration-notes.md` para decisiones detalladas de migración.
   cada documento, no invención nueva.
 - **Stack Shell/QML (ambxst) en calidad/testing, 2026-08-24**: filas qmltestrunner+bats+kcov+qmllint/shellcheck en tablas de testing-strategy y code-quality; mutación y CRAP declarados NO disponibles para QML (fallback: gauntlet visual + Gate 2; prohibidos proxies caseros); variante Quickshell de verify-code.sh vive en code-quality §4 con referencia cruzada desde ambxst-packaging (fuente única del script).
 - **Routing dinámico con Jev, 2026-09-22**: `master-orchestrator` queda fijo en Luna; Jev selecciona agente y nivel de razonamiento únicamente para Planner, arquitectos, diagnóstico, seguridad y validación final. El MCP `foundry-jev` usa Vercel AI Gateway como proveedor inicial y conserva Jev oficial como alternativa. El plugin traduce `low/medium/high/critical` a Luna/Terra/Sol, aplica umbrales de confianza y mantiene fallback estático. El Gate 1 evita reactivar Planner cuando solo corresponde descomponer tareas.
+- **ChatGPT Plus en vez de Copilot Pro+, 2026-10-03**: la decisión se toma por
+  **forma de facturar**, no por calidad de modelo. Copilot Pro+ cobra por token
+  en AI Credits (7000/mes) y se consumió el 90% en una semana; ChatGPT Plus da
+  un allowance de Codex con dos medidores (5h y semanal) y contadores
+  independientes de Go. En Plus el recurso escaso es Sol (15-160 msgs/5h) y el
+  abundante Luna (350-3.000), así que Sol queda solo para decidir (planner,
+  solution-architect, RCA) y **ningún agente de volumen lo toca**. Opus 5.5 y
+  Sonnet 5.5 no existen en Plus: los cinco agentes que los usaban (spec-validator,
+  enterprise-architect, reviewer, security-reviewer, final-validation) van a
+  GLM-5.3 en Go —familia Z.ai, independiente del planner (OpenAI) y de quien
+  codifica (DeepSeek)—. Coste de esa elección: `security-reviewer` y
+  `final-validation` bajan de Sonnet 5.5 a GLM-5.3; se acepta a cambio de no
+  gastar el allowance de Plus en puertas de calidad. `harness_copilot` queda
+  inactivo como rollback. Evals: spec-validator 4/4 (mejor que el 3/4 de Opus
+  5.5), security-reviewer 3/3 y final-validation 3/3 con `--repeat 2`; los
+  agentes de Plus sin certificar hasta que se conecte el OAuth.
+- **Caps de OpenCode Go corregidos a Go Plus, 2026-10-03**: los `cap:` de
+  `profiles/models.yaml` estaban copiados de la tabla de Go $10 (15/60) y no
+  del plan de $40 que está pagado (60/120/180/240). El diseño estaba
+  restringiéndose por límites inexistentes. Los topes son por modelo, así que
+  repartir agentes entre familias multiplica el margen.
+- **Guardas de lint, 2026-10-03**: el chequeo de YAML no podía fallar (el
+  `while` sobre una tubería corre en subshell y su `fail` nunca incrementaba
+  `ERRORS`), y un slot colgante en `tier_bindings` mataba el build de Codex con
+  un `KeyError` desnudo. Corregido el `while` y añadido
+  `validate_bindings()` en `adapters/shared/foundry.py`, invocado desde lint.
 
 ## Mejoras de coordinación pendientes de discutir (Fase 7)
 

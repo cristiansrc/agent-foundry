@@ -29,8 +29,14 @@ dynamic_agents:
   - final-validation
 
 reasoning_bindings:
-  harness_copilot:
+  # Solo un proveedor por nivel: el render itera en orden y el último en
+  # escribir gana, así que declarar dos proveedores para el mismo nivel haría
+  # el resultado dependiente del orden del YAML.
+  # harness_copilot queda inactivo desde 2026-10-03 (rollback). Al desactivarlo
+  # sin tocar este bloque, reasoning_models se vaciaba en el build y el plugin
+  # se quedaba sin niveles.
+  harness_chatgpt:
     low: luna
-    medium: sonnet55
+    medium: luna
     high: sol
-    critical: opus55
+    critical: sol

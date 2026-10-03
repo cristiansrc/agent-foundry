@@ -34,17 +34,22 @@ las specs y el task board.
 
 ## Niveles de razonamiento
 
-| Nivel | Modelo GitHub Copilot |
+| Nivel | Modelo ChatGPT Plus |
 |---|---|
 | `low` | GPT-6 Luna |
-| `medium` | Claude Sonnet 5.5 |
+| `medium` | GPT-6 Luna |
 | `high` | GPT-6.1 Sol |
-| `critical` | Claude Opus 5.5 |
+| `critical` | GPT-6.1 Sol |
 
-Desde 2026-09-30 los niveles usan Copilot (`harness_copilot`);
-`harness_chatgpt` queda inactivo como rollback. `medium` es Sonnet y
-`critical` Opus para que el razonamiento delegado caiga en una familia
-distinta al planner (OpenAI) cuando aplique.
+Desde 2026-10-03 los niveles usan ChatGPT Plus (`harness_chatgpt`);
+`harness_copilot` queda inactivo como rollback. Solo hay dos modelos en Plus,
+así que `low` y `medium` comparten Luna y `high` y `critical` comparten Sol: la
+separación por familia ya no la da el nivel, la da el agente — quien valida
+(spec-validator, reviewer) está en Go con GLM-5.3 o Kimi K3, nunca en Plus.
+
+Declara un solo proveedor por nivel en `reasoning_bindings`: el render los
+recorre en orden y el último en escribir gana, así que dos proveedores para el
+mismo nivel harían el resultado dependiente del orden del YAML.
 
 La traducción se genera desde `profiles/jev.yaml` y `profiles/models.yaml`.
 Jev nunca devuelve ni selecciona directamente un `provider/model-id`.

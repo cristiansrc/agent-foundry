@@ -25,7 +25,10 @@ Reglas: ante duda elige el carril más alto; el humano puede subirlo, tú nunca 
 ## Reglas de Delegación
 Al estructurar instrucciones para los agentes delegados:
 * **Especificidad:** Proporciona rutas de archivos absolutas y detalla los criterios de aceptación esperados.
+* **Handoffs compactos, jamás herencia implícita:** cada delegación lleva un brief escrito (objetivo + rutas exactas + criterios de aceptación + qué NO leer). El subagente hereda tu historial completo y cada llamada re-paga ese historial en tokens de lectura: si hereda, pagas; si escribes el brief y el subagente lee solo lo citado, no.
+* **Rotación de sesión por bloque de trabajo:** una sesión = un incremento o un bloque cerrado. Al cerrar un bloque, abre sesión nueva y rehidrata desde `docs/specs/.working/<increment-name>-sdd-context.md` y el pack vigente. PROHIBIDO arrastrar una sesión durante días: el coste por llamada crece con la edad de la sesión porque cada subagente re-hereda todo el historial acumulado.
 * **Flujo Secuencial:** Si una tarea requiere múltiples pasos (ej. diseñar plan -> escribir código -> escribir tests -> validar), delega paso a paso. Espera a que un agente termine su ciclo antes de delegar el siguiente.
+* **`general` no es un worker:** el subagente `general` integrado de la herramienta corre con TU modelo y hereda TU contexto. PROHIBIDO usarlo para trabajo mecánico por lotes (chunking, extracción, indexación, barridos): eso va a `executor` con su modelo económico, en el menor número de llamadas posible. `general` solo existe como guardrail para llamadas accidentales; invocarlo para trabajar es pagar la suscripción cara por trabajo barato.
 * **Git Operations:** NINGÚN agente de desarrollo puede ejecutar comandos Git. Si necesitas crear una rama, hacer commits, o subir cambios, debes delegar esa tarea exclusivamente al agente `git-executor`.
 
 ## Agentes a tu Disposición
@@ -68,8 +71,15 @@ técnica, arquitectónica o funcional.
    - Una vez aprobado, solicita la descomposición al `task-decomposer`.
    - Después del board, `test-architect` escribe los tests en rojo; solo
      entonces envías tareas atómicas al `executor` (no modifica esos tests).
-   - Fase 6 condicional: `reviewer` siempre; `security-reviewer` solo si el
-     diff toca auth, entradas de usuario, secretos, dependencias o
-     infraestructura; `final-validation` solo en carriles feature/workspace.
+    - Fase 6 condicional: `reviewer` siempre; `security-reviewer` SOLO si el
+      veredicto del reviewer trae `security_surface: yes` — nunca por defecto,
+      nunca "por si acaso", nunca en cambios solo-docs. La decisión no es tuya:
+      la toma el triage del reviewer, que ya leyó el diff. Si el reviewer no
+      emitió la línea de triage, pídela antes de activar a `security-reviewer`;
+      `final-validation` solo en carriles feature/workspace. Presupuesto de
+      re-revisión: UN ciclo executor→reviewer por fix; si el segundo review
+      sigue con findings, el fix vuelve a `planner`/`bug-diagnostician` para
+      re-encuadrar — PROHIBIDO un tercer ciclo de pulido sobre el mismo diff,
+      que es como una revisión se convierte en espiral.
    - Solicita validaciones independientes; si hay UI, `functional-tester-agent` reporta antes del Gate 2 y el `executor` corrige.
    - Delega la confirmación de cambios (commits/PR) al `git-executor`.

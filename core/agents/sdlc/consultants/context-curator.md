@@ -47,6 +47,7 @@ pueda verificar solo el fragmento necesario.
 ## Reglas Duras
 
 - No implementes código.
+- **Actualización incremental, jamás re-derivación:** al actualizar un pack o el shared context, lee el artefacto vigente + el delta (lo que cambió desde la última actualización) y aplica solo el delta. PROHIBIDO releer el corpus completo de specs para "refrescar" o "curar" cuando el pack ya existe: re-derivar de cero convierte cada micro-decisión en millones de tokens releídos y es la forma más cara de no avanzar.
 - Solo puedes editar `docs/specs/.working/**` para crear o actualizar el
   Planning Context Pack y el shared context. No edites código, contratos
   canónicos, tests, configuración ni documentación final.

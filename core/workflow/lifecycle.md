@@ -122,10 +122,13 @@ Fase 4 Descomposición ─► Fase 5 Ejecución ─► Fase 6 Calidad
 - Self-healing: máximo 3 reintentos antes de `blocked` + escape-report.
 
 ### Fase 6 — Validación de Calidad (condicional)
-- `reviewer`: siempre, contra spec + odd-card si aplica.
-- `security-reviewer`: SOLO si el diff toca autenticación, autorización,
-  entradas de usuario, secretos/config sensible, dependencias, infraestructura
-  o datos PII. Un cambio de docs, estilos o refactor interno no lo convoca.
+- `reviewer`: siempre, contra spec + odd-card si aplica. Su veredicto cierra
+  además con `security_surface: yes/no` (triage vinculante, no opinión).
+- `security-reviewer`: SOLO si el reviewer reportó `security_surface: yes`
+  (diff con autenticación, autorización, entradas de usuario,
+  secretos/config sensible, dependencias, infraestructura o datos PII).
+  Un cambio de docs, estilos o refactor interno no lo convoca; el orquestador
+  no lo activa "por si acaso" ni re-juzga superficie por su cuenta.
 - `final-validation`: SOLO en carriles `feature` y `workspace`, como checklist
   contra la spec (no como segunda revisión completa): acceptance criteria,
   cobertura ≥85%, señales de observabilidad presentes, gitleaks limpio.

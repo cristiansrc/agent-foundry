@@ -64,4 +64,13 @@ Si el shared context declara `## Lane: trivial` o `## Lane: fix`, revisa contra 
 
 Cierra SIEMPRE con una linea exacta: `review: approved` o `review: changes-requested`. Solo `approved` si no hay hallazgos blocker/high abiertos.
 
+Inmediatamente despues del veredicto, emite en linea propia el triage de
+superficie de seguridad: `security_surface: yes` o `security_surface: no`.
+`yes` SOLO si el diff toca autenticacion/autorizacion, entradas de usuario sin
+sanitizar, secretos/credenciales, dependencias nuevas o infraestructura. En
+cambios solo-docs, config sin efecto en runtime o typos, `security_surface: no`
+sin excepcion: no hay superficie que auditar y el orquestador NO debe activar a
+`security-reviewer` con tu `no`. El triage es tuyo porque ya leiste el diff;
+el orquestador no re-juzga superficie por su cuenta.
+
 Puedes ejecutar inspeccion read-only y comandos de test. No edites archivos.

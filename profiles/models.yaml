@@ -60,7 +60,7 @@ agent_tiers:
   final-validation:       {tier: sdd_validation, slot: glm_reasoning}
   documentation:          {tier: sdd_validation}
   executor:               {tier: code_heavy}
-  test-architect:         {tier: code_volume, slot: kimi_k27_code}
+  test-architect:         {tier: code_volume, slot: haiku55}
   devops-architect:       {tier: code_volume}
   git-executor:           {tier: sdd_validation}
   refactor:               {tier: code_heavy, slot: deepseek_v4_pro}
@@ -161,7 +161,15 @@ providers:
         vision: false
         cost: 0.95/4.00
         cap: 180
-        notes: Tests de test-architect; contador independiente de DeepSeek.
+        notes: "Rollback manual de test-architect (era su slot hasta 2026-10-10; quemaba $18.83/semana). Contador independiente de DeepSeek; retención 0."
+      haiku55:
+        id: opencode-go/claude-haiku-5-5
+        status: active
+        context: 1M
+        vision: true
+        cost: 0.10/0.50 hasta 100K ctx, 0.50/2.50 por encima
+        cap: 60
+        notes: "Slot de test-architect desde 2026-10-10: ~15x más barato por request que Kimi en workload de caché ($0.01 vs $0.19 por M leídos). Familia Anthropic: mantiene independencia del executor (DeepSeek). Certificado con evals/cases/test-architect.yaml 2/2. Ojo: modelo del 2026-10-07 (un timeout observado y recuperado) y retención 30 días, no ZDR."
       qwen38_max:
         id: opencode-go/qwen3.8-max
         status: active
@@ -205,6 +213,7 @@ providers:
       longcat:       [mimo_v26_flash]
       glm_flash:     [mimo_v26_flash]
       kimi_k27_code: [deepseek_v41_flash]
+      haiku55:       [kimi_k27_code]
 
   # GitHub Copilot Pro+ vía OAuth en OpenCode (/connect github-copilot).
   # INACTIVO desde 2026-10-03: se vuelve a ChatGPT Plus porque Pro+ factura

@@ -116,6 +116,18 @@ Ver `docs/migration-notes.md` para decisiones detalladas de migración.
   Los `cap:` de 272K en los modelos gpt-6* también eran el umbral de tariff de
   Copilot/Go, no la ventana de contexto: el catálogo (models.dev) reporta
   1.050.000 para openai y github-copilot. Corregido.
+- **test-architect a Claude Haiku 5.5, 2026-10-10**: Kimi K2.7 quemaba
+  $18.83/semana (21% de su tope) en workload dominado por caché; Haiku cuesta
+  $0.01 por M leídos frente a $0.19 de Kimi (~15x por request, el slot pasaría
+  a ~$1-2/semana). Familia Anthropic: mantiene la independencia del executor
+  (DeepSeek) que motivó el slot original. Certificado con suite nueva
+  `evals/cases/test-architect.yaml` 2/2 con `--repeat 2` más probe funcional
+  cara a cara (Haiku cubrió empates negativos que Kimi omitió; ambos mezclan
+  JUnit con JS, empate en ese defecto). Riesgos anotados en el perfil: modelo
+  del 2026-10-07 (un timeout largo observado y recuperado; el ping va bien) y
+  retención 30 días, no ZDR. Rollback manual: slot a `kimi_k27_code` + build +
+  sync. Reviewers se quedan en GLM-5.3: recién certificados 4/4-3/3-3/3 y las
+  puertas de calidad no se mueven a un modelo de 3 días.
 
 ## Mejoras de coordinación pendientes de discutir (Fase 7)
 

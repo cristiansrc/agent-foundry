@@ -360,7 +360,7 @@ La skill `agent-foundry-reader` se instala mediante
 | `spec-remediator` | opencode-go/mimo-v2.6-pro |
 | `spec-validator` | opencode-go/glm-5.3 |
 | `task-decomposer` | opencode-go/mimo-v2.6-pro |
-| `test-architect` | opencode-go/kimi-k2.7-code |
+| `test-architect` | opencode-go/claude-haiku-5-5 |
 | `ui-designer` | openai/gpt-6-luna |
 | `ui-executor` | opencode-go/deepseek-v4-flash-vision-exp |
 

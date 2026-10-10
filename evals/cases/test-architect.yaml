@@ -1,0 +1,34 @@
+# Casos de evaluación: test-architect (suite en rojo + edge cases)
+# Creada 2026-10-10 para certificar el slot de test-architect: la decisión
+# kimi-k2.7-code vs claude-haiku-5-5 se toma con estos casos, no con precio.
+version: 1
+agent: test-architect
+
+system_context: |
+  Diseña con la información inline (no hay repositorio disponible; no leas
+  archivos). Entrega el set en rojo con tabla esperado-vs-actual y cierra con
+  cobertura estimada y riesgos declarados como `uncovered:`.
+
+cases:
+  - id: empates-halfeven-incluye-negativos
+    description: Empates .5 exigen HALF_EVEN también en negativos
+    expect_regex: "-3[./]2|Math\\.round\\(-3\\.5\\)|HALF_EVEN"
+    input: |
+      function prorate(totalCents, daysUsed, daysInPeriod) {
+        // retorna el monto prorrateado en centavos, redondeo HALF_EVEN a entero
+        return Math.round(totalCents * daysUsed / daysInPeriod);
+      }
+      Diseña tests en rojo: empates HALF_EVEN (incluye negativos como -3.5),
+      división por cero y overflow. Un caso debe fallar con la implementación
+      actual. Cierra con tabla esperado-vs-actual.
+
+  - id: suite-roja-declara-uncovered
+    description: La suite en rojo declara cobertura y riesgo residual
+    expect_regex: "uncovered:|cobertura|rojo"
+    input: |
+      function prorate(totalCents, daysUsed, daysInPeriod) {
+        return Math.round(totalCents * daysUsed / daysInPeriod);
+      }
+      Diseña tests en rojo para esta función. Lo que no cubras, decláralo como
+      `uncovered:`. Cierra con cobertura estimada y confirmación de que la
+      suite está en rojo.

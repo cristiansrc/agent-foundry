@@ -44,7 +44,7 @@ modelo**, así que cada familia tiene contador propio y no compite con Plus.
 | Plan estructurado / remediación | OpenCode Go | MiMo-V2.6 Pro | task-decomposer, api-governance-agent, spec-remediator |
 | Código delicado | OpenCode Go | DeepSeek V4 Pro | refactor, database-architect |
 | Código | OpenCode Go | DeepSeek V4.1 Flash | executor, architect-executor, devops-architect |
-| Tests | OpenCode Go | Kimi K2.7 Code | test-architect (contador propio) |
+| Tests | OpenCode Go | Claude Haiku 5.5 | test-architect (familia Anthropic, independiente del executor; Kimi K2.7 como rollback manual) |
 | Trabajo mecánico | OpenCode Go | MiMo-V2.6 Flash | git-executor, documentation, context-curator |
 | UI/E2E | OpenCode Go | DeepSeek V4 Flash Vision Exp (excepción documentada) | functional-tester-agent, ui-executor |
 

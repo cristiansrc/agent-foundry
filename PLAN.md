@@ -120,14 +120,30 @@ Ver `docs/migration-notes.md` para decisiones detalladas de migración.
   $18.83/semana (21% de su tope) en workload dominado por caché; Haiku cuesta
   $0.01 por M leídos frente a $0.19 de Kimi (~15x por request, el slot pasaría
   a ~$1-2/semana). Familia Anthropic: mantiene la independencia del executor
-  (DeepSeek) que motivó el slot original. Certificado con suite nueva
+  (DeepSeek) que motivó el slot original en 9d7d9a7. Certificado con suite nueva
   `evals/cases/test-architect.yaml` 2/2 con `--repeat 2` más probe funcional
-  cara a cara (Haiku cubrió empates negativos que Kimi omitió; ambos mezclan
-  JUnit con JS, empate en ese defecto). Riesgos anotados en el perfil: modelo
-  del 2026-10-07 (un timeout largo observado y recuperado; el ping va bien) y
-  retención 30 días, no ZDR. Rollback manual: slot a `kimi_k27_code` + build +
-  sync. Reviewers se quedan en GLM-5.3: recién certificados 4/4-3/3-3/3 y las
-  puertas de calidad no se mueven a un modelo de 3 días.
+  cara a cara (Haiku cubrió empates HALF_EVEN negativos que Kimi omitió; ambos
+  mezclan JUnit con JS, empate en ese defecto). Riesgos anotados en el perfil:
+  modelo del 2026-10-07 (un timeout en generación larga, observado y
+  recuperado; ping OK) y retención 30 días, no ZDR. Rollback manual: slot a
+  `kimi_k27_code` + build + sync (fallbacks es config muerta, no encadena).
+- **Tres gates + validación enterprise a LongCat-2.0, 2026-10-11**: reviewer,
+  security-reviewer, final-validation (antes GLM-5.3) y enterprise-spec-validator
+  (antes Kimi K3, $5.86/semana = 78% de su semana en plan $10). LongCat-2.0
+  (Meituan, $0.30/$1.20, caché $0.006, 1M ctx, sin visión): ~40x más barato por
+  request que GLM en workload de caché, y familia distinta de planner (OpenAI),
+  spec-validator (Z.ai) y executor (DeepSeek) a la vez. Candidatos descartados
+  con fundamento: DeepSeek V4 Pro comparte familia con el executor (correlación
+  validador/implementador) y Sol 6.1 es el modelo del planner (el spec-validator
+  no puede certificar su propia familia) además de fundir el allowance escaso
+  de Plus con 40 sesiones/semana. Certificación: odd-reviewer 2/2,
+  security-reviewer 3/3, final-validation 3/3 (--repeat 2) + probe enterprise
+  cualitativo (detectó inconsistencia inter-servicios y trampa de enum
+  created/CREATED, veredicto workspace-blocked con checklist). spec-validator y
+  enterprise-architect se quedan en GLM (1 llamada cada uno, esperan ventana).
+  Riesgos anotados: timeouts transitorios el día del estreno; sin visión
+  (delega capturas, patrón establecido). Rollbacks manuales: glm_reasoning y
+  kimi_k3.
 
 ## Mejoras de coordinación pendientes de discutir (Fase 7)
 

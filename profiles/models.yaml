@@ -48,16 +48,16 @@ agent_tiers:
   # Opus 5.5 -> GLM-5.3. Familia Z.ai vs OpenAI del planner: independencia.
   spec-validator:         {tier: spec_validation_critical, slot: glm_reasoning, locked: true}
   # Sin slot: kimi_k3 (Moonshot), familia distinta a la del spec-validator.
-  enterprise-spec-validator: {tier: spec_validation_critical}
+  enterprise-spec-validator: {tier: spec_validation_critical, slot: longcat}
   spec-remediator:        {tier: sdd_validation, slot: mimo_v26_pro}
   context-curator:        {tier: sdd_validation}
-  reviewer:               {tier: sdd_validation, slot: glm_reasoning}
+  reviewer:               {tier: sdd_validation, slot: longcat}
   # security-reviewer y final-validation estaban en Sonnet 5.5, que no existe
   # en ChatGPT Plus. A GLM-5.3: son las dos puertas approve/block y el tope de
   # $120/mes de Go Plus aguanta las 5aprox. requests/semana por agente de sobra.
-  security-reviewer:      {tier: sdd_validation, slot: glm_reasoning}
+  security-reviewer:      {tier: sdd_validation, slot: longcat}
   requirements-analyst:   {tier: sdd_validation, harness_provider: harness_chatgpt, slot: sol}
-  final-validation:       {tier: sdd_validation, slot: glm_reasoning}
+  final-validation:       {tier: sdd_validation, slot: longcat}
   documentation:          {tier: sdd_validation}
   executor:               {tier: code_heavy}
   test-architect:         {tier: code_volume, slot: haiku55}
@@ -97,7 +97,7 @@ providers:
         vision: false
         cost: 1.40/4.40
         cap: 120
-        notes: "Sustituye a Opus 5.5 el 2026-10-03: spec-validator, enterprise-architect, reviewer, security-reviewer y final-validation. ~$0.015 por request (700 in + 52k cached + 150 out) contra un tope semanal de $60 -> ~3.950 requests/semana para los 5 agentes. Familia Z.ai: distinta del planner (OpenAI) y de quien codifica (DeepSeek). Sin entrenamiento, retención 0."
+        notes: "Sustituye a Opus 5.5 el 2026-10-03. Desde 2026-10-11 solo spec-validator y enterprise-architect (reviewer, security-reviewer y final-validation pasaron a LongCat-2.0 tras certificarlo). Familia Z.ai: distinta del planner (OpenAI) y de quien codifica (DeepSeek). Sin entrenamiento, retención 0."
       deepseek_v41_flash:
         id: opencode-go/deepseek-v4.1-flash
         status: active
@@ -129,7 +129,7 @@ providers:
         vision: false
         cost: 0.30/1.20
         cap: 240
-        notes: Respaldo de planning/gobernanza estructurada.
+        notes: "Slots desde 2026-10-11: reviewer, security-reviewer, final-validation y enterprise-spec-validator (antes GLM-5.3 y Kimi K3). ~$0.0005 por request en workload de caché ($0.006 por M leídos, ~40x menos que GLM). Familia Meituan: distinta del planner (OpenAI), del spec-validator (Z.ai) y de quien codifica (DeepSeek). Sin visión: delega capturas en functional-tester-agent (patrón ya establecido). Certificado: odd-reviewer 2/2, security-reviewer 3/3, final-validation 3/3 (--repeat 2) + probe enterprise (detectó inconsistencia inter-servicios y trampa de enum). Ojo: timeouts transitorios observados el día del estreno; se recupera solo."
       mimo_v26_flash:
         id: opencode-go/mimo-v2.6-flash
         status: active
@@ -153,7 +153,7 @@ providers:
         vision: false
         cost: 3.00/15.00
         cap: 60
-        notes: Validador enterprise (familia Moonshot, distinta al planner y al spec-validator). Sin entrenamiento, retención 0.
+        notes: "Rollback manual de enterprise-spec-validator (era su default hasta 2026-10-11; quemaba $5.86/semana, 78% de su semana en plan $10). Familia Moonshot, distinta al planner y al spec-validator. Sin entrenamiento, retención 0."
       kimi_k27_code:
         id: opencode-go/kimi-k2.7-code
         status: active
@@ -210,6 +210,7 @@ providers:
       glm_reasoning: [qwen38_max, mimo_v26_pro]
       kimi_k3:       [qwen38_max, mimo_v26_pro]
       qwen38_max:    [mimo_v26_pro]
+      longcat:       [mimo_v26_flash]
       longcat:       [mimo_v26_flash]
       glm_flash:     [mimo_v26_flash]
       kimi_k27_code: [deepseek_v41_flash]

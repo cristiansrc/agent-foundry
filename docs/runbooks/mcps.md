@@ -31,7 +31,7 @@ registra el qué y el por qué).
 (`adapters/lmstudio/` borrado) por falta de uso. Todos los agentes que necesitan
 ver imágenes usan modelos con visión nativa: `ui-designer` (GPT-6 Luna),
 `ui-executor` y `functional-tester-agent` (DeepSeek Vision), `reviewer`
-(GLM-5.3, sin visión: si necesita capturas, delegar en functional-tester-agent). Si algún modelo sin visión necesitara ver capturas en el futuro,
+(LongCat-2.0, sin visión: si necesita capturas, delegar en functional-tester-agent). Si algún modelo sin visión necesitara ver capturas en el futuro,
 revaluar un puente local antes de reintroducirlo.
 
 ### Por proyecto (activar cuando aplique)

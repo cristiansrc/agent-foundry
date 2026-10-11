@@ -39,8 +39,8 @@ modelo**, así que cada familia tiene contador propio y no compite con Plus.
 | RCA | ChatGPT Plus | GPT-6.1 Sol | bug-diagnostician, requirements-analyst |
 | Validación crítica | OpenCode Go | GLM-5.3 | spec-validator (familia Z.ai, distinta al planner) |
 | Macro-arquitectura | OpenCode Go | GLM-5.3 | enterprise-architect |
-| Review / seguridad / QA final | OpenCode Go | GLM-5.3 | reviewer, security-reviewer, final-validation |
-| Validación enterprise | OpenCode Go | Kimi K3 | enterprise-spec-validator (familia Moonshot) |
+| Review / seguridad / QA final | OpenCode Go | LongCat-2.0 | reviewer, security-reviewer, final-validation (familia Meituan, independiente de planner, spec-validator y executor; sin visión: delegan capturas) |
+| Validación enterprise | OpenCode Go | LongCat-2.0 | enterprise-spec-validator (misma independencia triple; Kimi K3 como rollback manual) |
 | Plan estructurado / remediación | OpenCode Go | MiMo-V2.6 Pro | task-decomposer, api-governance-agent, spec-remediator |
 | Código delicado | OpenCode Go | DeepSeek V4 Pro | refactor, database-architect |
 | Código | OpenCode Go | DeepSeek V4.1 Flash | executor, architect-executor, devops-architect |
@@ -48,10 +48,13 @@ modelo**, así que cada familia tiene contador propio y no compite con Plus.
 | Trabajo mecánico | OpenCode Go | MiMo-V2.6 Flash | git-executor, documentation, context-curator |
 | UI/E2E | OpenCode Go | DeepSeek V4 Flash Vision Exp (excepción documentada) | functional-tester-agent, ui-executor |
 
-GLM-5.3 absorbe cinco agentes (los dos que usaban Opus 5.5 más las tres puertas
-de calidad que estaban en Sonnet 5.5, que no existe en Plus). Su tope mensual
-en Go Plus es de $120 —unos $0.015 por request— así que da de sobra para
-validadores; si aun así se aprieta, reparte con `qwen38_max` o `kimi_k3`.
+GLM-5.3 queda con dos agentes (spec-validator y enterprise-architect, los que
+usaban Opus 5.5). Las tres puertas de calidad y la validación enterprise
+pasaron el 2026-10-11 a LongCat-2.0 (~$0.0005 por request en workload de
+caché, ~40x menos que GLM): el gasto medido de GLM-5.3 era relectura, no
+razonamiento, y LongCat pasó la batería completa. Si LongCat aprieta o
+degrada, el rollback es `kimi_k27_code`-style manual: slots de vuelta a
+`glm_reasoning`/`kimi_k3` + build + sync.
 
 ### Si se agota el allowance de Plus
 

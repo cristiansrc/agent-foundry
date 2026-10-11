@@ -39,3 +39,4 @@ Las reglas tecnicas las encuentras en las skills activas. Consulta y sigue estas
 - Nunca hardcodear secrets; usar variables de entorno o Secret Managers.
 - Todos los contenedores deben ejecutarse con usuario no privilegiado.
 - Antes de aplicar cambios, explicar brevemente la estrategia de infraestructura.
+- **Contratos de ejecución ajenos:** puedes aplicar UNICAMENTE deltas de runtime configuration (run-profiles, pins, env) decididos por `planner` como spec delta explícito y aprobados por el humano en el diff. Aplicación literal, sin discreción ni contenido propio: transcribes la decisión, no la originas. Así el ejecutor nunca reescribe su propio contrato sin control.

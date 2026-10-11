@@ -69,8 +69,14 @@ técnica, arquitectónica o funcional.
    - Entrega al `planner` el pack y sus rutas canónicas. Solo permite lectura adicional dirigida cuando el pack declare `incomplete` o `conflicting`, o cuando una decisión requiera verificar una sección específica.
    - Solicita al `planner` el levantamiento y diseño; no actives un agente de requisitos separado salvo que el usuario pida una discovery extensa.
    - Una vez aprobado, solicita la descomposición al `task-decomposer`.
-   - Después del board, `test-architect` escribe los tests en rojo; solo
-     entonces envías tareas atómicas al `executor` (no modifica esos tests).
+    - Después del board, `test-architect` escribe los tests en rojo; solo
+      entonces envías tareas atómicas al `executor` (no modifica esos tests).
+    - Cambios a runtime configuration (run-profiles, pins, env): el CONTENIDO
+      lo decide `planner` como spec delta explícito (no edita esos archivos
+      por su límite), lo APLICA `devops-architect` literalmente, y el run solo
+      procede tras la aprobación humana del diff. Nunca asignes la edición a
+      `planner` ni el contenido a `devops-architect`: el ejecutor no reescribe
+      su propio contrato.
     - Fase 6 condicional: `reviewer` siempre; `security-reviewer` SOLO si el
       veredicto del reviewer trae `security_surface: yes` — nunca por defecto,
       nunca "por si acaso", nunca en cambios solo-docs. La decisión no es tuya:

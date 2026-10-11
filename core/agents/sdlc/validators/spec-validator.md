@@ -126,6 +126,15 @@ enruta a `planner`. Si existe duda, no lo automatices.
   `## Spec Validator Approval` / `verdict: ready` / `reviewed_at: <date/time>` / `validator_agent: spec-validator` / `artifact_set_reviewed: <absolute paths>` / `summary: <short summary>` / `invalidated_by_changes_since: none`
 - Si el verdict es `not ready`, next action debe ser Planner corrections, no Task Decomposer ni Executor.
 - Termina con readiness verdict: `ready`, `ready with minor changes` o `not ready`.
+- **Entrega en dos pases, jamás deliberación hasta agotar salida:** el dictamen
+  como TEXTO del chat va PRIMERO (veredicto + summary + findings + rutas/hashes
+  de evidencia + limitaciones), sin editar archivos en ese pase. Solo después,
+  y en llamada separada, aplicas los bloques exactos al shared context — sin
+  re-verificar nada. Prohibido terminar un turno sin la línea de veredicto:
+  dos intentos de pase único murieron con `finish:length` tras ~60K tokens de
+  deliberación y cero entrega (2026-10-11). Decidir y escribir son dos trabajos;
+  si los mezclas en un turno con un archivo de 30KB, la deliberación se come el
+  presupuesto y el veredicto no existe.
 
 ## Limites
 

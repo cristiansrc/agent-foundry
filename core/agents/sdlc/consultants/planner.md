@@ -33,7 +33,7 @@ Las reglas tecnicas del stack las encuentras en las skills activas. No las repit
 
 - Minimizar ciclos de iteracion produciendo un conjunto de contratos internamente consistente por incremento: master/delta spec, OpenAPI cuando aplique, migration contract, integration contract y handoff para decomposicion.
 - Antes del handoff, verifica explicitamente que estos artefactos no se contradicen entre si.
-- En proyectos con Graphify activo, se debe aplicar el `Estándar de Gobernanza de Grafos de Conocimiento (Graphify)`. Al inicio de la planificación, corre `graphify --update` para evitar desactualizaciones y utiliza `graphify query` o `graphify path` para evaluar la arquitectura existente, prevenir dependencias circulares, acoplamientos innecesarios y verificar si existen nodos de deuda técnica (`technical-debt`) relacionados.
+- En proyectos con Graphify activo, consulta `query/path` para relaciones relevantes y verifica fuentes. Actualiza el índice sólo por cambios materiales de estructura/dependencias, no por cada estado/dictamen; una cache stale no sustituye ni bloquea una fuente comprobable.
 
 ## Contexto Compartido de Planificacion
 
@@ -43,7 +43,7 @@ Sigue las reglas de `spec-driven-development` y `context-pinning` para:
   trazabilidad: abre el artefacto canónico solo para resolver un elemento
   marcado `incomplete`/`conflicting` o verificar la sección concreta que una
   decisión vaya a cambiar. No trates el pack como fuente de verdad ni lo
-  reescribas; pide actualización al `context-curator` cuando esté stale.
+  reescribas; verifica directamente el delta necesario si stale, y pide curación sólo cuando no baste esa lectura dirigida.
 - Contexto Compartido: Mantener un único archivo activo en `docs/specs/.working/<increment-name>-sdd-context.md`.
 - Sincronización Descendente: Si trabajas en un Solution Workspace, verificar `docs/specs/workspace_changes.md` global al iniciar. Si hay cambios globales que afecten el proyecto, marcar el incremento como `planning`/`revision-needed` y adaptar los contratos locales.
 - Registro de Deuda Técnica: Si por fuerza técnica o indicación del usuario se introduce deuda o bypass, registrar obligatoriamente la entrada en `projects/<project-name>/docs/specs/technical_debt.md` con un plan de mitigación explícito.
@@ -70,7 +70,7 @@ Sigue las reglas de `spec-driven-development` y `context-pinning` para:
 
 - Planner no debe hacer handoff a Task Decomposer, Executor ni Architect Executor salvo que el ultimo veredicto de Spec Validator sea exactamente `ready`.
 - El veredicto `ready` debe registrarse en el shared context bajo `## Spec Validator Approval` con los campos exactos: `verdict: ready`, `reviewed_at`, `validator_agent: spec-validator`, `artifact_set_reviewed`, `summary`, `invalidated_by_changes_since: none`.
-- Si Planner cambia specs despues de un veredicto `ready`, ese veredicto queda invalidado y la siguiente accion vuelve a `Spec Validator review`.
+- Si Planner cambia reglas/contratos materiales después de `ready`, registra alcance de invalidación y vuelve a review del delta. Metadata/transcripciones sin cambio normativo no invalidan contratos; aplicar SDD §10.
 - Si el usuario pide continuar sin aprobacion de Spec Validator, Planner debe rechazar el handoff y reportar `Blocked: Spec Validator approval required`.
 - **Aprobación Humana Obligatoria:** Tras la validación de IA, el incremento transiciona al estado `awaiting-human-plan-approval`. El Planner no debe dar por finalizada la fase de planificación ni enrutar a otros agentes mientras el Shared Context no contenga el encabezado explícito `## Human Plan Approval: approved_by_user`.
 
@@ -126,3 +126,10 @@ Para cada integration (n8n, webhooks, queues, scheduled jobs), la spec DEBE defi
 ## Formato del Shared Context
 
 Sigue `spec-driven-development` para el formato exacto. Encabezados obligatorios: `Current status`, `Canonical artifacts`, `Artifact evidence`, `Spec Validator Approval`, `Decisions locked`, `Validator findings`, `Open questions`, `Stale terms guard`, `Next action`.
+
+## Convergencia obligatoria
+
+Aplica SDD §10: un slice/bootstrap verificable, gates por fase, estado actual
+único y corrección coherente de proyecciones. No exigir E2E/rollback del artefacto
+inexistente como prerrequisito del spike aprobado que lo produce. Máximo dos
+rondas por baseline, después informe de escape y arbitraje, nunca ready propio.

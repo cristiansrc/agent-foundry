@@ -10,14 +10,14 @@ Esta skill define el protocolo técnico para coordinar las especificaciones y co
 ## 1. Flujo de Coordinación
 
 ### A. Sincronización Ascendente (Proyecto -> Workspace)
-* Al finalizar el desarrollo y validación de un proyecto local (directorio `projects/<project-name>/`):
+* Al finalizar desarrollo/validación de proyecto local según mapping autorizado:
   1. El `planner` local debe consolidar la especificación y los contratos OpenAPI.
   2. El `enterprise-architect` debe invocar la actualización de dependencias e interfaces del workspace.
-  3. Ejecutar `graphify --update` en la raíz del Solution Workspace para actualizar el grafo general del landscape.
+   3. Worker con shell actualiza Graphify sólo por cambio estructural/material; cache no es gate normativo.
 
 ### B. Sincronización Descendente (Workspace -> Proyecto)
 * El `enterprise-architect` documenta los cambios arquitectónicos globales en `docs/specs/workspace_changes.md`.
-* Los agentes locales de planeación (`planner`, `requirements-analyst`) de cada proyecto deben revisar `docs/specs/workspace_changes.md` y el reporte de dependencias global de Graphify (`graphify-out/GRAPH_REPORT.md` de la raíz) al inicio del incremento.
+* Agentes locales leen workspace_changes y fuentes afectadas declaradas. Grafo sólo para relaciones relevantes, sin re-curación por transcripción de estado.
 * Si el proyecto es afectado, se crea una Delta Spec local para adaptar el código a la especificación global.
 
 ## 2. Gestión de Deuda Técnica (Technical Debt)

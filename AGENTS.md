@@ -22,8 +22,10 @@ core/ (fuente de verdad) -> profiles/ (bindings modelo+permisos)
    `profiles/permissions.yaml`; tier→modelo SOLO en `profiles/models.yaml`.
    El `ROUTING` del plugin `model-router` deriva de ahí en el build; jamás se
    hardcodea un modelo en `plugins/` ni en `core/`.
-5. **Cambios de agentes o skills** requieren: editar `core/` → `build.sh` →
-   `sync.sh` → commit. Los tres pasos, siempre.
+5. **Cambios de agentes o skills**: editar `core/` → lint/tests/evals aplicables →
+   `build.sh` → sync completo o `sync.sh --workflow-only` acotado sólo con verificación satisfactoria. Commit únicamente
+   cuando el usuario lo solicite. Si eval/instalación bloqueada, declarar fuentes
+   y salidas preparadas sin presentar configuración activa como actualizada.
 6. **Cambios de perfil** siguen `docs/runbooks/model-change.md` (incluye evals).
 7. **Pre-commit activo**: lint + auditoría de matriz corren antes de cada
    commit; no saltarse con --no-hooks salvo emergencia documentada.

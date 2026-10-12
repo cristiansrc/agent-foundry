@@ -26,6 +26,7 @@ import sys
 from pathlib import Path
 
 import yaml
+from foundry import governed_body
 
 ROOT = Path(__file__).resolve().parents[2]
 CORE = ROOT / "core"
@@ -93,7 +94,7 @@ def resolve_binding(agent: str, profiles: dict) -> dict:
     # no es un ID válido (Copilot responde UnknownError; el plugin lo
     # propagaba como modelID). Verificado con OpenCode 1.18.31 el 2026-09-30.
     variant = info.get("variant")
-    p = pcfg["agents"].get(agent, {})
+    p = {**pcfg.get("defaults", {}), **pcfg["agents"].get(agent, {})}
     perm_keys = [k for k in ("edit", "bash", "execute", "task") if k in p]
     return {
         "model": primary_id,
@@ -127,7 +128,7 @@ def render_agent(src: Path, binding: dict) -> str:
             dumped = yaml.safe_dump({k: v}, allow_unicode=True, sort_keys=False).rstrip()
             lines.extend(f"  {line}" for line in dumped.splitlines())
     lines.append("---")
-    return "\n".join(lines) + "\n\n" + body
+    return "\n".join(lines) + "\n\n" + governed_body(src, body)
 
 
 def render_plugin(manifest: list[dict], profiles: dict) -> Path:

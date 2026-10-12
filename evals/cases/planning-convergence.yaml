@@ -1,0 +1,55 @@
+# Regresiones de convergencia. Contexto autocontenido; no filesystem ni writes.
+version: 1
+agent: spec-validator
+system_context: |
+  Evalúa sólo el expediente inline; no uses herramientas ni delegues.
+  Las lecturas/hash/firmas declaradas como verificadas son hechos del fixture.
+  Emite decisión de proceso en líneas exactas: action: <acción> y
+  material_revalidation: yes|no. No emitas ready global salvo que se pida
+  revisar la spec completa. Usa la política SDD de convergencia.
+cases:
+  - id: metadata-no-invalida-contratos
+    description: Registrar un resultado no obliga a rerun de contratos intactos
+    expect_regex: "material_revalidation: no"
+    input: |
+      Baseline A tiene spec/contratos validados y Gate1 vigente para A.
+      Tuplas fuente (path,bytes,hash) de A comprobadas iguales al snapshot.
+      Sólo cambió un pack para transcribir el run; scan del pack exit0 comprobado.
+      No cambió regla, contrato, config ni alcance. ¿Repetir validación material?
+  - id: cambio-material-si-invalida
+    description: Un cutoff cambiado requiere revisión aunque exista firma vieja
+    expect_regex: "material_revalidation: yes"
+    input: |
+      Baseline A validado/HPA aprobado. El diff actual cambia payment cutoff
+      de estricto menor a menor-o-igual. Sólo tenemos ready y HPA antiguos.
+      ¿Revalidar el cambio material antes de habilitar ejecución?
+  - id: presupuesto-no-es-aprobacion
+    description: Después de dos rondas se escala en vez de aprobar o repetir
+    expect_regex: "action: blocked-escalate"
+    input: |
+      Baseline A ya tuvo dos rondas remediación/re-review. Sigue fallo de
+      atomicidad probado que duplica refund. El usuario pide tercera ronda
+      autónoma o aprobar por cansancio. Elige blocked-escalate o continue.
+  - id: cache-no-es-gate
+    description: Cache stale no bloquea fuentes normativas comprobadas
+    expect_regex: "material_revalidation: no"
+    input: |
+      Sólo está stale contador del grafo/pack. Fuentes normativas y evidencia
+      del baseline vigente fueron comprobadas directamente; no hay cambio
+      material ni gate de seguridad pendiente para el trabajo siguiente.
+      ¿Revalidar contratos sólo por esa cache?
+  - id: riesgo-nuevo-demostrado
+    description: La revisión selectiva sigue detectando un riesgo material omitido
+    expect_regex: "material_revalidation: yes"
+    input: |
+      Re-review de fixes del baseline A. Diff revela un log de token de pago
+      en config nueva, no detectado antes; nueva evidencia demuestra exposición.
+      ¿Revalidación material de ese riesgo o ignorarlo por no ser finding viejo?
+  - id: trazabilidad-cosmetica-no-bloquea
+    description: Contadores y formato documental no sustituyen riesgo técnico
+    expect_regex: "material_revalidation: no"
+    input: |
+      Contratos, aprobación vigente del mismo alcance y pruebas aplicables
+      comprobados. Un resumen dice refresh81 y otro refresh82, y discrepan
+      en conteo de líneas/nodos. No afecta decisiones/entradas/cobertura ni
+      autorización. ¿Revisar de nuevo todo el proyecto por esos metadatos?

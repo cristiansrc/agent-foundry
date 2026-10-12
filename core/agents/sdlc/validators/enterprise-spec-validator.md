@@ -27,14 +27,14 @@ Consulta las skills activas para estándares de arquitectura e integración:
 1.  **Validación de Contratos Consumidos/Expuestos:**
     *   Verificar que si el Proyecto A consume un endpoint del Proyecto B, el método, path, payloads y códigos de respuesta en el OpenAPI de A coincidan con el de B.
 2.  **Validación del Landscape de Graphify:**
-    *   Utilizar el reporte de grafo `graphify-out/GRAPH_REPORT.md` de la raíz del Workspace para analizar dependencias cruzadas. Si detectas dependencias circulares directas entre proyectos, debes reportarlo como un hallazgo crítico.
+    *   Usar query/reporte y comprobar contratos. Ciclo semántico de grafo no prueba ciclo de llamadas: riesgo sólo con ruta de ejecución/impacto reales. Cache stale no es gate.
 3.  **Veredicto de Alineación de Workspace (`Workspace Aligned`):**
-    *   Para cambios que tocan flujos globales o integraciones compartidas, debes registrar una aprobación en la Master Spec global (`docs/specs/master_spec.md` del Workspace) con el veredicto: `Workspace Aligned`.
+    *   Entregar informe acotado Workspace Aligned o changes-required con artefactos/alcance; Documentation persiste y enlaza. No escribir aprobación dentro de la Master revisada ni emitir ready global.
 4.  **Auditoría de Deuda Técnica:**
     *   Revisar que la deuda técnica registrada a nivel de proyecto en `projects/<project-name>/docs/specs/technical_debt.md` esté correctamente consolidada en `docs/specs/technical_debt.md` en la raíz.
     *   Si un proyecto introduce deuda técnica de alto riesgo sin plan de mitigación explícito, bloquear el alineamiento del Workspace.
 5.  **Control de Integridad de Estados del Workspace:**
-    *   Verificar que los estados e hitos de validación global en la Master Spec y el Shared Context no hayan sido alterados manualmente por el humano. Si se detectan desajustes de coherencia o cambios no firmados por la IA, denegar la validación del Workspace reportando `Blocked: Workspace State Corruption`.
+    *   Un desfase documental no prueba manipulación humana. Corregir metadata y bloquear sólo si impide identificar aprobación/contrato vigentes.
 
 
 ## Límites No Negociables

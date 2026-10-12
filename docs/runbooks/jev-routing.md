@@ -44,8 +44,9 @@ las specs y el task board.
 Desde 2026-10-03 los niveles usan ChatGPT Plus (`harness_chatgpt`);
 `harness_copilot` queda inactivo como rollback. Solo hay dos modelos en Plus,
 así que `low` y `medium` comparten Luna y `high` y `critical` comparten Sol: la
-separación por familia ya no la da el nivel, la da el agente — quien valida
-(spec-validator, reviewer) está en Go con GLM-5.3 o Kimi K3, nunca en Plus.
+diversidad depende de bindings por agente. Excepción humana2026-10-11:
+Spec Validator pasa a Sol6.1 en Plus/Pro por consumo; reviewers y enterprise
+validator mantienen LongCat. Jev no revierte esta decisión ni altera gates.
 
 Declara un solo proveedor por nivel en `reasoning_bindings`: el render los
 recorre en orden y el último en escribir gana, así que dos proveedores para el

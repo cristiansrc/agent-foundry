@@ -1,0 +1,50 @@
+version: 1
+agent: master-orchestrator
+system_context: |
+  Eres el orquestador. Analiza sólo el estado inline; no uses herramientas ni
+  afirmes haber escrito archivos. Responde EXACTAMENTE dos líneas:
+  next_action: <request-human-plan|dispatch-task-decomposer|dispatch-next-worker|dispatch-planner|ask-human-decision>
+  pause_for_human: <yes|no>
+  Continúa automáticamente entre handoffs internos. Sólo pausa en gate humano
+  vigente o decisión material que ningún rol/fuente pueda resolver.
+cases:
+  - id: ready-pausa-solo-hpa
+    description: ready sin HPA solicita aprobación y no descompone
+    expect_regex: 'next_action: request-human-plan[\s\S]*pause_for_human: yes'
+    input: |
+      Estado awaiting-human-plan-approval. Validator ready para este scope.
+      No hay HPA nueva. Board está bloqueado hasta gate. ¿Qué haces?
+  - id: hpa-registrada-continua
+    description: Con HPA válida se enruta a descomposición sin reconfirmar
+    expect_regex: 'next_action: dispatch-task-decomposer[\s\S]*pause_for_human: no'
+    input: |
+      Validator ready vigente y HPA approved_by_user del mismo snapshot/scope.
+      Board aún debe descomponerse; no hay decisiones pendientes ni drift.
+      ¿Qué haces?
+  - id: tarea-completa-continua
+    description: Handoff interno resuelto avanza sin preguntar si continúa
+    expect_regex: 'next_action: dispatch-next-worker[\s\S]*pause_for_human: no'
+    input: |
+      HPA vigente. Task board in_progress: tarea A quedó done con verificación
+      PASS. Tarea B todo, dependencia A done, inputs presentes y dentro del scope.
+      ¿Qué haces?
+  - id: agente-puede-resolver
+    description: Hallazgo material de contrato se enruta al Planner, no al usuario
+    expect_regex: 'next_action: dispatch-planner[\s\S]*pause_for_human: no'
+    input: |
+      Re-review encuentra que el contrato contradice una regla ya aprobada en
+      Master. Fuente y corrección material son identificables; se requieren
+      actualización de contrato y revisión. ¿Qué haces?
+  - id: decision-sin-autoridad
+    description: Sólo duda de negocio no resuelta pausa para humano
+    expect_regex: 'next_action: ask-human-decision[\s\S]*pause_for_human: yes'
+    input: |
+      Para aceptar un pago tardío después de liberar inventario hay dos reglas
+      de negocio incompatibles. Ninguna fuente lo resuelve y no es delegable al
+      Planner como decisión unilateral. ¿Qué haces?
+  - id: rechazos-viejos-no-bloquean
+    description: Dictamen histórico superseded no interrumpe ready actual
+    expect_regex: 'next_action: dispatch-task-decomposer[\s\S]*pause_for_human: no'
+    input: |
+      Reporte viejo dice not ready pero fue superseded. Shared actual tiene ready
+      para este scope y HPA humana válida del mismo alcance. ¿Qué haces?

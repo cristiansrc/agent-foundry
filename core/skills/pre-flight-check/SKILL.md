@@ -39,10 +39,10 @@ Si la tarea cambia migraciones, entidades, repositorios, queries, índices o con
 - Si Flyway o Testcontainers falla, el cierre queda `blocked`.
 
 ### Node.js / React / Angular
-- Usar `pnpm`, no `npm`.
+- Usar gestor/lockfile declarado por proyecto; pnpm default sólo para greenfield sin elección previa.
 - Instalar/verificar dependencias solo si el proyecto lo requiere y está permitido por el entorno.
 - Ejecutar según scripts existentes: `pnpm test`, `pnpm run lint`, `pnpm run typecheck`, `pnpm run build`, `pnpm run coverage`.
-- Si existe `package-lock.json`, detener y proponer migración a `pnpm-lock.yaml` antes de continuar.
+- No migrar package-lock por preferencia del agente ni bloquear verificación por otro gestor ya aprobado.
 
 ### Python / FastAPI
 - Ejecutar tests: `pytest`.
@@ -55,8 +55,9 @@ Si la tarea cambia migraciones, entidades, repositorios, queries, índices o con
 
 ### Grafo de Conocimiento (Graphify)
 Si el proyecto cuenta con Graphify (directorio `graphify-out/` o archivo `graph.json` presente en el repositorio):
-- Es obligatorio ejecutar `graphify --update` antes de dar por completado el Pre-flight Check. Esto asegura la coherencia del grafo y que `graphify-out/GRAPH_REPORT.md` refleje las modificaciones recientes.
-- Si el comando de actualización falla, el Pre-flight Check se marcará como `blocked` o `fail`.
+- Update incremental sólo por cambio estructural relevante. Para metadata no aplica.
+- Cache fallida se reporta como limitación; verificar dependencias directamente.
+  Sólo bloquea si falta evidencia material necesaria, no por frescura del índice.
 
 ### Deuda Técnica
 - Si el cambio de código requiere introducir bypasses de arquitectura, atajos temporales o reducción temporal de cobertura de tests, el agente executor debe registrar formalmente la entrada de deuda técnica en `projects/<project-name>/docs/specs/technical_debt.md` (o el archivo equivalente local).

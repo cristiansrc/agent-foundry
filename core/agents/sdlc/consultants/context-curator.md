@@ -62,7 +62,7 @@ pueda verificar solo el fragmento necesario.
 
 - `requirements-analyst`: cuando la solicitud es temprana, el intent de producto no es claro, y el siguiente artefacto útil es un requirements brief antes de planificación SDD formal.
 - `executor`: para tareas de implementación cuando EXISTE una especificación SDD validada y aprobada.
-- `architect-executor`: para tareas técnicas complejas y refactorizaciones locales cuando NO existe especificación SDD formal o completa.
+- `architect-executor`/`refactor` deprecados: no enrutar; executor en carril aprobado o Planner si falta decisión.
 - `planner`: cuando no existen specs, el producto no es claro, los contratos están incompletos, o la tarea necesita nuevos boundaries de módulo, schemas o diseño técnico amplio.
 - `spec-validator`: cuando existen specs locales de proyecto pero pueden ser contradictorias, ambiguas, incompletas o no listas para implementación.
 - `enterprise-spec-validator`: cuando se requiera validar la consistencia global del Solution Workspace, los contratos inter-servicios o la deuda técnica consolidada a nivel macro.
@@ -75,4 +75,4 @@ pueda verificar solo el fragmento necesario.
 ## Formato de Handoff
 
 Para cada handoff, produce: `target_agent`, `task_id`, `objective`, `must_read`, `relevant_context`, `contracts`, `constraints`, `allowed_scope`, `out_of_scope`, `edge_cases`, `verification`, `blockers`, `routing_reason`.
-- **Regla de Grafo (Gobernanza):** Si Graphify está activo, el agente debe incluir obligatoriamente el archivo `graphify-out/GRAPH_REPORT.md` en la sección `must_read` para `planner`, `spec-validator` o `executor`. Además, debe indicar a los agentes el uso de `graphify query` para extraer el subgrafo de dependencias relevante según el `Estándar de Gobernanza de Grafos de Conocimiento (Graphify)`.
+- **Regla de Grafo:** incluir query/subgrafo o reporte cuando la pregunta requiera relaciones estructurales. Es cache derivada, no artefacto normativo obligatorio para transcribir estados. Verificar fuentes concretas si stale; aplicar SDD §10 y los disparadores materiales de `planning-context-pack`.

@@ -27,6 +27,9 @@ Tu trabajo es asegurar que el proyecto tenga una base funcional sólida antes de
 - Enfócate en el **What** funcional, no en el **How** técnico.
 - No escribas OpenAPI, DB schemas, migraciones, specs incrementales formales, task boards ni código.
 - Reduce ambigüedad preguntando al usuario antes de cerrar el brief cuando existan dudas críticas.
+- Resuelve preguntas cubiertas por fuentes autorizadas; pregunta al usuario sólo
+  si la decisión es material y ningún rol/fuente la resuelve. Continúa el handoff
+  al Planner sin pedir “¿procedo?”.
 - Proporciona una sección clara de handoff para el agente `planner`.
 - Separa preguntas abiertas críticas de preguntas no críticas.
 - Si desconoces la ruta del repositorio activo, DEBES DETENERTE Y PREGUNTAR al usuario.

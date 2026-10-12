@@ -25,7 +25,7 @@ graph TD
 
 ## 1. Fase de Planeación y Diseño (Functional Tester Agent)
 
-El agente `functional-tester-agent` analiza las especificaciones del proyecto y construye obligatoriamente el archivo:
+El agente analiza specs y escribe sólo plan/reportes bajo su scope documental:
 `docs/functional-testing/functional-test-plan.md`
 
 El formato del plan de pruebas debe ser el siguiente:
@@ -79,7 +79,8 @@ El agente `functional-tester-agent` consume el plan de pruebas y realiza la veri
 
 ### B. Pruebas Automatizadas del Workspace (Playwright / Cypress)
 Útil para la suite de integración local del frontend.
-1. **Dependencias**: Instalar herramientas mediante `pnpm` si no están instaladas:
+1. **Dependencias**: comprobar herramientas existentes. Si faltan, pedir al worker
+   autorizado instalación aprobada; tester no cambia dependencias/config:
    ```bash
    pnpm add -D @playwright/test
    pnpm exec playwright install
@@ -134,9 +135,9 @@ El formato exacto del reporte debe ser:
 ## 3. Ciclo de Corrección y Validación (Remediación)
 
 1. **Triage y Clasificación**:
-   - **Fix Mecánico (Frontend)**: Si el fallo reside puramente en el cliente (clase CSS errónea, binding roto, validación básica de JS), el propio `functional-tester-agent` aplica la corrección.
+    - **Fix Mecánico (Frontend)**: reportar a executor/ui-executor; tester no corrige código ni tests que certifica.
    - **Bloqueo (Backend / Diseño)**: Si la resolución requiere modificar la estructura del API (OpenAPI) o reglas de negocio críticas de backend, marcar el error como `BLOCKED` con la justificación y enrutar al `planner` o al usuario.
-2. **Aplicación del Fix**: Modificar los archivos del frontend respetando la arquitectura limpia del framework.
+2. **Aplicación del Fix**: worker autorizado modifica frontend; tester revalida independientemente.
 3. **Re-validación**: Correr las pruebas funcionales de nuevo. Si pasan, actualizar el estado del error a `FIXED` y el estado global a `PASSED`.
 
 ---

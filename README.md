@@ -59,9 +59,11 @@ entre dos suscripciones, elegidas por **forma de facturar**:
   Sol es el recurso escaso (15-160 mensajes por 5h), Luna el abundante
   (350-3.000) — por eso el volumen nunca toca Sol.
 - **OpenCode Go Plus** (topes de uso por modelo, $40/mes): volumen, código y
-  las puertas de calidad. DeepSeek para código, Kimi para tests y validación
-  enterprise, MiMo para trabajo mecánico, y GLM-5.3 como validador
-  independiente del planner (familia Z.ai frente a OpenAI).
+   las puertas de calidad. DeepSeek para código, LongCat para varias revisiones
+   y MiMo para trabajo mecánico. **Cambio humano2026-10-11:** GLM-5.3 pausado;
+   enterprise-architect y spec-validator pasan a GPT-6.1 Sol. Planner/validator
+   comparten modelo temporalmente por decisión de consumo; roles y gates siguen
+   independientes. Alternativas de otra familia se revisarán más adelante.
 
 Cada suscripción lleva sus propios contadores, así que agotar una no afecta a
 la otra. El detalle, la política de privacidad, el reparto por proveedor y los
@@ -84,6 +86,11 @@ aprobación del reviewer **y** Gate 2 humano; cualquier decisión de negocio o
 arquitectura escala automáticamente a SDD. Skill:
 `outcome-observability-driven`; estados en `core/workflow/states.md`.
 
+Planificación con baseline/slice acotado, estado actual único y máximo dos
+rondas de remediación/re-review; metadata e índices sin cambio material no
+reinician validación contractual. Gates por fase y evidencia durable:
+[`planning-convergence`](docs/runbooks/planning-convergence.md).
+
 ## Roles de agentes
 
 | Rol | Agentes |
@@ -99,7 +106,7 @@ arquitectura escala automáticamente a SDD. Skill:
 2. Gates humanos obligatorios: `awaiting-human-plan-approval` y
    `awaiting-human-qa-approval`. Ver `core/workflow/states.md`.
 3. Cobertura mínima: 85% en archivos testables.
-4. Git exclusivo de `git-executor`: ningún otro agente ejecuta comandos git.
+4. Git mutante exclusivo de `git-executor` y petición explícita; inspección read-only permitida al rol con shell.
 5. Anti-drift: si un agente menciona `model:` o una ruta absoluta `/home/`
    dentro de `core/`, el lint falla.
 
@@ -346,7 +353,7 @@ La skill `agent-foundry-reader` se instala mediante
 | `database-architect` | opencode-go/deepseek-v4-pro |
 | `devops-architect` | opencode-go/deepseek-v4.1-flash |
 | `documentation` | opencode-go/mimo-v2.6-flash |
-| `enterprise-architect` | opencode-go/glm-5.3 |
+| `enterprise-architect` | openai/gpt-6.1-sol |
 | `enterprise-spec-validator` | opencode-go/longcat-2.0 |
 | `executor` | opencode-go/deepseek-v4.1-flash |
 | `final-validation` | opencode-go/longcat-2.0 |
@@ -358,7 +365,7 @@ La skill `agent-foundry-reader` se instala mediante
 | `security-reviewer` | opencode-go/longcat-2.0 |
 | `solution-architect` | openai/gpt-6.1-sol |
 | `spec-remediator` | opencode-go/mimo-v2.6-pro |
-| `spec-validator` | opencode-go/glm-5.3 |
+| `spec-validator` | openai/gpt-6.1-sol |
 | `task-decomposer` | opencode-go/mimo-v2.6-pro |
 | `test-architect` | opencode-go/claude-haiku-5-5 |
 | `ui-designer` | openai/gpt-6-luna |

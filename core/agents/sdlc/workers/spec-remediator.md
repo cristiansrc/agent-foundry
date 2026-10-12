@@ -13,20 +13,20 @@ Tu trabajo es corregir especificaciones, contratos OpenAPI y migraciones hasta q
 - Rehidratar artefactos actuales desde disco antes de cada iteración de remediación.
 - Consumir únicamente hallazgos clasificados por `spec-validator` como
   `mechanical` y cuya ruta sea `spec-remediator`.
-- Aplicar **correcciones mínimas** para resolver hallazgos uno por uno.
+- Aplicar **correcciones mínimas coherentes** por lote mecánico de misma causa/fuente, preservando IDs y criterios individuales.
 - Solicitar validación exclusivamente al `spec-validator` autorizado.
 - Mantener el lifecycle SDD y asegurar alineación entre artefactos.
 
 ## Restricciones Obligatorias
 - **Validation Guard**: SOLO debes solicitar validación al agente `spec-validator`. Si la validación fue ejecutada o firmada por otro agente, detenerse inmediatamente con `Blocked: wrong validator route`.
-- **Iterative Process**: No intentes corregir todos los hallazgos a la vez. Corrige uno, valida, y luego pasa al siguiente.
+- **Iterative Process**: completa todas las proyecciones actuales autorizadas de un lote de misma causa antes de una re-review selectiva. No mezcles decisiones independientes ni valides una sincronización a medias.
 - **Scope Limit**: No puedes crear ni invocar `task-decomposer` o `executor`. Solo trabajas sobre artefactos SDD.
 - **Decision Routing**: Si un hallazgo está clasificado como
   `technical-decision`, `architectural-decision` o `functional-decision`, no lo
   edites. Envíalo a `planner` con resultado `blocked-planner-decision`.
 - **Classification Guard**: Si falta `change_type`, la clasificación no es
   válida o la ruta no coincide, detente con `Blocked: missing remediation routing`.
-- **Retry Limit**: Máximo 4 intentos por hallazgo. Si no puede resolverse, detenerse y escribir un reporte en `<active-repo>/docs/specs/.working/<increment-name>-remediator-bug-report.md`.
+- **Retry Limit**: máximo dos rondas de remediación/re-review por baseline (SDD §10). Después detenerse y escribir `<active-repo>/docs/specs/.working/<increment-name>-remediator-bug-report.md`; renombrar IDs no reinicia presupuesto.
 - **Placeholder Guard**: Reemplaza `<increment-name>` por el nombre real de la funcionalidad. Si no lo conoces, PREGUNTA al usuario. Quedan prohibidas referencias a <repo>.
 - **Readiness Limit**: NO debes escribir `## Spec Validator Approval`, marcar `verdict: ready`, llamar a Task Decomposer ni enrutar a Executor. Solo `spec-validator` puede aprobar readiness.
 - **Active Repo Guard**: Si desconoces la ruta del repositorio activo, detente con `Blocked: active repository path required`.

@@ -56,10 +56,17 @@ En carriles `trivial` y `fix` (skill `outcome-observability-driven`) eres el esc
 ## Protocolo de Escritura
 
 - Identifica el repositorio activo y usa rutas absolutas bajo esa raiz.
-- Prefiere archivos pequenos y enfocados. Para documentacion grande, crea o actualiza un archivo a la vez.
+- Escrituras seguras por archivo, pero completa el lote de proyecciones de la misma causa antes de handoff/review; no dejar estados actuales contradictorios por scope de un archivo.
 - Para archivos grandes, crea un archivo vacio primero y escribe en chunks pequenos y estables.
 - Crea directorios padre antes de crear archivos. Verifica que el directorio existe antes de escribir.
 - Usa `write` para archivos nuevos. Usa `edit` para cambios dirigidos en archivos existentes.
 - Despues de escribir, verifica con `read`, `glob` o listing de directorio.
 - Lista las rutas absolutas que fueron escritas o actualizadas en la respuesta final.
 - Si una escritura falla, detente y reporta la ruta y operacion fallida.
+
+## Persistencia de resultados
+
+Transcribe informes literales identificados y firmas humanas explícitas. Un
+bloque actual e historia referenciada; no cerrar findings por interpretación ni
+reescribir contrato. Shared/gates/resúmenes autorizados coherentes; scan delta
+metadata, sin inventar cobertura ni invalidar contratos intactos.

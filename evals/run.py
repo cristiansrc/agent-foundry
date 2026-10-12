@@ -10,6 +10,7 @@ Uso:
                       asignado en su perfil; grep del expect_contains.
 """
 import argparse
+import json
 import re
 import subprocess
 import sys
@@ -27,21 +28,41 @@ def run_case_opencode(agent: str, model: str | None, system: str, user_input: st
     fuerza a evaluar solo con el contexto inline del caso.
     """
     with tempfile.TemporaryDirectory(prefix="foundry-eval-") as sandbox:
-        cmd = ["opencode", "run", "--dir", sandbox, "--agent", agent]
+        cmd = ["opencode", "run", "--dir", sandbox, "--agent", agent, "--format", "json"]
         if model:
             cmd += ["--model", model]
         cmd.append(f"{system}\n\n---\n\n{user_input}")
         try:
             result = subprocess.run(cmd, capture_output=True, text=True,
                                     timeout=timeout, cwd=sandbox)
-        except subprocess.TimeoutExpired:
-            return f"__TIMEOUT__ ({timeout}s)"
-    return result.stdout + result.stderr
+        except subprocess.TimeoutExpired as exc:
+            partial = exc.stderr or exc.stdout or ""
+            if isinstance(partial, bytes):
+                partial = partial.decode("utf-8", errors="replace")
+            return f"__TIMEOUT__ ({timeout}s)\n{partial}"
+    if result.returncode:
+        return f"__EXECUTION_ERROR__ ({result.returncode})\n{result.stderr}"
+    return response_text(result.stdout)
+
+
+def response_text(events: str) -> str:
+    """No evaluar logs, tool output o prompt reflejado como respuesta del modelo."""
+    parts = []
+    for line in events.splitlines():
+        try:
+            event = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if isinstance(event, dict) and event.get("type") == "text":
+            part = event.get("part", {})
+            if isinstance(part, dict) and isinstance(part.get("text"), str):
+                parts.append(part["text"])
+    return "\n".join(parts) if parts else "__NO_RESPONSE__"
 
 
 def evaluate(out: str, expect: str | None, expect_regex: str | None,
              expect_not: str | None) -> tuple[bool, str]:
-    if out.startswith("__TIMEOUT__"):
+    if out.startswith(("__TIMEOUT__", "__EXECUTION_ERROR__", "__NO_RESPONSE__")):
         return False, out
     if expect_regex:
         ok = re.search(expect_regex, out, flags=re.IGNORECASE) is not None
@@ -68,6 +89,8 @@ def main() -> int:
                         help="segundos por ejecución (default 900)")
     parser.add_argument("--show-output", action="store_true",
                         help="muestra la respuesta del agente para diagnosticar un caso")
+    parser.add_argument("--case", dest="case_id", help="ejecutar sólo un caso identificado")
+    parser.add_argument("--stop-on-error", action="store_true", help="no consumir llamadas después del primer fallo")
     args = parser.parse_args()
 
     suite = yaml.safe_load(Path(args.suite).read_text(encoding="utf-8"))
@@ -78,7 +101,10 @@ def main() -> int:
     if args.executor == "echo":
         print("(dry-run: solo valida estructura de casos)\n")
 
-    for case in suite["cases"]:
+    cases = [case for case in suite["cases"] if not args.case_id or case["id"] == args.case_id]
+    if not cases:
+        parser.error("caso no encontrado")
+    for case in cases:
         cid = case["id"]
         expect = case.get("expect_contains")
         expect_regex = case.get("expect_regex")
@@ -107,6 +133,8 @@ def main() -> int:
                 print("[salida truncada a 8000 caracteres]")
             print("--- fin salida ---")
         passed, failed = passed + ok, failed + (not ok)
+        if not ok and args.stop_on_error:
+            break
 
     print(f"\nResultado: {passed} pass / {failed} fail / {passed+failed} total")
     return 1 if failed else 0

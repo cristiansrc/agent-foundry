@@ -22,18 +22,26 @@ defaults:
   mode: all
   edit: deny
   bash: deny
+  task: deny
 
 agents:
   # ── Workers ──────────────────────────────────────────────────────────────
   executor:               {edit: allow, bash: allow, temp: "0.15"}
   ui-executor:            {edit: allow, bash: allow, temp: "0.15"}
-  architect-executor:     {edit: allow, bash: allow, temp: "0.15"}
+  architect-executor:     {edit: deny, bash: deny, temp: "0.15"}
   database-architect:     {edit: allow, bash: allow, temp: "0.10"}
   devops-architect:       {edit: allow, bash: allow, temp: "0.2"}
-  refactor:               {edit: allow, bash: allow, temp: "0.2"}
+  refactor:               {edit: deny, bash: deny, temp: "0.2"}
   documentation:          {edit: allow, bash: allow, temp: "0.25"}
-  spec-remediator:        {edit: allow, bash: deny, temp: "0.1"}
-  functional-tester-agent: {mode: subagent, edit: deny, bash: allow, temp: "0.2"}
+  spec-remediator:
+    edit: {"*": deny, "docs/**/*.md": allow, "**/docs/**/*.md": allow}
+    bash: deny
+    temp: "0.1"
+  functional-tester-agent:
+    mode: subagent
+    edit: {"*": deny, "docs/functional-testing/**": allow, "**/docs/functional-testing/**": allow}
+    bash: allow
+    temp: "0.2"
   git-executor:           {edit: allow, bash: allow, temp: "0.1"}
 
   # ── Consultants ──────────────────────────────────────────────────────────
@@ -52,11 +60,40 @@ agents:
     edit: {"*": deny, "**/docs/specs/.working/**": allow, "docs/specs/.working/**": allow}
     bash: deny
     temp: "0.10"
-  master-orchestrator:    {mode: primary, edit: deny, bash: deny, execute: allow, task: allow, temp: "0.15"}
+  master-orchestrator:
+    mode: primary
+    edit: deny
+    bash: deny
+    execute: allow
+    temp: "0.15"
+    task:
+      "*": deny
+      planner: allow
+      task-decomposer: allow
+      executor: allow
+      reviewer: allow
+      final-validation: allow
+      git-executor: allow
+      solution-architect: allow
+      enterprise-architect: allow
+      ui-designer: allow
+      ui-executor: allow
+      test-architect: allow
+      database-architect: allow
+      devops-architect: allow
+      documentation: allow
+      functional-tester-agent: allow
+      security-reviewer: allow
+      spec-validator: allow
+      enterprise-spec-validator: allow
+      api-governance-agent: allow
+      bug-diagnostician: allow
+      spec-remediator: allow
+      context-curator: allow
 
   # ── Validators ───────────────────────────────────────────────────────────
-  spec-validator:         {mode: subagent, edit: allow, bash: deny, temp: "0.1"}
-  enterprise-spec-validator: {mode: subagent, edit: allow, bash: deny, temp: "0.1"}
+  spec-validator:         {mode: subagent, edit: deny, bash: deny, temp: "0.1"}
+  enterprise-spec-validator: {mode: subagent, edit: deny, bash: deny, temp: "0.1"}
   api-governance-agent:   {mode: subagent, edit: deny, bash: allow, temp: "0.10"}
   bug-diagnostician:      {mode: subagent, edit: deny, bash: allow, temp: "0.10"}
   reviewer:               {mode: subagent, edit: deny, bash: allow, temp: "0.1"}

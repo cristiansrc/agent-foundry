@@ -75,8 +75,8 @@ Si el proyecto es standalone y no forma parte de una solucion multi-repo, estos 
 - API gateway: si existe, documentar routing ownership, versioning, auth delegation, rate limits y OpenAPI aggregation.
 
 ## Solution Workspace
-- Si existe una solucion multi-repo, usar carpeta `projects/` en la raiz del workspace de solucion.
-- No usar `proyectos/` como nombre canonico en reglas de agentes o automatizacion.
+- Detectar solución por ownership/landscape/contratos, no carpeta. `projects/`
+  es default greenfield si aprobado; respetar mapping físico existente.
 - El `.gitignore` de la raiz de solucion debe ignorar `projects/*` para no versionar subrepositorios dentro del repo de arquitectura.
 - Cada subproyecto mantiene su propio repositorio, lifecycle, tests y versionado.
 - `docs/architecture/workspace-mapping.md` debe declarar cada proyecto: ruta relativa, repositorio remoto si aplica, bounded context, owner y estado.
@@ -92,7 +92,7 @@ Si el proyecto es standalone y no forma parte de una solucion multi-repo, estos 
 - Bloquear si se propone un servicio sin bounded context, owner o integration contract.
 - Bloquear si dos servicios escriben la misma fuente de datos sin ownership y consistencia definidos.
 - Bloquear si un flujo cross-service no define idempotency, retries, timeout o compensation.
-- Bloquear si el workspace usa `proyectos/` como ruta canonica en vez de `projects/`.
+- No bloquear por nombre de carpeta distinto si mapping/ownership son inequívocos.
 - Bloquear si diagramas/texto contradicen specs, OpenAPI, event schemas o repositorios reales.
 - Bloquear si una decision macro rompe boundaries de `hexagonal-architecture` dentro de los servicios.
 

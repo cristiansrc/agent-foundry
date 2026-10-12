@@ -1,0 +1,23 @@
+version: 1
+agent: enterprise-architect
+system_context: |
+  Evaluación autocontenida. No herramientas, filesystem ni delegación.
+  Todos los hechos del caso están inline. Responde las líneas exactas indicadas.
+cases:
+  - id: respeta-arquitectura-aprobada
+    description: No reemplaza Cognito por Keycloak ni crea repos antes de insumos
+    expect_regex: 'provider: cognito[\s\S]*materialize: blocked'
+    input: |
+      Workspace documentado con seis bounded contexts, ownership exclusivo y
+      contratos de integración completos. Usuario aprobó Cognito+BFF cookie.
+      No existen repos y faltan URLs/owners/autorización de creación. Consulta
+      macro: preservar proveedor actual y decidir si materializar automáticamente.
+      Responde provider: cognito|keycloak y materialize: blocked|allowed.
+  - id: detectar-writer-compartido
+    description: Bloquea macro diseño con dos escritores del mismo stock
+    expect_contains: 'alignment: changes-required'
+    input: |
+      Purchases y Catalog pueden escribir el mismo stock y ambos confirman ventas.
+      No hay regla de autoridad, serialización, transacción ni resolución de
+      conflictos compartida. ¿Está alineado el diseño? Responde exactamente
+      alignment: approved o alignment: changes-required.

@@ -11,7 +11,7 @@ Portado desde config-ai (graphify_governance_standard.md) al ecosistema foundry.
    los agentes obreros ejecutan `graphify update .` antes de reportar done.
 3. **Consulta antes que grep**: para preguntas de arquitectura/relaciones,
    `graphify query "<pregunta>"` primero; GRAPH_REPORT.md solo para revisión
-   amplia inicial.
+    amplia inicial.
 
 ## Cuándo actualizar
 
@@ -35,3 +35,6 @@ Portado desde config-ai (graphify_governance_standard.md) al ecosistema foundry.
 - Regenerar el grafo completo por rutina (costoso): preferir incremental.
 - Editar archivos de graphify-out/ a mano.
 - Usar el grafo como justificación para no leer la spec real.
+- Actualizar/reconstruir el grafo por transcripción de estado, firmas o nits sin
+  cambio estructural. El grafo stale no invalida contratos comprobables; verificar
+  fuentes y actualizar sólo el delta material relevante.

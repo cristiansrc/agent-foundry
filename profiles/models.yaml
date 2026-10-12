@@ -3,7 +3,7 @@
 # Los agentes viven en core/ agnósticos; este archivo los une a un modelo real.
 # Cambiar de modelo/proveedor = editar aquí + tooling/build.sh.
 schema: foundry/profiles/models/v2
-updated: 2026-09-30
+updated: 2026-10-11
 
 # ── 1. Tiers abstractos (capacidad requerida, sin marcas) ──────────────────
 tiers:
@@ -31,13 +31,13 @@ agent_tiers:
   # comparte contador con la otra suscripción.
   # Sol es el recurso escaso de Plus (15-160 msgs/5h); Luna es el abundante
   # (350-3.000/5h). Ningún agente de volumen (executor, docs, git) toca Sol.
-  # Validadores críticos en familia distinta al planner: Z.ai (GLM) y Moonshot
-  # (Kimi) frente a OpenAI del planner. SUSTITUYE a Copilot Pro+ del 2026-09-30.
+  # Excepción humana temporal 2026-10-11: enterprise-architect y spec-validator
+  # pasan de GLM-5.3 a Sol6.1 por consumo de la cuenta. Planner/validator
+  # comparten familia/modelo temporalmente; mantienen roles/gates independientes.
+  # Revisar alternativas más adelante, sin fallback automático al modelo pausado.
   master-orchestrator:    {tier: orchestration, harness_provider: harness_chatgpt}
   general:                {tier: orchestration, harness_provider: harness_chatgpt}
-  # Opus 5.5 -> GLM-5.3 (era harness_copilot/opus55). Slot explicito para dejar
-  # constando el mapeo; el tier ya lo resuelve igual.
-  enterprise-architect:   {tier: macro_architecture, slot: glm_reasoning}
+  enterprise-architect:   {tier: macro_architecture, harness_provider: harness_chatgpt, slot: sol}
   solution-architect:     {tier: patterns_logic, harness_provider: harness_chatgpt}
   # Era Sonnet 5.5. ui-designer es iterativo (3-4 direcciones HTML) -> Luna,
   # que en Plus es plentiful y con visión.
@@ -45,16 +45,14 @@ agent_tiers:
   planner:                {tier: planning_governance, harness_provider: harness_chatgpt, variant: high}
   api-governance-agent:   {tier: planning_governance, slot: mimo_v26_pro}
   task-decomposer:        {tier: planning_governance, slot: mimo_v26_pro}
-  # Opus 5.5 -> GLM-5.3. Familia Z.ai vs OpenAI del planner: independencia.
-  spec-validator:         {tier: spec_validation_critical, slot: glm_reasoning, locked: true}
-  # Sin slot: kimi_k3 (Moonshot), familia distinta a la del spec-validator.
+  # Excepción de familia aprobada: mismo modelo que Planner, revisión por otro rol.
+  spec-validator:         {tier: spec_validation_critical, harness_provider: harness_chatgpt, slot: sol, locked: true}
+  # Verificador enterprise conserva LongCat, familia distinta a OpenAI.
   enterprise-spec-validator: {tier: spec_validation_critical, slot: longcat}
   spec-remediator:        {tier: sdd_validation, slot: mimo_v26_pro}
   context-curator:        {tier: sdd_validation}
   reviewer:               {tier: sdd_validation, slot: longcat}
-  # security-reviewer y final-validation estaban en Sonnet 5.5, que no existe
-  # en ChatGPT Plus. A GLM-5.3: son las dos puertas approve/block y el tope de
-  # $120/mes de Go Plus aguanta las 5aprox. requests/semana por agente de sobra.
+  # Puertas quality/seguridad conservan LongCat; no se cambian por esta petición.
   security-reviewer:      {tier: sdd_validation, slot: longcat}
   requirements-analyst:   {tier: sdd_validation, harness_provider: harness_chatgpt, slot: sol}
   final-validation:       {tier: sdd_validation, slot: longcat}
@@ -92,12 +90,12 @@ providers:
         notes: Curación de contexto y respaldo barato. Sin entrenamiento, retención 0.
       glm_reasoning:
         id: opencode-go/glm-5.3
-        status: active
+        status: blocked
         context: 1M
         vision: false
         cost: 1.40/4.40
         cap: 120
-        notes: "Sustituye a Opus 5.5 el 2026-10-03. Desde 2026-10-11 solo spec-validator y enterprise-architect (reviewer, security-reviewer y final-validation pasaron a LongCat-2.0 tras certificarlo). Familia Z.ai: distinta del planner (OpenAI) y de quien codifica (DeepSeek). Sin entrenamiento, retención 0."
+        notes: "Pausado por decisión humana2026-10-11: consumo de cuenta elevado. enterprise-architect/spec-validator pasan a openai/gpt-6.1-sol. Mantener referencia histórica, no primario ni fallback automático hasta decisión nueva."
       deepseek_v41_flash:
         id: opencode-go/deepseek-v4.1-flash
         status: active
@@ -129,7 +127,7 @@ providers:
         vision: false
         cost: 0.30/1.20
         cap: 240
-        notes: "Slots desde 2026-10-11: reviewer, security-reviewer, final-validation y enterprise-spec-validator (antes GLM-5.3 y Kimi K3). ~$0.0005 por request en workload de caché ($0.006 por M leídos, ~40x menos que GLM). Familia Meituan: distinta del planner (OpenAI), del spec-validator (Z.ai) y de quien codifica (DeepSeek). Sin visión: delega capturas en functional-tester-agent (patrón ya establecido). Certificado: odd-reviewer 2/2, security-reviewer 3/3, final-validation 3/3 (--repeat 2) + probe enterprise (detectó inconsistencia inter-servicios y trampa de enum). Ojo: timeouts transitorios observados el día del estreno; se recupera solo."
+        notes: "Slots desde 2026-10-11: reviewer, security-reviewer, final-validation y enterprise-spec-validator (antes GLM-5.3 y Kimi K3). Familia Meituan distinta de Planner/Spec Validator (OpenAI) y Executor (DeepSeek). Certificación histórica anterior: odd-reviewer2/2, security-reviewer3/3, final-validation3/3 (--repeat2) y probe enterprise; no certifica cambios posteriores del flujo. Sin visión: capturas por functional-tester-agent."
       mimo_v26_flash:
         id: opencode-go/mimo-v2.6-flash
         status: active
@@ -188,13 +186,11 @@ providers:
         notes: Precio corregido 2026-09-30 (antes figuraba 0.0175). Sin vision.
     tier_bindings:
       orchestration:       [mimo_v26_flash]
-      # macro_architecture era mimo_v26_pro; el 2026-10-03 pasa a GLM-5.3 para
-      # sustituir a Opus 5.5 en enterprise-architect.
-      macro_architecture:  [glm_reasoning]
+      # Respaldo Go; enterprise-architect usa harness_chatgpt/sol explícito.
+      macro_architecture:  [mimo_v26_pro]
       patterns_logic:      [mimo_v26_flash]
       planning_governance: [longcat]
-      # Default = enterprise-spec-validator (Kimi K3, Moonshot). spec-validator
-      # fuerza GLM-5.3 con `slot` para no compartir familia con su verificador.
+      # Respaldo Go; enterprise-spec-validator fuerza longcat, spec-validator Sol.
       spec_validation_critical: [kimi_k3, mimo_v26_pro]
       sdd_validation:      [mimo_v26_flash]
       code_volume:         [deepseek_v41_flash]
@@ -207,7 +203,6 @@ providers:
       hy3:           [mimo_v26_flash]
       mimo_v26_flash: [glm_flash]
       mimo_v26_pro:  [qwen38_max, mimo_v26_flash]
-      glm_reasoning: [qwen38_max, mimo_v26_pro]
       kimi_k3:       [qwen38_max, mimo_v26_pro]
       qwen38_max:    [mimo_v26_pro]
       longcat:       [mimo_v26_flash]
@@ -304,14 +299,13 @@ providers:
         context: 1M
         vision: true
         cost: 50/250 creditos
-        notes: "Flagship. Escaso en Plus (15-160 msgs/5h) y con tope semanal encima: solo razonamiento que decide. planner (effort high), solution-architect y bug-diagnostician. NO para volumen."
+        notes: "Razonamiento: planner, solution-architect, bug-diagnostician y desde2026-10-11 enterprise-architect/spec-validator por excepción humana de costo. No agentes mecánicos/volumen. Cuotas del proveedor aplican, sin promesa de ahorro garantizado."
     tier_bindings:
       orchestration:       [luna]
       macro_architecture:  [sol]
       patterns_logic:      [sol]
       planning_governance: [sol]
-      # Solo respaldo: los validadores críticos viven en Go para no compartir
-      # familia con el planner (sería el mismo modelo que certifica su propia spec).
+      # spec-validator usa este binding por excepción humana temporal de familia.
       spec_validation_critical: [sol]
       sdd_validation:      [luna]
       code_volume:         [luna]
@@ -433,6 +427,7 @@ providers:
 
 # ── 4. Bloqueados (nunca asignar) ──────────────────────────────────────────
 blocked:
+  - {id: opencode-go/glm-5.3, reason: "Pausado por consumo de cuenta por petición humana2026-10-11; sustituido por openai/gpt-6.1-sol en enterprise-architect/spec-validator. Alternativas pendientes."}
   - {id: openai/gpt-6-astra, reason: "Astra es la opción Pro del Codex (5-45 msgs/5h) y ChatGPT Plus no incluye Pro ni extra-high. 2026-10-03."}
   - {id: github-copilot/gpt-6-astra, reason: "Coste 5x Sol 6.1 ($10/$50 por 1M) — consumiría los AI Credits de Pro+. 2026-09-30."}
   - {id: opencode-go/hy4-preview, reason: "Preview — política de no usar modelos en pruebas. 2026-09-30."}

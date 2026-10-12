@@ -62,7 +62,13 @@ qué debe verificar directamente y qué bloquea el incremento.
 - Mantén el pack por debajo de 250 líneas salvo que enumerar contratos o
   conflictos requiera más. Si excede ese límite, divide por dominio y añade un
   índice, sin eliminar evidencia.
-- Reutiliza el pack mientras `refresh_when` no ocurra. Si cambian fuentes
-  canónicas, actualízalo antes de planificar de nuevo.
+- `refresh_when` enumera cambios materiales que afectan el objetivo, no cada
+  transcripción de estado, firma, scan o re-emisión del propio pack. Separar
+  snapshot normativo de metadata; nunca usar el pack como gate autosostenido.
+- Actualizar una vez al terminar el lote material. Cambios sólo de resultado
+  pueden ir al handoff referenciado, sin re-curación del corpus.
+- Si el pack está stale, el receptor puede verificar directamente las fuentes
+  concretas necesarias; pedir curación sólo si falta localizar/entender ese
+  impacto. `complete` describe suficiencia del índice, nunca readiness.
 - Un `pack_status: incomplete` o `conflicting` prohíbe asumir completitud:
   el Planner debe verificar la fuente señalada o solicitar una nueva curación.

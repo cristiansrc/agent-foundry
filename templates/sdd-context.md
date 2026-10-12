@@ -6,7 +6,7 @@
 > Placeholder Guard: reemplazar `<increment-name>` antes de guardar.
 
 ## Current status
-- requirements-discovery
+state: requirements-discovery
 
 <!-- Enum válido: requirements-discovery | planning | validator-review |
      revision-needed | validated-not-executed | awaiting-human-plan-approval |
@@ -19,8 +19,8 @@
 | Requirements brief | docs/specs/requirements/<increment-name>-requirements-brief.md | entrada funcional |
 | Delta spec | docs/specs/increments/<increment-name>.md | contrato del incremento |
 | OpenAPI | docs/api/openapi.yaml | contratos expuestos |
-| Task board | docs/specs/tasks/<increment-name>-task-board.md | descomposición |
-<!-- Agregar migraciones/config/graphify-out/GRAPH_REPORT.md si aplican.
+<!-- Agregar task board sólo después de ready + Gate 1, no como prerequisito de readiness.
+     Agregar migraciones/config si aplican; grafo/packs son índices derivados.
      Rutas canónicas: distinguir archivo vs directorio; una ruta inexistente bloquea. -->
 
 ## Artifact evidence
@@ -37,11 +37,12 @@ reviewed_at: <pendiente>
 validator_agent: spec-validator
 artifact_set_reviewed: <pendiente>
 summary: <pendiente>
-invalidated_changes_since: none
+invalidated_by_changes_since: none
 
 <!-- Solo `verdict: ready` EXACTO autoriza descomposición/ejecución.
-     Cambios post-ready por planner invalidan el ready: registrar razón en
-     invalidated_changes_since y volver a validator-review.
+      Cambios MATERIALES post-ready invalidan el ready: registrar razón en
+      invalidated_by_changes_since y volver a validator-review.
+      Metadata/transcripciones sin cambio normativo requieren verificación/scan de delta.
      Prohibido duplicar este heading en otra parte del archivo. -->
 
 ## Decisions locked
@@ -74,4 +75,5 @@ invalidated_changes_since: none
 ## Human Plan Approval: approved_by_user
 
 ## Human QA Approval: approved_by_user
-     Cualquier otra edición humana sobre estados/veredictos = corrupted-state. -->
+      No fabricar firmas/veredictos; metadata incoherente se recupera con fuente,
+      no se presume corrupción por autor humano. -->

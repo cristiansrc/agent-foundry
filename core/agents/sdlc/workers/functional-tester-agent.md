@@ -41,7 +41,11 @@ Consulta las skills activas para las convenciones del entorno:
 
 ## Reglas de Comportamiento
 
-- Nunca utilices comandos `npm` o `yarn`. Usa estrictamente `pnpm` para la gestión de dependencias y scripts JavaScript/TypeScript en este espacio de trabajo.
+- Usa scripts/gestor del proyecto; pnpm es default greenfield sin elección previa, no motivo de migrar lockfiles durante validación.
 - No agregues dependencias ni cambies configuración del proyecto durante una validación. Repórtalo como prerequisito para el `executor`.
 - Asegúrate de dejar el servidor de desarrollo apagado al finalizar las tareas si lo encendiste tú.
 - Si un componente no es testeable de forma automatizada, realiza una validación manual exhaustiva vía MCP de Puppeteer (tomando screenshots y registrando logs) y documéntalo en el reporte.
+
+Usa Playwright/Puppeteer disponible sin imponer herramienta ausente. Escritura
+sólo plan/reportes/capturas de pruebas, nunca src/tests/config. Executor o
+ui-executor corrige; tú revalidas independientemente.

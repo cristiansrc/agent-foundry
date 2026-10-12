@@ -10,9 +10,9 @@ Esta skill define el estándar para la creación y evolución de especificacione
 ## 0. Roles y Ownership
 - `requirements-analyst`: levanta requerimientos funcionales cuando la solicitud aun no está lista para SDD formal. No escribe OpenAPI, migraciones, specs incrementales formales, task boards ni código.
 - `planner`: dueño de specs, contratos OpenAPI, decisiones técnicas, restricciones de arquitectura y shared context durante planificación.
-- `spec-validator`: dueño del veredicto de readiness. Puede actualizar reportes de validación y metadatos de lifecycle/status, pero no debe corregir decisiones técnicas.
+- `spec-validator`: dueño del veredicto de readiness; entrega informe. Documentation persiste/transcribe sin cambiar el dictamen ni corregir decisiones técnicas por inferencia.
 - `spec-remediator`: corrige hallazgos mecánicos o drift con fuente autoritativa inequívoca. No invoca Task Decomposer ni Executor.
-- `task-decomposer`: dueño exclusivo del task board y de la atomización de tareas después de `validated-not-executed`.
+- `task-decomposer`: dueño exclusivo del task board después de `ready` vigente y Gate 1 humano del mismo alcance.
 - `executor`: implementa desde task board/spec aprobados; no toma decisiones de arquitectura ni reinterpreta contratos.
 - `final-validation`: valida cumplimiento final contra intención original, specs, contratos, seguridad, tests y documentación.
 
@@ -26,7 +26,7 @@ Para añadir características a un sistema existente:
 3. **Contrato:** Actualizar el `openapi.yaml` antes de tocar el código.
 4. **Validación:** El `spec-validator` debe asegurar que el incremento no rompa reglas core.
 5. **Contexto Compartido:** Mantener un único archivo activo en `docs/specs/.working/<increment-name>-sdd-context.md`.
-6. **Task Board:** Crear `docs/specs/tasks/<increment-name>-task-board.md` solo cuando el incremento esté `validated-not-executed`.
+6. **Task Board:** Crear `docs/specs/tasks/<increment-name>-task-board.md` solo tras `ready` vigente y Gate 1 humano del mismo alcance.
 7. **Grafo de Dependencias:** Si Graphify está configurado, usar `graphify-out/GRAPH_REPORT.md` para mapear dependencias y prever impactos en la estructura de la solución.
 
 **Placeholder Guard:** reemplazar siempre `<increment-name>` por el nombre real del incremento (ej. `user-auth`, `invoice-export`). Si el nombre no es claro, preguntar al usuario. Nunca crear archivos con placeholders literales.
@@ -54,7 +54,7 @@ Cuando se cambia el comportamiento actual:
 
 ## 5. Gates Obligatorios
 - No ejecutar `task-decomposer` si la spec o el shared context están en `planning`, `draft`, `validator-review`, `revision-needed` o `implementation-blocked`.
-- Solo se permite descomposición cuando el último veredicto de `spec-validator` es `ready` y el estado es `validated-not-executed`.
+- Solo se permite descomposición tras `ready` vigente y aprobación humana de ese plan; `validated-not-executed` por sí solo no libera Gate 1.
 - La aprobación debe existir en el shared context como heading exacto `## Spec Validator Approval`.
 - El bloque de aprobación debe contener exactamente: `verdict: ready`, `reviewed_at`, `validator_agent: spec-validator`, `artifact_set_reviewed`, `summary` e `invalidated_by_changes_since: none`.
 - **Solution Workspace Gate:** En Solution Workspaces (bajo `projects/`), si la especificación modifica contratos OpenAPI expuestos, esquemas de bases de datos compartidas o integraciones entre servicios, es obligatorio que el agente `enterprise-spec-validator` apruebe la alineación global otorgando el veredicto de `Workspace Aligned` en la Master Spec global del Workspace antes de descomponer o ejecutar.
@@ -63,7 +63,7 @@ Cuando se cambia el comportamiento actual:
 
 
 - Frases narrativas como `Ready for Task Decomposer`, `Artifacts aligned`, `all findings resolved` o `Current readiness validated-not-executed` no son aprobación válida.
-- Si cualquier review summary o validator output dice `not ready`, la siguiente acción es corrección por Planner y nueva validación, no implementación ni descomposición.
+- El dictamen **vigente** usa `ready` o `revision-needed`. `not ready` histórico se interpreta como rechazo, nunca como estado canónico nuevo; dictámenes superseded no gobiernan el incremento actual. El rechazo vigente exige corrección y re-review, no implementación.
 - No se permite declarar una inconsistencia como resuelta sin verificar el archivo autoritativo real.
 - No se permiten frases como `Known Technical Debt`, `Override Approved by User` o `fix post-increment` para saltarse inconsistencias de spec/OpenAPI/migraciones, salvo aprobación explícita del usuario registrada en el shared context.
 - Debe existir un único shared context activo por incremento; contextos anteriores deben marcarse como `superseded` o históricos.
@@ -74,13 +74,13 @@ Cuando se cambia el comportamiento actual:
 - Excepción pre-descomposición: un task board bloqueado únicamente por `Awaiting Spec Validator approval` no invalida la spec por sí mismo si todas sus tareas de implementación están `blocked`. Debe tratarse como artefacto pendiente/stale que `task-decomposer` reescribirá o desbloqueará después de `verdict: ready`.
 - Antes del primer `verdict: ready`, el task board no debe ser evidencia obligatoria de readiness de la spec. Si aparece, debe listarse como `Pending execution artifact` o histórico, no como contrato canónico requerido.
 - La spec no puede tener afirmaciones de ciclo de vida contradictorias: si el encabezado dice `planning` o `draft`, ningún footer o resumen puede decir `validated-not-executed`, `Listo para Task Decomposer` o equivalente.
-- Si Planner cambia specs, OpenAPI, migraciones, reglas de transacción, seguridad, integración, task-board prerequisites o runtime config después de un `verdict: ready`, ese ready queda invalidado. El shared context debe registrar `invalidated_by_changes_since` con la razón y volver a `Spec Validator review`.
+- Un cambio **material** de reglas, contratos, transacciones, seguridad, integración, prerrequisitos o runtime después de `ready` invalida su cobertura afectada. Registrar razón/alcance y volver a review. Transcripciones exactas de dictámenes, índices, rutas históricas o firmas sin cambio normativo no invalidan contratos: verificar/scanear el delta documental y mantener identidad del set revisado.
 - `ready with minor changes` no autoriza descomposición ni ejecución. Solo `verdict: ready` exacto autoriza avanzar.
 
 ## 5.1 Alcance de Búsqueda en Filesystem
 - Nunca buscar artefactos desde la raíz del filesystem `/`.
 - Toda búsqueda debe limitarse al repositorio activo o a rutas canónicas explícitas del shared context.
-- **Jerarquía de Solución**: Solo aplica cuando el repositorio actual está dentro de una carpeta llamada exactamente `projects/`. Si el padre no es `projects`, el proyecto es STANDALONE y no debe forzarse documentación enterprise ni Master Spec global.
+- **Jerarquía de Solución**: identificar workspace por instrucciones, landscape, ownership y contratos inter-proyecto explícitos. El nombre físico `projects/` no es condición necesaria ni suficiente. No inventar una solución enterprise si no existe evidencia de coordinación multi-proyecto.
 - Shared contexts: buscar solo en `<repo>/docs/specs/.working/`.
 - Task boards: buscar solo en `<repo>/docs/specs/tasks/`.
 - OpenAPI: buscar solo en `<repo>/docs/api/`, `<repo>/src/main/resources/` o ruta canónica.
@@ -104,7 +104,7 @@ Todo checklist de consistencia debe incluir:
 - Ningún artefacto puede marcarse `pass` si el agente no leyó o listó el archivo/directorio real en el ciclo actual.
 - Ningún artefacto puede marcarse `pass` si la evidencia contradice el contenido actual del archivo.
 - Las rutas canónicas deben distinguir archivos y directorios. Una ruta inexistente en `Canonical artifacts` bloquea la preparación.
-- Si Graphify está configurado en el proyecto, el reporte de dependencias (`graphify-out/GRAPH_REPORT.md`) debe incluirse en los `Canonical artifacts` del shared context y verificarse su estado de actualización.
+- Graphify y packs son índices derivados, no contratos normativos. Referenciarlos como navegación cuando sean relevantes; verificar fuentes materiales directamente si stale. No bloquear por frescura de cache cuando la fuente necesaria está identificada y comprobada.
 - El shared context no debe duplicar headings obligatorios como `## Spec Validator Approval` o `## Next action`; duplicarlos vuelve ambiguo el estado real.
 
 ## 7. Shared Context Mínimo
@@ -123,7 +123,7 @@ El shared context debe incluir, como mínimo:
 Si falta `## Artifact evidence` o `## Spec Validator Approval`, el incremento no está listo para descomposición ni ejecución.
 
 ## 8. Formato Mínimo de Task Board
-El task board debe ser creado o reescrito por `task-decomposer` después de `validated-not-executed` y debe incluir:
+El task board debe ser creado o reescrito por `task-decomposer` después de `ready` vigente y Gate 1 humano del mismo alcance, y debe incluir:
 - Ruta absoluta de spec aprobada y shared context usado.
 - Estado superior: `todo`, `in_progress`, `done` o `blocked`.
 - Tareas atómicas con id estable, owner esperado, dependencias, archivos/áreas permitidas, pasos de implementación y verificación.
@@ -138,3 +138,73 @@ No debe contener tareas genéricas como "implementar backend" o "crear frontend"
 - El estado final debe distinguir entre `implemented`, `closed` y `superseded`; no reutilizar `validated-not-executed` para incrementos ya ejecutados.
 - Al cerrar un incremento, transferir las lecciones aprendidas o bugs técnicos recurrentes al registro de memoria `MEMORY.md` (local o global) para evitar que los agentes los vuelvan a cometer en futuras tareas.
 
+## 10. Convergencia de planificación y revisión
+
+Estas reglas aplican a Planner, Curator, Remediator, validadores y orquestación.
+No eliminan gates ni permiten aprobar por agotamiento de intentos.
+
+### Baseline, fase y alcance
+
+- Planificar un slice vertical o bootstrap verificable; la arquitectura global
+  delimita dependencias, no obliga a especificar toda V1 como un único gate.
+- Antes de review, registrar baseline material, artefactos, criterios de salida
+  y decisiones cerradas. Cada gate declara fase: diseño, bootstrap, ejecución
+  o go-live. Sólo son prerrequisitos los aplicables al siguiente trabajo.
+- Una prueba que necesita un artefacto aún inexistente es aceptación posterior,
+  no prerrequisito de crear ese artefacto. Si falta evidencia de compatibilidad,
+  proponer spike separado, acotado y aprobado con resultado reproducible; no
+  autoriza código de negocio ni producción bajo un plan rechazado.
+- Cambios de alcance tras aprobación crean delta explícito. Preservar decisiones
+  y firmas históricas, sin transferirlas como aprobación del plan enmendado.
+
+### Estado único y evidencia
+
+- Un solo `Current status`, `Lane`, `Spec Validator Approval` y `Next action`
+  actuales por shared. Dentro de Current status, declarar primero `state: <enum>`.
+  Historia y dictámenes anteriores viven en informes fechados referenciados.
+- Separar set normativo (spec/contratos/reglas/config material) de metadata
+  (packs, informes, transcripciones, firmas). Un informe no se incluye dentro
+  del snapshot que ese mismo informe pretende certificar.
+- El registro de un resultado no es una modificación de lo probado. Si hashes
+  normativos no cambian, revisar/scanear metadata nueva sin repetir contratos.
+- Evidencia en custodia durable identificada por ruta, fecha, alcance y hashes;
+  staging temporal no es custodia. Evidencia nueva no reconstruye un run perdido.
+- Actualizar todas las proyecciones actuales del mismo hecho en un lote lógico
+  autorizado. Si permisos impiden completar el lote, declarar el bloqueo de
+  proceso y solicitar su scope completo, no revisar una actualización a medias.
+
+### Hallazgos y presupuesto
+
+- **Trazabilidad mínima útil:** decisión vigente + fuente verificable + resultado
+  de prueba aplicable. Contadores de refresh, conteos de líneas/nodos, duplicación
+  de enlaces, formato preferido o prosa histórica no son criterios de readiness.
+  Resolverlos como mantenimiento documental sin otra ronda global. Sólo bloquea
+  falta de trazabilidad que impida conocer contrato/alcance autorizado, comprobar
+  cobertura real o implementar de forma segura; explicar ese impacto concreto.
+- La revisión prioriza negocio, contratos, integridad transaccional, seguridad
+  y arquitectura del trabajo siguiente. No crear protocolos de procedencia más
+  complejos que el cambio ni exigir reconstruir toda la historia para avanzar.
+- Finding con ID estable, evidencia exacta, riesgo concreto, fase bloqueada,
+  change_type/owner y criterio reproducible de cierre. Low/nits no bloquean por
+  presentación; severidad mayor exige impacto real, no preferencia del revisor.
+- Re-review comprueba fixes y diff/dependencias afectadas. Reabrir uno cerrado
+  sólo por regresión material o riesgo omitido demostrado, citando evidencia
+  nueva; no cambiar ID para reiniciar contador.
+- Máximo **dos rondas de remediación + re-review por baseline**. Si no converge,
+  detener con `blocked`, informe de escape y arbitraje/recorte humano. No tercera
+  ronda automática, no `ready` forzado, no override silencioso.
+- No preguntar nuevamente decisiones cerradas. Insumos humanos que bloquean el
+  siguiente paso se piden entonces, agrupados, sin esperar un gate imposible.
+
+### Regla de pausa humana
+
+- Continuar automáticamente por defecto: informes/handoffs/subagentes son pasos
+  internos, no solicitudes de confirmación.
+- Pausar sólo en `awaiting-human-plan-approval`, `awaiting-human-qa-approval`
+  del incremento actual, o ante una decisión material no resoluble desde fuentes
+  ni por un rol autorizado.
+- No pedir HPA anticipada durante planning/revision-needed. `ready` tampoco es
+  HPA; al persistirse la firma humana válida, reanudar sin otro “¿continúo?”.
+- No detener tareas del board por aprobaciones intermedias no definidas como gate.
+  Preguntar sólo lo que cambia la decisión inmediata; agrupar por owner y dejar
+  seguimientos no bloqueantes en su backlog.

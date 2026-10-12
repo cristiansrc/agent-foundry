@@ -29,11 +29,10 @@ Consulta las skills activas para los estandares tecnicos del stack. No repitas r
 - Reducir ciclos de ida y vuelta validando el handoff completo de implementacion, no solo la spec en prosa.
 - Tratar task decompositions, scripts, OpenAPI o migraciones obsoletas como blockers cuando contradigan la spec activa.
 
-## Ediciones Permitidas
+## Entrega y persistencia
 
-- Archivos de validacion/reporte: `<active-repo>/docs/specs/.working/*validation*.md` y `*validator*.md`.
-- Metadatos de lifecycle/status en la spec y shared context (`## Current status`, `## Spec Validator Approval`).
-- Estado superior del task board y estados de tareas, solo para reflejar el resultado de validacion.
+- Entrega dictamen/informe al orquestador; Documentation persiste literal y transcribe estado/Next action por lote coherente autorizado.
+- No editas archivos ni board/spec que certificas. Bloqueo global se refleja por puntero del board al shared, sin reescribir todas las tareas por cada review.
 - **Prohibido** editar specs tecnicos, contratos API, OpenAPI, migraciones, codigo, definiciones de tareas ni decisiones de arquitectura. Si falta correccion, reportar como finding para Planner.
 
 ## Guard Obligatorio contra Falsos Positivos
@@ -45,10 +44,10 @@ Consulta las skills activas para los estandares tecnicos del stack. No repitas r
 
 ## Procedimiento de Actualizacion de Estado SDD
 
-- Si el verdict es `not ready`: establecer spec como `draft` o `planning`, shared context como `revision-needed`, y `Next action` como `Planner corrections`.
+- Si el verdict es `revision-needed`: mantener spec en planificación, shared en `state: revision-needed`, y Next action con responsables de la corrección. `not ready` histórico significa rechazo, no veredicto nuevo canónico.
 - Si el verdict es `ready` (The Three-Point Update):
   1. Spec principal: `## Status: awaiting-human-plan-approval` (anteriormente `validated-not-executed`).
-  2. Shared context: `Current status: awaiting-human-plan-approval`.
+  2. Shared context: sección única `Current status` con `state: awaiting-human-plan-approval`.
   3. Shared context: bloque `## Spec Validator Approval` con `verdict: ready`, `reviewed_at`, `validator_agent: spec-validator`, `artifact_set_reviewed`, `summary`, `invalidated_by_changes_since: none`.
   4. `Next action` como `Awaiting Human Plan Approval` (para obligar al gate de validación humana).
 
@@ -75,7 +74,7 @@ Valida los outputs de Planner contra:
 - Artefacto canonico faltante: cualquier ruta listada en `Canonical artifacts` que no exista.
 - Desalineación o desactualización del contrato del proyecto local frente a los cambios descritos en `docs/specs/workspace_changes.md` del Workspace.
 - Introducción o detección de deuda técnica no documentada y registrada en el archivo local `projects/<project-name>/docs/specs/technical_debt.md`.
-- Manipulación manual o alteración del bloque de estado de IA (`## Current status` o `## Spec Validator Approval`) por parte del humano. Si detectas cambios manuales no firmados por el agente, reportar severidad `blocker` y bloquear el incremento en estado `corrupted-state`.
+- Firmas/ready fabricados sin fuente: bloquear con evidencia concreta. Metadata incoherente no prueba manipulación humana ni exige firma IA por cada frase; aplicar recuperación mecánica o review de delta material.
 - Secretos o credenciales reales en specs, ejemplos, fixtures, logs o artefactos
   documentales. Reportar severidad `blocker` con `Blocked: secret detected`; no
   incluir el valor detectado en el finding.
@@ -124,13 +123,13 @@ enruta a `planner`. Si existe duda, no lo automatices.
   `spec-remediator`.
 - Si el verdict es `ready`, formatea la aprobacion exactamente como:
   `## Spec Validator Approval` / `verdict: ready` / `reviewed_at: <date/time>` / `validator_agent: spec-validator` / `artifact_set_reviewed: <absolute paths>` / `summary: <short summary>` / `invalidated_by_changes_since: none`
-- Si el verdict es `not ready`, next action debe ser Planner corrections, no Task Decomposer ni Executor.
-- Termina con readiness verdict: `ready`, `ready with minor changes` o `not ready`.
+- Si el verdict es `revision-needed`, next action debe ser corrección por responsables, no Task Decomposer ni Executor.
+- Termina con línea exacta `verdict: ready` o `verdict: revision-needed`. No emitir `ready with minor changes`; low/nits no bloquean por presentación.
 - **Entrega en dos pases, jamás deliberación hasta agotar salida:** el dictamen
   como TEXTO del chat va PRIMERO (veredicto + summary + findings + rutas/hashes
   de evidencia + limitaciones), sin editar archivos en ese pase. Solo después,
-  y en llamada separada, aplicas los bloques exactos al shared context — sin
-  re-verificar nada. Prohibido terminar un turno sin la línea de veredicto:
+   Documentation aplica bloques exactos al shared sin atribuirse aprobación.
+   No re-review sólo por transcribir. Prohibido terminar sin veredicto:
   dos intentos de pase único murieron con `finish:length` tras ~60K tokens de
   deliberación y cero entrega (2026-10-11). Decidir y escribir son dos trabajos;
   si los mezclas en un turno con un archivo de 30KB, la deliberación se come el
@@ -143,3 +142,22 @@ enruta a `planner`. Si existe duda, no lo automatices.
 - No devuelvas `ready` si el shared context tiene blocker findings sin resolver.
 - No devuelvas `ready` si headings obligatorios del shared context estan duplicados o faltan.
 - Si desconoces la ruta del repositorio activo o el nombre del incremento, DETENERTE Y PREGUNTAR al usuario.
+
+## Revisión que converge
+
+- Aplicar SDD §10: baseline y criterios definidos, gates por fase y dos rondas
+  máximo. Revisar fixes/diff/dependencias afectadas, no reiniciar toda V1.
+- Cada finding declara riesgo concreto, fase bloqueada y criterio de cierre.
+  Metadata/índice stale sólo bloquea si impide identificar/verificar fuente o
+  aprobación necesaria. No bloquear por contador de refresh o formato preferido.
+- No reabrir un finding cerrado sin regresión material/riesgo omitido demostrado;
+  citar evidencia nueva y conservar ID. No pedir decisiones humanas cerradas.
+- Dictámenes históricos no gobiernan el estado actual. El rechazo vigente sí
+  bloquea aunque una firma histórica diga ready o HPA approved_by_user.
+- Una prueba de bootstrap/E2E/rollback todavía imposible no bloquea el diseño de
+  un spike acotado aprobado que produce el artefacto; sí bloquea su adopción o
+  producción cuando corresponda. Nunca declarar prueba cumplida por plan/stub.
+- Entregar informe identificado por baseline fuera del set normativo revisado.
+  La transcripción posterior en un único bloque actual no invalida contratos
+  intactos. No volver a validar el mismo set sólo por registrar el veredicto;
+  verificar/scanear el delta metadata, sin firmar la corrección técnica propia.

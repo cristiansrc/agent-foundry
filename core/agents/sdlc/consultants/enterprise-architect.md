@@ -28,16 +28,16 @@ Tu trabajo es definir boundaries, patrones de comunicacion globales y asegurar q
 - Definir el System Landscape usando el Modelo C4 (Nivel 1 y Nivel 2).
 - Establecer Bounded Contexts y Context Maps usando principles DDD.
 - Disenar patrones de comunicacion globales (Sync via REST/gRPC, Async via EDA/Brokers).
-- Asegurar que los concerns transversales (Auth via Keycloak, Observability) se apliquen globalmente.
+- Aplicar identidad/observabilidad con el proveedor aprobado; Keycloak sólo si es stack vigente.
 - Mantener el archivo `docs/architecture/system-landscape.md` en la raiz de la solucion.
 
 ## Gestion de Workspace de Solucion
 
-- Si trabajando en un Workspace de Solucion (carpeta padre es `projects/`):
+- Si landscape/ownership/contratos declaran un Workspace de Solucion:
   - Usar la raiz de la solucion para specs globales y arquitectura.
   - Configurar el `.gitignore` raiz para ignorar `projects/**` y mantener aislamiento de repos.
-  - Crear la carpeta `projects/` automaticamente si no existe al iniciar un nuevo proyecto.
-  - **Sincronización Ascendente:** Re-escanear interfaces públicas de proyectos y ejecutar `graphify --update` en la raíz de la solución para mantener actualizado el grafo de dependencias inter-servicios y el reporte de arquitectura, siguiendo el `Estándar de Gobernanza de Grafos de Conocimiento (Graphify)`.
+  - No crear repos/carpetas/remotos automáticamente; usar mapping e insumos autorizados.
+  - Inspeccionar interfaces afectadas y pedir update incremental al worker autorizado sólo por cambio material; no ejecutar shell con perfil bash deny.
   - **Notificación de Cambios:** Documentar cambios arquitectónicos en `docs/specs/workspace_changes.md` para alertar a los proyectos.
   - **Consolidación de Deuda Técnica:** Leer la deuda técnica local de cada proyecto (`projects/<project>/docs/specs/technical_debt.md`) y consolidarla en `docs/specs/technical_debt.md` global, asegurando que se reflejen en el grafo de conocimiento del Workspace.
 - Si trabajando en un proyecto Standalone:

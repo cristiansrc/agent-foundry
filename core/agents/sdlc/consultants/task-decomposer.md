@@ -40,7 +40,9 @@ Si falta el paso 4, detente con `Blocked: Awaiting Human Plan Approval`.
 - Si OpenAPI, migraciones, config/realm contradicen la spec activa, detente con `Blocked: artifact mismatch`.
 - Si la spec no tiene `Decomposition Contract`, detente con `Blocked: missing Decomposition Contract`.
 - No infieras desde ejemplos historicos, estados antiguos o comentarios obsoletos.
-- No crees tareas si algun review summary dice `not ready`.
+- No crees tareas si dictamen ACTUAL rechaza el alcance; rechazo histórico superseded no bloquea el plan vigente.
+- Descompón/desbloquea sólo el slice autorizado por HPA vigente; no devuelvas
+  al usuario entre board, test-architect y workers. Slices futuros quedan bloqueados.
 
 ## Task Board Persistente
 
@@ -76,7 +78,7 @@ Cada tarea debe incluir: `id`, `title`, `agent`, `spec_refs`, `goal`, `scope`, `
 - Persistencia antes de logica de servicio.
 - Logica de servicio antes de controllers/API exposure.
 - API clients antes de pantallas frontend.
-- Comportamiento core antes de tests cuando los tests necesitan detalles de implementacion; de lo contrario, preferir test-first.
+- Bootstrap/harness aprobado antes de pruebas que lo necesitan; tests funcionales en rojo antes de implementar comportamiento.
 - Documentacion despues de comportamiento estable.
 
 Si la spec no esta lista para implementacion, detente y produce una lista de blockers para Planner/Spec Validator.

@@ -121,9 +121,10 @@ Firma de IA transcrita (no humana): `## Reviewer Approval: approved`. La
 escribe `documentation` copiando literalmente el veredicto `review: approved`
 del reviewer; exigida en carriles `trivial` y `fix`.
 
-Cualquier otra edición humana sobre bloques `## Current status`,
-veredictos o auditorías = `corrupted-state`. Los agentes se detienen con
-`Blocked: State corruption detected`.
+No inventar firmas ni elevar rechazo a aprobación sin fuente. `corrupted-state`
+exige evidencia de falsificación/manipulación de autorización; un desfase,
+formato inválido o petición humana de cambio no la demuestra. Corregir metadata
+con fuente inequívoca; decisiones materiales vuelven a revisión por delta.
 
 ## 4. Enum de Fases y Triggers
 
@@ -164,7 +165,20 @@ Los gates G1/G2 NO son fases: son estados de espera definidos arriba.
 4. Toda transición debe quedar registrada en el shared context con fecha y agente responsable.
 5. Self-healing: máximo 3 reintentos autónomos antes de pasar a `blocked` con escape-report.
 6. Ningún agente baja el carril declarado; solo el humano puede subirlo.
-   `escalated-to-sdd` es irreversible para ese incremento.
+    `escalated-to-sdd` es irreversible para ese incremento.
+7. Shared con una sola sección actual `## Lane:`, `## Current status` y
+   `## Spec Validator Approval`. Current status comienza con `state: <enum>`.
+   Historia vive en reportes referenciados, no firmas/veredictos activos duplicados.
+8. Readiness pertenece al set material y alcance revisados: metadata posterior
+   sin cambio normativo se verifica/escanea por delta, sin invalidarlo por rutina.
+9. Planificación: máximo dos rondas de remediación/re-review por baseline según
+   `spec-driven-development` §10; después `blocked` y escape-report, no ready forzado.
+10. El flujo continúa automáticamente entre estados/agentes autorizados. Pausa
+    humana sólo en `awaiting-human-*` del incremento vigente o ante decisión
+    material sin fuente/owner capaz. Tras firma válida, transición/handoff
+    automáticos; nunca inferir firma del contenido de un informe.
+11. `awaiting-human-*` pausa el bloque: no despachar agentes aguas abajo. Al
+    recibir la firma válida, transicionar y continuar el routing automáticamente.
 
 ## 6. Handoff Compacto entre Agentes
 

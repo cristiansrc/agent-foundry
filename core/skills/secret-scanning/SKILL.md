@@ -18,7 +18,14 @@ repositorio activo.
 
 ## Comandos obligatorios
 
-Para cambios del working tree, incluyendo modificaciones no staged:
+Para artefactos nuevos/no tracked y cambios documentales, filesystem con rutas
+afectadas o todo el repo si el gate lo exige (redactar hallazgos):
+
+```bash
+gitleaks dir <ruta-afectada> --redact --no-banner
+```
+
+Para cambios tracked del working tree cuando se verifica diff Git:
 
 ```bash
 gitleaks git --pre-commit --verbose
@@ -39,6 +46,10 @@ gitleaks git --verbose
 ## Reglas de bloqueo
 
 - Si `gitleaks` no esta instalado, detenerse con `Blocked: gitleaks unavailable`.
+- Si el rol no tiene shell, pedir ejecución al worker autorizado y consumir
+  su resultado por alcance; no exigir que un consultor con bash deny lo ejecute.
+- Metadata posterior con baseline material intacto requiere scan de delta,
+  no rerun de contratos ni full scan autosostenido por transcribir su resultado.
 - Si detecta un secreto, detenerse con `Blocked: secret detected`.
 - No incluir el valor secreto en la respuesta, logs, shared context o reporte.
 - No usar allowlists, `gitleaks:allow` ni baselines para ocultar un hallazgo sin

@@ -74,7 +74,8 @@ def main() -> int:
 
         # Estados en cuerpo vs declarados
         body_states = {s for s in STATE_TOKENS if s in body}
-        declared_states = set(entry.get("reads_states", [])) | set(entry.get("writes_states", []))
+        declared_states = (set(entry.get("reads_states", [])) | set(entry.get("writes_states", []))
+                           | set(entry.get("recommends_states", [])))
         undeclared_states = body_states - declared_states - {
             # estados universales que todo agente puede ver en flujo general
             "planning", "blocked", "todo", "done", "in_progress", "ready",
@@ -108,7 +109,7 @@ def main() -> int:
         print(f"  - {s}")
 
     print(f"\nTotal hallazgos: {issues}")
-    return 0
+    return 1 if issues or orphan_skills else 0
 
 
 if __name__ == "__main__":

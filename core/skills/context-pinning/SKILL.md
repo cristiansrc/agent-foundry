@@ -9,10 +9,9 @@ Esta skill asegura que los agentes siempre trabajen sobre la base de conocimient
 
 ## 1. Archivos Core en `.opencode-context`
 El agente debe priorizar la lectura de:
-- **Master Spec de Solución:** Si existe una carpeta `proyectos/` en el nivel superior, leer la spec macro en `../../docs/specs/master_spec.md`.
-- **Master Spec del Proyecto:** `docs/specs/master_spec.md` (Fuente de verdad funcional consolidada del microservicio).
+- **Master Spec de Solución/Proyecto:** ruta vigente del shared/mapping verificada; detectar workspace por landscape/ownership, no nombre físico de carpeta. `docs/specs/master_spec.md` es default, no obligación de duplicar una Master existente en otra ruta.
 - **Contratos OpenAPI:** ruta canonica declarada por el proyecto en shared context o spec. Para Spring Boot, ubicaciones validas por defecto: `docs/api/openapi.yaml`, `docs/api/openapi.yml`, `src/main/resources/openapi.yaml` o `src/main/resources/openapi.yml`.
-- **Reporte de Dependencias Graphify:** `graphify-out/GRAPH_REPORT.md` (si el proyecto tiene Graphify configurado).
+- **Graphify:** índice opcional para relaciones; no artefacto normativo/gate por frescura. Verificar fuentes relevantes si stale.
 - **Memoria del Proyecto/Workspace:** `MEMORY.md` (registro histórico de lecciones aprendidas y decisiones de diseño complejas que no deben reincidir).
   - **Formato canónico de entrada:** `[Fecha] [Módulo] - Error/Desafío: <descripción> -> Solución Aplicada: <solución> -> Regla para el Agente: <instrucción preventiva>`.
   - **Lectura obligatoria:** `planner` (al diseñar incrementos) y `executor`/`architect-executor` (antes de implementar) deben revisarlo para evitar reincidir en errores ya resueltos.

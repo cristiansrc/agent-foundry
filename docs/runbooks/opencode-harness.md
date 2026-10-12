@@ -37,8 +37,8 @@ modelo**, así que cada familia tiene contador propio y no compite con Plus.
 | Planificación | ChatGPT Plus | GPT-6.1 Sol (effort high) | planner |
 | Patrones / diseño técnico | ChatGPT Plus | GPT-6.1 Sol | solution-architect |
 | RCA | ChatGPT Plus | GPT-6.1 Sol | bug-diagnostician, requirements-analyst |
-| Validación crítica | OpenCode Go | GLM-5.3 | spec-validator (familia Z.ai, distinta al planner) |
-| Macro-arquitectura | OpenCode Go | GLM-5.3 | enterprise-architect |
+| Validación crítica | ChatGPT Plus/Pro | GPT-6.1 Sol | spec-validator (excepción temporal de familia aprobada2026-10-11) |
+| Macro-arquitectura | ChatGPT Plus/Pro | GPT-6.1 Sol | enterprise-architect |
 | Review / seguridad / QA final | OpenCode Go | LongCat-2.0 | reviewer, security-reviewer, final-validation (familia Meituan, independiente de planner, spec-validator y executor; sin visión: delegan capturas) |
 | Validación enterprise | OpenCode Go | LongCat-2.0 | enterprise-spec-validator (misma independencia triple; Kimi K3 como rollback manual) |
 | Plan estructurado / remediación | OpenCode Go | MiMo-V2.6 Pro | task-decomposer, api-governance-agent, spec-remediator |
@@ -48,13 +48,11 @@ modelo**, así que cada familia tiene contador propio y no compite con Plus.
 | Trabajo mecánico | OpenCode Go | MiMo-V2.6 Flash | git-executor, documentation, context-curator |
 | UI/E2E | OpenCode Go | DeepSeek V4 Flash Vision Exp (excepción documentada) | functional-tester-agent, ui-executor |
 
-GLM-5.3 queda con dos agentes (spec-validator y enterprise-architect, los que
-usaban Opus 5.5). Las tres puertas de calidad y la validación enterprise
-pasaron el 2026-10-11 a LongCat-2.0 (~$0.0005 por request en workload de
-caché, ~40x menos que GLM): el gasto medido de GLM-5.3 era relectura, no
-razonamiento, y LongCat pasó la batería completa. Si LongCat aprieta o
-degrada, el rollback es `kimi_k27_code`-style manual: slots de vuelta a
-`glm_reasoning`/`kimi_k3` + build + sync.
+GLM-5.3 normal está pausado por petición humana2026-10-11 debido al consumo.
+Sus dos agentes pasan a Sol6.1; Planner/Spec Validator comparten familia/modelo
+temporalmente, con roles e informes separados. LongCat se conserva en review,
+seguridad, calidad y validación enterprise. No volver automáticamente a GLM
+como rollback; una alternativa requiere decisión y evaluación explícitas.
 
 ### Si se agota el allowance de Plus
 
@@ -65,12 +63,13 @@ el error llega al orquestador y hay que cambiar el binding a mano.
 Orden de preferencia para recortar sin romper la independencia de validadores:
 
 1. Mueve `ui-designer` a `mimo_v26_flash` en Go (ahorra Luna, no Sol).
-2. Mueve `solution-architect` a `glm_reasoning` —pierdes el modelo más fuerte
-   en diseño técnico.
+2. Reducir alcance/contexto de las consultas y evaluar un modelo alternativo
+   disponible, sin reactivar GLM pausado automáticamente.
 3. Como último recurso, baja el `variant` del `planner` de `high` a `medium`.
 
-No bajes `spec-validator`: es la única garantía de que el planner no certifica
-su propia spec, y depende de que sea otra familia de modelo.
+La revisión sigue siendo por otro rol y exige evidencia/gates. Otra familia
+es preferencia de diversidad, temporalmente exceptuada por el usuario; no es
+garantía suficiente de calidad ni motivo para impedir esta sustitución.
 
 Bloqueados: GPT-6 Astra (opción Pro, no incluida en Plus), modelos preview,
 `Omen Alpha` y variantes Muse Spark Contributor (entrenan con prompts).

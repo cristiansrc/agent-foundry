@@ -33,26 +33,67 @@ REVIEW_SIG = "## Reviewer Approval: approved"
 LANE_RE = re.compile(r"^#+\s*Lane\s*:\s*`?([a-z]+)`?\s*$", re.M | re.I)
 GATE1_SIG = "## Human Plan Approval: approved_by_user"
 GATE2_SIG = "## Human QA Approval: approved_by_user"
-STATUS_RE = re.compile(r"^#+\s*Current status\s*:?\s*$\n?\s*[-*]?\s*`?([a-z_-]+)`?",
-                       re.M | re.I)
-VERDICT_READY = re.compile(r"verdict\s*:\s*ready", re.I)
+SECTION_RE = re.compile(r"^##[ \t]+([^\n]+)$", re.M)
+STATUS_RE = re.compile(
+    r"^[ \t]*(?:[-*][ \t]+)?(?:state:[ \t]*)?`?([a-z][a-z_-]*)`?[ \t]*$",
+    re.M,
+)
+
+
+def sections(text: str) -> dict[str, list[str]]:
+    """Extrae bloques exactos; firmas comentadas no son autorizaciones."""
+    text = re.sub(r"<!--.*?-->", "", text, flags=re.S)
+    headings = list(SECTION_RE.finditer(text))
+    result: dict[str, list[str]] = {}
+    for i, heading in enumerate(headings):
+        end = headings[i + 1].start() if i + 1 < len(headings) else len(text)
+        result.setdefault(heading.group(1).strip(), []).append(text[heading.end():end])
+    return result
 
 
 def validate_file(path: Path) -> list[str]:
     errors = []
-    text = path.read_text(encoding="utf-8")
-    m = STATUS_RE.search(text)
+    text = re.sub(r"<!--.*?-->", "", path.read_text(encoding="utf-8"), flags=re.S)
+    blocks = sections(text)
+    current = blocks.get("Current status", [])
+    approvals = blocks.get("Spec Validator Approval", [])
+    lane_matches = list(LANE_RE.finditer(text))
+    if len(current) != 1:
+        errors.append(f"{path.name}: exige UN bloque 'Current status'")
+    if len(approvals) > 1 or any(
+        name.startswith("Spec Validator Approval") and name != "Spec Validator Approval"
+        for name in blocks
+    ):
+        errors.append(f"{path.name}: dictámenes activos ambiguos; mover historia a reportes")
+    if len(lane_matches) > 1:
+        errors.append(f"{path.name}: exige UN carril activo; mover historia a reportes")
+    for title in ("Human Plan Approval", "Human QA Approval"):
+        if sum(name.startswith(title) for name in blocks) > 1 or len(
+            blocks.get(f"{title}: approved_by_user", [])
+        ) > 1:
+            errors.append(f"{path.name}: firmas duplicadas de '{title}'")
+    if errors:
+        return errors
+    # El primer dato es el estado, no un match tomado de la narración posterior.
+    first = current[0].strip().splitlines()[0] if current[0].strip() else ""
+    m = STATUS_RE.fullmatch(first)
     if not m:
-        return [f"{path.name}: sin bloque 'Current status' legible"]
-    status = m.group(1).strip()
+        return [f"{path.name}: Current status requiere 'state: <enum>' como primer dato"]
+    status = m.group(1)
     if status not in STATES:
         errors.append(f"{path.name}: estado NO canonico '{status}'")
         errors.append(f"  -> posible corrupcion o alias; detener agentes (corrupted-state)")
 
-    has_gate1 = GATE1_SIG in text
-    has_gate2 = GATE2_SIG in text
-    has_ready = bool(VERDICT_READY.search(text))
-    has_review = REVIEW_SIG in text
+    has_gate1 = "Human Plan Approval: approved_by_user" in blocks
+    has_gate2 = "Human QA Approval: approved_by_user" in blocks
+    approval = approvals[0] if approvals else ""
+    verdicts = re.findall(r"^verdict:[ \t]*([^\n]+)$", approval, re.M)
+    has_ready = len(verdicts) == 1 and verdicts[0].strip() == "ready"
+    if has_ready:
+        has_ready = bool(re.search(
+            r"^invalidated_by_changes_since:[ \t]*none[ \t]*$", approval, re.M
+        ))
+    has_review = "Reviewer Approval: approved" in blocks
 
     lane_m = LANE_RE.search(text)
     lane = lane_m.group(1).lower() if lane_m else "feature"
@@ -71,7 +112,8 @@ def validate_file(path: Path) -> list[str]:
     if status in ODD_STATES - {"escalated-to-sdd"}:
         errors.append(f"{path.name}: estado ODD '{status}' en carril {lane}")
 
-    if status == "awaiting-human-plan-approval" and not has_ready:
+    if status in ("validated-not-executed", "awaiting-human-plan-approval",
+                  "decomposition-completed", "in_progress") and not has_ready:
         errors.append(f"{path.name}: Gate 1 sin 'Spec Validator Approval verdict: ready' previo")
     if status in ("decomposition-completed", "in_progress") and not has_gate1:
         errors.append(f"{path.name}: ejecucion/descomposicion sin firma del Gate 1")

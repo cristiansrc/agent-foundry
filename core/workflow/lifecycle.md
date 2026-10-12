@@ -7,9 +7,8 @@ agente-fase-skill en [matrix.yaml](matrix.yaml).
 ## 1. Clasificación de Agentes
 
 - **Workers (obreros):** implementan código, BD, docs e infraestructura.
-  `executor`, `ui-executor`, `architect-executor`, `database-architect`,
-  `devops-architect`,
-  `refactor`, `documentation`, `spec-remediator`, `functional-tester-agent`,
+  `executor`, `ui-executor`, `database-architect`, `devops-architect`,
+  `documentation`, `spec-remediator`,
   `git-executor`.
 - **Consultants (consultores):** asesoran, diseñan y descomponen.
   `requirements-analyst`, `planner`, `enterprise-architect`,
@@ -17,7 +16,7 @@ agente-fase-skill en [matrix.yaml](matrix.yaml).
   `context-curator`, `master-orchestrator`.
 - **Validators (validadores):** solo lectura; auditan calidad y consistencia.
   `spec-validator`, `enterprise-spec-validator`, `api-governance-agent`,
-  `bug-diagnostician`, `reviewer`, `security-reviewer`, `final-validation`.
+  `bug-diagnostician`, `reviewer`, `security-reviewer`, `final-validation`, `functional-tester-agent`.
 - **Guardrails:** bloquean enrutes accidentales (`general`).
 
 ## 2. Inicialización
@@ -71,7 +70,10 @@ Fase 4 Descomposición ─► Fase 5 Ejecución ─► Fase 6 Calidad
 ```
 
 ### Fase 1 — Levantamiento de Requerimientos
-- Agente: `requirements-analyst`. Estado: `requirements-discovery`.
+- Agente: `requirements-analyst` si instalado; en harness que lo excluye,
+  `planner` realiza discovery funcional acotado antes de diseñar. No invocar agente inexistente.
+  Estado: `requirements-discovery`.
+- Discovery pasa a planning sin pausa humana si no queda decisión funcional material.
 - Entregable: `docs/specs/requirements/<increment-name>-requirements-brief.md`.
 - Git: se crea `feature/<increment-name>` desde `develop`.
 
@@ -82,6 +84,7 @@ Fase 4 Descomposición ─► Fase 5 Ejecución ─► Fase 6 Calidad
 - Agentes: `planner` (consulta a `solution-architect`, `enterprise-architect` y,
   si el incremento tiene superficie UI, a `ui-designer`).
 - Estado: `planning`.
+- Planner resuelve lo cubierto por fuentes/mandato y pasa automáticamente a validación cuando el set está listo.
 - Entregable: Delta Spec `docs/specs/increments/<increment-name>.md` +
   actualización de `openapi.yaml`.
 
@@ -98,26 +101,29 @@ Fase 4 Descomposición ─► Fase 5 Ejecución ─► Fase 6 Calidad
 - Agentes: `spec-validator` (+ `enterprise-spec-validator` si hay workspace,
   + `api-governance-agent` si cambian contratos).
 - Estado: `validator-review` → `validated-not-executed` o `revision-needed`
-  (con ciclo de `spec-remediator` hasta llegar a ready).
+  (corrección coherente + re-review selectiva, máximo dos rondas por baseline;
+  después `blocked` e informe de escape, nunca un ciclo indefinido).
 
 ### GATE HUMANO 1 — Aprobación de Plan
 - Estado: `awaiting-human-plan-approval`. Firma: ver states.md §3.
+- Pausa humana en este estado; tras la firma, descomposición automática.
 
 ### Fase 4 — Descomposición + tests en rojo
 - Agente: `task-decomposer`. Estado: `decomposition-completed`.
 - Entregable: `docs/specs/tasks/<increment-name>-task-board.md` en `todo`.
-- Inmediatamente después, `test-architect` escribe los tests del board desde
-  la spec validada y confirma que FALLAN (red-first). Sin tests en rojo no
-  hay Fase 5.
+- Después, `test-architect` prepara rojo funcional desde spec/board. Si falta
+  harness, ejecutar primero tarea bootstrap aprobada y luego rojo del
+  comportamiento antes de implementarlo. No exigir rojo artificial a docs/checks existentes.
 
 ### Fase 5 — Ejecución
 - Agentes: `executor` (con spec SDD validada; implementa hasta poner en verde
   los tests de `test-architect` SIN modificarlos),
   `ui-executor` (superficie UI con dirección aprobada),
   con soporte de `test-architect`, `database-architect`, `devops-architect`,
-  `refactor` y `documentation`.
+  `documentation` (refactor intencional integrado en executor).
 - Estados: `in_progress`; tareas `todo → in_progress → done | blocked`.
-- Pre-flight obligatorio: compilar, tests locales, graphify update.
+- Pre-flight aplicable: build/tests de artefactos modificados; grafo sólo por
+  cambio estructural relevante, no gate por mantenimiento de cache.
 - Deuda técnica: registrarla en `technical_debt.md`, nunca ocultarla.
 - Self-healing: máximo 3 reintentos antes de `blocked` + escape-report.
 
@@ -145,6 +151,7 @@ Fase 4 Descomposición ─► Fase 5 Ejecución ─► Fase 6 Calidad
 - Estado: `awaiting-human-qa-approval`. Firma: ver states.md §3.
 - El humano prueba manualmente o valida la ejecución E2E de
   `functional-tester-agent`.
+- Pausa humana en este estado; tras aprobación, promoción según permiso Git aplicable.
 
 ### Fase 7 — Git-Ops
 - Agente exclusivo: `git-executor`. Estados: `merged` → `archived`.
@@ -161,9 +168,18 @@ Fase 4 Descomposición ─► Fase 5 Ejecución ─► Fase 6 Calidad
 
 1. **Aislamiento de proyecto:** prohibido escribir fuera del repo activo.
 2. **Placeholder Guard:** `<increment-name>` se resuelve dinámicamente o se pregunta.
-3. **Git exclusivo de git-executor:** ningún otro agente ejecuta comandos git.
-4. **Inmutabilidad de estado IA:** solo las firmas humanas del states.md §3 son editables por humanos.
+3. **Git mutante exclusivo de git-executor:** read-only permitido al rol con shell;
+   ningún commit/push/merge sin petición explícita. Secret scan preferente filesystem.
+4. **Integridad de aprobación:** no fabricar dictámenes/firmas; cambios humanos
+   explícitos siguen delta/revisión. Metadata stale no demuestra state corruption.
 5. **Pre-push hook:** los pushes hacia ramas estables exigen el shared context
    del incremento exacto con `quality-approved` + firma del Gate 2 (ver tooling/hooks).
 6. **Conventional Commits** con scope del incremento: `feat(<increment>): ...`.
 7. **MEMORY.md:** errores resueltos se registran como reglas para prevenir reincidencia.
+8. **Convergencia:** aplicar `spec-driven-development` §10. Slices pequeños,
+   gates por fase, set normativo separado de metadata, evidencia durable y
+   estado actual único. Curación/transcripción/firmas sin cambio material no
+   invalidan el set contractual. Insumos bloqueantes se preguntan oportunamente.
+9. **Continuación por defecto:** encadenar roles/estados permitidos sin pedir
+   confirmación entre fases. Detener sólo en `awaiting-human-*`, decisión material
+   sin dueño/fuente capaz, límite de intentos o mutación que requiera permiso.

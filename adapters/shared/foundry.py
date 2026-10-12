@@ -12,6 +12,17 @@ PROFILES = ROOT / "profiles"
 PROVIDERS = ("opencode", "chatgpt", "kiro")
 
 
+def workflow_protocol() -> str:
+    return (CORE / "workflow" / "agent-protocol.md").read_text(encoding="utf-8").strip()
+
+
+def governed_body(src: Path, body: str) -> str:
+    """Mismo protocolo para todos los roles SDLC, independientemente del adapter."""
+    if "sdlc" in src.relative_to(CORE / "agents").parts:
+        return workflow_protocol() + "\n\n---\n\n" + body
+    return body
+
+
 def load_profiles() -> dict:
     return {
         "models": yaml.safe_load((PROFILES / "models.yaml").read_text(encoding="utf-8")),
@@ -38,7 +49,7 @@ def core_agents() -> list[tuple[str, dict, str]]:
     out = []
     for src in sorted(CORE.glob("agents/**/*.md")):
         fm, body = parse_frontmatter(src.read_text(encoding="utf-8"))
-        out.append((src.stem, fm, body))
+        out.append((src.stem, fm, governed_body(src, body)))
     return out
 
 

@@ -26,11 +26,15 @@ Guía para corregir de forma segura y granular los hallazgos reportados por el `
        `functional-decision` -> `planner`.
      - Un `contract-drift` solo es mecánico si la fuente autoritativa y la
        corrección exacta son inequívocas; en caso contrario va a `planner`.
-3. **Priorización**: tomar el primer hallazgo `mechanical` con ruta
-   `spec-remediator` y evidencia suficiente.
-4. **Corrección Mínima**: Aplicar el cambio más pequeño posible para resolver un único hallazgo.
-5. **Registro**: Actualizar el shared context solo con progreso de remediación, hallazgo tratado, archivos modificados y siguiente validación requerida. No escribir aprobación.
-6. **Re-Validación Selectiva**: Solicitar validación solo de ese hallazgo o del artefacto afectado al `spec-validator` oficial.
+3. **Priorización**: agrupar hallazgos `mechanical` de la misma causa/fuente
+   autoritativa, con rutas y criterios explícitos; mantener IDs individuales.
+4. **Corrección Mínima Coherente**: resolver ese lote en todas sus proyecciones
+   actuales autorizadas antes de revisión. No agrupar decisiones independientes.
+5. **Registro**: actualizar progreso, IDs, archivos y siguiente validación. No
+   escribir aprobación. Si scope/permisos impiden completar el lote, bloquear
+   por proceso y pedir alcance completo, no validar la mitad sincronizada.
+6. **Re-Validación Selectiva**: solicitar una revisión del lote/diff afectado al
+   `spec-validator` oficial; no review entre cada cambio mecánico relacionado.
 
 ## Correcciones Permitidas
 - Normalizar lifecycle/status cuando contradice el veredicto vigente y la evidencia es clara.
@@ -48,10 +52,10 @@ Guía para corregir de forma segura y granular los hallazgos reportados por el `
 - Usar `<repo> como ubicación de reportes de proyecto. Los reportes de remediación viven dentro del repositorio activo.
 
 ## Reglas de Oro
-- **Iteración Granular**: No intentar corregir todos los hallazgos a la vez.
+- **Unidad Coherente**: un lote de misma causa y autoridad; sin rediseño ni mezcla de decisiones independientes.
 - **Validación Específica**: Las validaciones deben pedirse exclusivamente al agente `spec-validator`, con el modelo asignado en el perfil de ejecución.
 - **Bloqueo por Modelo**: Si la validación se ejecuta con un modelo no autorizado, se debe detener el proceso con `Blocked: wrong validator model`.
-- **Límite de Intentos**: Máximo 4 intentos por hallazgo. Si persiste, escribir `<active-repo>/docs/specs/.working/<increment-name>-remediator-bug-report.md` y detener el flujo.
+- **Límite de Intentos**: máximo dos rondas por baseline según SDD §10. Si persiste, escribir `<active-repo>/docs/specs/.working/<increment-name>-remediator-bug-report.md` y detener; IDs nuevos no reinician el contador.
 - **Alcance**: No puede crear ni llamar a `task-decomposer` ni `executor`. Solo trabaja sobre artefactos SDD (Specs, OpenAPI, Migraciones, Config).
 - **Decisiones de Diseño**: Si un hallazgo requiere una decisión de arquitectura profunda, debe enrutar al Planner o al Usuario.
 - **Routing Guard**: Si falta `change_type`, la ruta no coincide o el hallazgo
@@ -65,4 +69,4 @@ Cada iteración debe terminar con uno de estos resultados:
 - `blocked-planner-decision`: requiere decisión técnica de Planner.
 - `blocked-user-decision`: requiere decisión del usuario.
 - `blocked-validator-process-bug`: el hallazgo parece falso positivo o error del validador.
-- `blocked-retry-limit`: se agotaron 4 intentos y se escribió bug report.
+- `blocked-retry-limit`: se agotaron dos rondas y se escribió bug report.

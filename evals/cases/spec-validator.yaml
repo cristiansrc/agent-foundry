@@ -23,6 +23,13 @@ cases:
       - Spec: docs/specs/increments/order-detail-read.md (este texto)
       - Contrato: openapi.yaml (fragmento nuevo incluido abajo)
       ## Decomposition Contract: 1 endpoint, 1 servicio, tests; sin migraciones.
+      Ownership existente y destino del delta: application.ReadOrderDetail usa
+      application.port.OrderReadRepository, implementado por infrastructure.JpaOrderReadAdapter.
+      ReadOrderDetail decide admin/dueño/404 y valida total persistido; sólo recibe
+      AuthenticatedPrincipal ya validado. infrastructure.OrderDetailController
+      convierte salida a OrderDetail; exception handler existente mapea 401/403/
+      404/500 a ApiErrorResponse y log ERROR con traceId. Dominio/application no
+      importan DTOs HTTP/JPA. Sin módulo nuevo ni elección de framework pendiente.
 
       Incremento: order-detail-read (solo lectura, sin cambios de esquema BD).
       Stack: Spring Boot 3 + PostgreSQL 16 + Keycloak. Sin migraciones.
@@ -36,6 +43,9 @@ cases:
         Roles de realm: "customer", "admin".
         Roles se leen de realm_access.roles con el converter existente
         KeycloakRealmRoleConverter (prefijo ROLE_). Se valida iss del realm.
+      Se exige aud que incluya "shop-api"; otro aud/missing -> 401 UNAUTHORIZED.
+      sub obligatorio UUID válido en el realm; validado por auth antes del
+      controller: missing/malformed -> 401, nunca UUID.fromString sin validar.
         Ownership: orders.customer_id == UUID.fromString(claim `sub`).
         Si tiene rol admin, prevalece admin.
         Token válido sin rol customer ni admin -> 403 FORBIDDEN.
@@ -57,12 +67,76 @@ cases:
       - ApiErrorResponse: {code: string, message: string, traceId: string}
         (schema ya existente, reutilizado).
       - Lectura por PK orders.id; no requiere índices nuevos.
+      - Regla existente de dominio y persistencia: total no negativo, CHECK
+        (total >= 0) ya aplicado y datos existentes verificados conformes.
+        No se agrega migración en este incremento. Una fila inválida detectada
+        defensivamente -> 500 INTERNAL_ERROR, sin alterar/saturar el importe.
       - Observabilidad: log INFO con traceId y orderId (sin PII); métrica
         http_server_requests por status.
       - Tests: unitarios del servicio (dueño, admin, ajeno, inexistente) y
         de integración del controller para 200/400/401/403/404 (incluye
         orden ajena -> 404, admin sobre inexistente -> 404, formato de total
         y createdAt, y ausencia de PII en logs).
+        Añadir auth negativo para aud/sub y caso 500 de fallo inesperado/fila
+        inválida; ApiErrorResponse y log ERROR correlacionados por traceId, sin
+        detalles internos. Verificar no-store en 200 owner/admin.
+
+      Contrato canónico completo del fixture, inline y autocontenido:
+      openapi: 3.0.3
+      info: {title: Shop API, version: 1.0.0}
+      paths:
+        /api/v1/orders/{id}:
+          get:
+            operationId: getOrderById
+            tags: [Orders]
+            security: [{bearerAuth: []}]
+            parameters:
+              - name: id
+                in: path
+                required: true
+                schema: {type: string, format: uuid}
+            responses:
+              '200':
+                description: Own order or admin read
+                headers:
+                  Cache-Control:
+                    schema: {type: string, enum: [no-store]}
+                content:
+                  application/json:
+                    schema: {$ref: '#/components/schemas/OrderDetail'}
+              '400': {$ref: '#/components/responses/Error'}
+              '401': {$ref: '#/components/responses/Error'}
+              '403': {$ref: '#/components/responses/Error'}
+              '404': {$ref: '#/components/responses/Error'}
+              '500': {$ref: '#/components/responses/Error'}
+      components:
+        securitySchemes:
+          bearerAuth: {type: http, scheme: bearer, bearerFormat: JWT}
+        responses:
+          Error:
+            description: ApiErrorResponse, mapping code/status specified above
+            content:
+              application/json:
+                schema: {$ref: '#/components/schemas/ApiErrorResponse'}
+        schemas:
+          OrderStatus: {type: string, enum: [CREATED, PAID, SHIPPED]}
+          OrderDetail:
+            type: object
+            additionalProperties: false
+            required: [id, status, total, createdAt]
+            properties:
+              id: {type: string, format: uuid}
+              status: {$ref: '#/components/schemas/OrderStatus'}
+              total: {type: string, pattern: '^\d+\.\d{2}$'}
+              createdAt: {type: string, format: date-time}
+          ApiErrorResponse:
+            type: object
+            additionalProperties: false
+            required: [code, message, traceId]
+            properties:
+              code: {type: string, enum: [INVALID_ORDER_ID, UNAUTHORIZED, FORBIDDEN, ORDER_NOT_FOUND, INTERNAL_ERROR]}
+              message: {type: string}
+              traceId: {type: string}
 
   - id: schema-faltante-rechaza
     description: Sin response schema definido debe rechazarse

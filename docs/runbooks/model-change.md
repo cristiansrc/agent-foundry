@@ -68,6 +68,11 @@ echo y | ./tooling/sync.sh     # backup automático previo
 
 Reinicia sesiones abiertas de OpenCode.
 
+Si hay cambios de prompts/permisos aún pendientes de certificación, aplicar
+sólo bindings ya verificados mediante `tooling/sync.sh --models-only <agentes>`.
+Este modo conserva cuerpos/permisos/skills/config y sólo sincroniza model y
+las rutas correspondientes del plugin, con backup. No equivale a full sync.
+
 ### 6. Documentar
 
 Commit con formato:

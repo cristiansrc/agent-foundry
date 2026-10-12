@@ -19,6 +19,8 @@ verde no hay sync.
 | `final-validation.yaml` | final-validation | `not ready` ante secretos o cobertura <85%; `ready` con cadena en verde |
 | `odd-*.yaml` (4) | orchestrator, executor, reviewer, bug-diagnostician | Carriles ODD: clasificación, escalamiento a SDD, boundaries, RCA |
 | `quality-conditional.yaml` | master-orchestrator | Fase 6 condicional (reviewer siempre, security ante superficie sensible) |
+| `planning-convergence.yaml` | spec-validator | Metadata/cache sin rerun material, delta material, presupuesto y riesgo nuevo demostrado |
+| `orchestrator-continuation.yaml` | master-orchestrator | Sólo pausa en gate humano o decisión realmente no resoluble; continúa handoffs internos |
 
 ## Ejecución
 
@@ -40,6 +42,9 @@ python3 evals/run.py evals/cases/<suite>.yaml --executor opencode --timeout 1200
   entero) puede necesitar más; si expira de forma sistemática, primero prueba
   el caso a mano antes de culpar al modelo.
 - `--show-output`: imprime la respuesta del agente en los casos FAIL.
+- `--case <id> --stop-on-error`: prueba acotada; no continuar consumiendo modelos
+  ante timeout/fallo del harness. Runner sólo evalúa eventos text de respuesta,
+  no logs/tool outputs; exit no-cero o respuesta ausente nunca es PASS.
 - Cada caso corre en un **sandbox temporal** (`opencode run --dir`): las
   evals nunca escriben artefactos en este repo.
 

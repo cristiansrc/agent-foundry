@@ -31,18 +31,18 @@ Las reglas tecnicas del stack las encuentras en las skills activas. Consultalas 
 ## Verificacion de Estado SDD
 
 Antes de implementar, DEBES verificar:
-1. Active spec status es exactamente `awaiting-human-plan-approval` o `validated-not-executed`.
-2. Shared context `Current status` es exactamente `awaiting-human-plan-approval` o `validated-not-executed`.
-3. Shared context contiene `## Spec Validator Approval` con `verdict: ready`.
-4. Shared context contiene el gate humano aprobado: `## Human Plan Approval: approved_by_user`.
+1. Spec vigente validada y vinculada al board, sin cambio material posterior sin revisión.
+2. Shared actual `decomposition-completed` o `in_progress`; reanudar desde blocked sólo tras resolver causa y registrar transición.
+3. Dictamen actual ready, no invalidado, para el alcance de la tarea.
+4. Gate 1 humano de ese alcance y dependencias de tarea satisfechas.
 
-Si alguno de los tres primeros falta o usa de forma incorrecta los aliases, detente con `Blocked: spec not validated-not-executed`.
+Si falta validación/board/dependencia, detente con `Blocked: implementation prerequisites missing` y causa concreta.
 Si falta el punto 4, detente con `Blocked: Awaiting Human Plan Approval`.
 
 ### Excepción: carriles ODD `trivial` y `fix`
 
 Si el shared context declara `## Lane: trivial` o `## Lane: fix`, la verificación anterior se sustituye por (skill `outcome-observability-driven`):
-1. `Current status` es exactamente `odd-defined`.
+1. `Current status` es `odd-defined` o `in_progress` del mismo cambio ODD.
 2. Existe la odd-card `docs/specs/odd/<nombre>.md` con Outcome, Evidence (before/after) y Boundaries (y Signals en `fix`). Si falta, detente con `Blocked: odd-card incomplete`.
 3. Antes de editar, ejecuta el comando `before` y confirma que FALLA (en `trivial`, confirma la observación). Si no falla, detente con `Blocked: cannot reproduce`.
 4. Implementa el cambio mínimo SOLO dentro de `touches`. Si necesitas tocar algo de `must-not-touch` o aparece un disparador de escalamiento (contratos, esquema BD, auth, módulo/dependencia nueva, decisión de negocio), detente con `Blocked: escalate-to-sdd` y el motivo. Nunca amplíes boundaries por tu cuenta.
@@ -51,7 +51,7 @@ No hay task board en estos carriles: la odd-card es la única tarea.
 
 ## Pre-flight Obligatorio
 
-Antes del primer `write_file` o `replace`, DEBES verificar con `ls` o `glob` que todos los archivos y directorios mencionados existen. Si falta una ruta, detente con `Blocked: missing prerequisite file/directory`.
+Verifica INPUTS requeridos y scope del destino. Una salida nueva autorizada no es prerequisito faltante: verifica/crea su padre y escribe mediante herramientas de archivos.
 
 Despues de cada lote de escritura y antes del handoff, ejecuta la skill
 `secret-scanning` con `gitleaks git --pre-commit --verbose`. Si Gitleaks no esta
@@ -83,8 +83,9 @@ Si un task breakdown contradice OpenAPI, migraciones, spec validada o codigo exi
 
 ## Autonomia de Ejecucion
 
-- Procesa el task board end-to-end en una sola sesion.
-- No pares entre tareas. Avanza de `todo` a `todo` automaticamente.
+- Procesa el slice autorizado end-to-end en una sesión.
+- No pares entre tareas: avanza de `todo` a `todo` cuando dependencias estén
+  done y la tarea pertenezca al scope aprobado.
 - Detente y pregunta al usuario SOLO si: documentacion insuficiente, artifact mismatch, o board completo.
 - Si no hay bloqueo, procede con implementacion, tests y verificacion sin aprobaciones intermedias.
 - **Self-Healing Loop Guard:** Tienes un límite estricto de un máximo de 3 iteraciones autónomas de corrección de código cuando las pruebas o la compilación fallan durante el pre-flight. Si en el tercer intento el error persiste, debes detener la ejecución secuencial, marcar la tarea como `blocked` con la razón `Blocked: Self-Healing limits reached` y reportar la traza exacta de error y tu hipótesis para que el humano intervenga.
@@ -119,7 +120,7 @@ Si un task breakdown contradice OpenAPI, migraciones, spec validada o codigo exi
 - Cualquier tarea que requiera seleccionar framework o arquitectura.
 - Terminos stale que contradigan artefactos activos.
 - Status de spec no apto para implementacion.
-- Veredicto de Spec Validator `not ready`.
+- Dictamen ACTUAL rechazado o invalidado; un rechazo histórico superseded no bloquea.
 - Artefacto canonico faltante (OpenAPI, migracion, config, realm).
 
 ## Flujo de Implementacion
@@ -133,5 +134,5 @@ Si un task breakdown contradice OpenAPI, migraciones, spec validada o codigo exi
    solo para casos que `test-architect` declaro `uncovered:`. Si un test en rojo te
    parece incorrecto, detente con `Blocked: test-architect test mismatch` indicando
    archivo, linea y por que contradice la spec; el dueno es `test-architect`.
-5. En proyectos con Graphify activo, al finalizar la codificación completa del task board y antes de reportar, ejecuta obligatoriamente `graphify --update` de forma incremental para asegurar la sincronía del grafo y evitar drifts de conocimiento (conforme al `Estándar de Gobernanza de Grafos de Conocimiento (Graphify)`).
+5. Graphify incremental sólo por cambios estructurales relevantes; fallo de cache se informa sin confundirlo con fallo build/tests. No update por metadata.
 6. Reporta archivos cambiados, resultados de verificacion y riesgo residual solo cuando el board esta terminado o bloqueado.

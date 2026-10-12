@@ -67,8 +67,9 @@ agents:
   spec-validator:
     role: validator
     phases: [validation]
-    writes_states: [validator-review, validated-not-executed, revision-needed, corrupted-state]
-    reads_states: [planning, awaiting-human-plan-approval]
+    writes_states: []
+    recommends_states: [validator-review, validated-not-executed, awaiting-human-plan-approval, revision-needed]
+    reads_states: [planning, awaiting-human-plan-approval, corrupted-state]
     skills: [spec-driven-development, openapi-standard, restful-standard, context-pinning,
              workspace-coordination, graphify, springboot-stack, fastapi-stack,
              keycloak-standard, security-standards, postgresql-standard, secret-scanning]
@@ -76,7 +77,8 @@ agents:
   enterprise-spec-validator:
     role: validator
     phases: [validation]
-    writes_states: [validator-review]
+    writes_states: []
+    recommends_states: [validator-review]
     skills: [enterprise-architecture-standard, workspace-coordination, spec-driven-development,
              context-pinning, graphify]
 
@@ -101,7 +103,7 @@ agents:
     role: worker
     phases: [execution]
     gate_required: G1
-    reads_states: [awaiting-human-plan-approval, validated-not-executed, odd-defined]
+    reads_states: [decomposition-completed, in_progress, blocked, odd-defined]
     writes_states: [in_progress, escalated-to-sdd]
     consumes_artifacts: [docs/designs/<increment-name>/ (direccion elegida),
                          docs/specs/odd/<nombre>.md (carriles trivial/fix)]
@@ -117,7 +119,7 @@ agents:
     role: worker
     phases: [execution]
     gate_required: G1
-    reads_states: [awaiting-human-plan-approval, validated-not-executed]
+    reads_states: [decomposition-completed, in_progress, blocked, awaiting-human-plan-approval]
     writes_states: [in_progress]
     consumes_artifacts: [docs/designs/<increment-name>/ (direccion elegida)]
     skills: [design-to-code, design-systems, react-stack, angular-stack,
@@ -139,7 +141,7 @@ agents:
     role: consultant
     phases: [decomposition, execution]
     gate_required: G1
-    reads_states: [validated-not-executed, decomposition-completed]
+    reads_states: [decomposition-completed, in_progress]
     writes_states: [in_progress]
     owns_tests: "header // red: test-architect — executor no los modifica"
     skills: [testing-strategy, performance-testing-k6, pre-flight-check, context-pinning,
@@ -169,7 +171,7 @@ agents:
 
   documentation:
     role: worker
-    phases: [execution, gitops, diagnosis]
+    phases: [transversal, execution, gitops, diagnosis]
     reads_states: [validated-not-executed]
     writes_states: [odd-defined]
     scribe_for: [bug-diagnostician, reviewer]   # transcribe literal odd-card y Reviewer Approval
@@ -247,12 +249,19 @@ agents:
   master-orchestrator:
     role: consultant
     phases: [transversal]
+    reads_states: [planning, validator-review, revision-needed,
+                   awaiting-human-plan-approval, decomposition-completed,
+                   in_progress, blocked, quality-approved,
+                   awaiting-human-qa-approval, merged]
     delegates_to: [requirements-analyst, context-curator, planner, task-decomposer, executor,
                    test-architect, spec-validator, final-validation,
                    git-executor, database-architect, devops-architect,
-                   functional-tester-agent, bug-diagnostician, reviewer, documentation]
+                   functional-tester-agent, bug-diagnostician, reviewer, documentation,
+                   solution-architect, enterprise-architect, enterprise-spec-validator,
+                   api-governance-agent, security-reviewer, spec-remediator, ui-designer, ui-executor]
     classifies: lane
-    skills: [outcome-observability-driven, jev-routing]   # mantiene contexto; Jev solo si el MCP foundry-jev existe, si no routing estático
+    continuation_policy: core/workflow/agent-protocol.md
+    skills: [outcome-observability-driven, jev-routing, spec-driven-development]   # contexto, routing y convergencia; Jev sólo si el MCP existe
 
   general:
     role: guardrail
@@ -330,11 +339,11 @@ packs:
     aplica_a: tarea pequena autocontenida dentro de un incremento ya aprobado,
       sin cambios de contratos OpenAPI, schema de BD ni UI nueva
   incremental:
-    activa: [executor, refactor, reviewer, final-validation]
+    activa: [executor, reviewer, final-validation]
     soporte_bajo_demanda: [database-architect, devops-architect, documentation,
                            functional-tester-agent]
     aplica_a: mejora o refactor de alcance medio sobre feature existente;
-      refactor entra solo si hay deuda de estructura, no por rutina
+      refactor intencional lo realiza executor, no agente deprecado
   completo:
     activa: ciclo completo fases 1-7 del lifecycle
     aplica_a: nuevos features e incrementos con delta spec completa

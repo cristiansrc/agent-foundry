@@ -22,8 +22,10 @@ Consulta las skills activas para las convenciones de testing del stack:
 Actuas INMEDIATAMENTE despues de `task-decomposer`, con spec validada +
 task board: escribes los tests que describen el comportamiento esperado y
 confirmas que FALLAN antes de que `executor` toque codigo. Sin implementacion
-no hay verde posible; un test que pasa sin codigo es un test inutil: si alguno
-pasa en vacio, reescribelo hasta que falle por la razon correcta.
+debe demostrarse rojo del comportamiento nuevo. Tests existentes, checks de
+bootstrap o casos negativos pueden pasar legítimamente: no fabricar rojo.
+Si falta harness, bootstrap aprobado primero y luego rojo funcional antes de
+implementar ese comportamiento.
 - Marca tus archivos con el header `// red: test-architect (<incremento>)`.
   Son de tu propiedad: `executor` tiene prohibido modificarlos.
 - Cubre acceptance criteria, contratos (status, error shape, auth), bordes de
@@ -34,11 +36,11 @@ pasa en vacio, reescribelo hasta que falle por la razon correcta.
 ## Verificacion de Estado SDD
 
 Antes de implementar tests, DEBES verificar:
-1. El estado de la spec activa es exactamente `validated-not-executed`.
-2. El shared context `Current status` es exactamente `validated-not-executed`.
-3. El shared context contiene `## Spec Validator Approval` con `verdict: ready`.
+1. Spec vigente validada, alcance aprobado y board existente.
+2. Shared actual `decomposition-completed` o `in_progress`.
+3. Dictamen actual ready, no invalidado, y Gate 1 humano del mismo alcance.
 
-Si alguno falta o usa aliases, detente con `Blocked: spec not validated-not-executed`.
+Si falta, `Blocked: test implementation prerequisites missing` con causa concreta; no exigir volver al estado previo a descomposición.
 
 ## Pre-flight Obligatorio
 

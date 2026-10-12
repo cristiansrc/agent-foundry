@@ -15,7 +15,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "shared"))
 import yaml
-from foundry import CORE, copy_skills, core_agents, load_profiles
+from foundry import CORE, copy_skills, core_agents, load_profiles, workflow_protocol
 
 OUT = Path(__file__).resolve().parent / "out"
 DESKTOP_ONLY = Path(__file__).resolve().parent / "skills"
@@ -60,8 +60,8 @@ def build_agents_md() -> str:
         "",
         "- Aislamiento: prohibido escribir fuera del repositorio activo.",
         "- Placeholder Guard: `<increment-name>` se resuelve dinámicamente o se pregunta.",
-        "- Estados: solo los definidos en core/workflow/states.md; manipulación humana",
-        "  de bloques IA = corrupted-state (detenerse).",
+        "- Estados: enum canónico; no fabricar firmas/veredictos. Metadata incoherente",
+        "  exige recuperación de fuente, no acusación automática de manipulación.",
         "- Self-healing: máximo 3 reintentos antes de marcar `blocked` y escapar al humano.",
         "- Conventional Commits con scope del incremento.",
         "",
@@ -71,7 +71,7 @@ def build_agents_md() -> str:
         "Consúltalas antes de implementar según el stack detectado.",
         "",
     ]
-    return "\n".join(lines)
+    return "\n".join(lines) + "\n\n" + workflow_protocol() + "\n"
 
 
 def build_config_toml(models_cfg: dict) -> str:

@@ -84,6 +84,36 @@ def validate_file(path: Path) -> list[str]:
         errors.append(f"{path.name}: estado NO canonico '{status}'")
         errors.append(f"  -> posible corrupcion o alias; detener agentes (corrupted-state)")
 
+    # Registro opcional para migración: legacy no falla por no tenerlo.
+    # Verifica entrega/presupuesto, no certifica autenticidad ni cobertura semántica.
+    delivery = blocks.get("Review delivery", [])
+    if len(delivery) > 1:
+        errors.append(f"{path.name}: exige UN registro Review delivery")
+    elif delivery:
+        fields = {}
+        for key in ("baseline_id", "baseline_scope", "remediation_rounds", "delivery_status", "report_path"):
+            values = re.findall(rf"^{key}:[ \t]*(.+)$", delivery[0], re.M)
+            if len(values) != 1 or not values[0].strip():
+                errors.append(f"{path.name}: Review delivery requiere campo único {key}")
+            else:
+                fields[key] = values[0].strip()
+        rounds = fields.get("remediation_rounds", "")
+        if rounds not in {"0", "1", "2"}:
+            errors.append(f"{path.name}: remediation_rounds debe ser 0, 1 o 2; no tercera ronda")
+        delivery_status = fields.get("delivery_status")
+        if delivery_status not in {"pending", "report-persisted", "complete"}:
+            errors.append(f"{path.name}: delivery_status inválido")
+        downstream = {"validated-not-executed", "awaiting-human-plan-approval",
+                      "decomposition-completed", "in_progress", "quality-approved",
+                      "awaiting-human-qa-approval", "merged", "archived"}
+        if status in downstream and delivery_status != "complete":
+            errors.append(f"{path.name}: review delivery incomplete; recuperar persistencia antes de avanzar")
+        if delivery_status in {"report-persisted", "complete"} and "report_path" in fields:
+            root = path.parents[3] if path.parent.name == ".working" else path.parent
+            report = (root / fields["report_path"]).resolve()
+            if not report.is_relative_to(root.resolve()) or not report.is_file():
+                errors.append(f"{path.name}: informe durable inexistente/fuera del repo")
+
     has_gate1 = "Human Plan Approval: approved_by_user" in blocks
     has_gate2 = "Human QA Approval: approved_by_user" in blocks
     approval = approvals[0] if approvals else ""

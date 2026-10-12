@@ -6,6 +6,25 @@ import re
 from pathlib import Path
 
 FIELD_RE = {key: re.compile(rf"^{key}:[ \t]*[^\n]*$", re.M) for key in ("model", "variant", "temperature")}
+OVERLAY_RE = re.compile(r"<!-- foundry-workflow:start -->.*?<!-- foundry-workflow:end -->", re.S)
+
+
+def compose_graphify(generated: str, installed: str) -> str:
+    """Sincroniza sólo routing Foundry; conserva mejoras upstream instaladas."""
+    source = OVERLAY_RE.findall(generated)
+    if len(source) != 1:
+        raise ValueError("overlay Graphify generado ausente/ambiguo")
+    if installed.count("<!-- foundry-workflow:start -->") != installed.count("<!-- foundry-workflow:end -->"):
+        raise ValueError("overlay Graphify instalado incompleto")
+    current = OVERLAY_RE.findall(installed)
+    if len(current) > 1:
+        raise ValueError("overlay Graphify instalado ambiguo")
+    if current:
+        return OVERLAY_RE.sub(lambda _: source[0], installed, count=1)
+    anchor = "# /graphify\n"
+    if installed.count(anchor) != 1:
+        raise ValueError("cabecera Graphify instalada ausente/ambigua")
+    return installed.replace(anchor, anchor + "\n" + source[0] + "\n", 1)
 
 
 def split_agent(text: str) -> tuple[str, str]:
@@ -48,14 +67,23 @@ def sync(generated: Path, installed: Path, skills: list[str]) -> list[Path]:
             raise ValueError(f"agente instalado inexistente; no se crea automáticamente: {target.name}")
         agent_updates.append((target, compose_agent(source.read_text(encoding="utf-8"),
                                                     target.read_text(encoding="utf-8"))))
+    overlays = []
     for name in skills:
         source, target = generated / "skills" / name, installed / "skills" / name
         if not (source / "SKILL.md").is_file() or not target.is_dir():
             raise ValueError(f"skill generada/instalada requerida: {name}")
+        if name == "graphify":
+            overlays.append((target / "SKILL.md", compose_graphify(
+                (source / "SKILL.md").read_text(encoding="utf-8"),
+                (target / "SKILL.md").read_text(encoding="utf-8"))))
     # Validar todo antes de escribir.
     for target, content in agent_updates:
         target.write_text(content, encoding="utf-8")
+    for target, content in overlays:
+        target.write_text(content, encoding="utf-8")
     for name in skills:
+        if name == "graphify":
+            continue
         source, target = generated / "skills" / name, installed / "skills" / name
         shutil.rmtree(target)
         shutil.copytree(source, target)

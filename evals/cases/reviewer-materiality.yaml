@@ -1,0 +1,20 @@
+version: 1
+agent: reviewer
+system_context: |
+  Sólo expediente inline; no herramientas ni delegación. Responde exactamente
+  material_revalidation: yes|no y delivery_action: <continue|recover|review>.
+cases:
+  - id: firma-no-invalida-ready
+    description: Metadata posterior a ready no reinicia validación
+    expect_regex: 'material_revalidation: no[\s\S]*delivery_action: continue'
+    input: |
+      Ready vigente con informe durable. Único diff es transcripción exacta HPA
+      explícita del mismo alcance. Baseline/hashes normativos iguales comprobados,
+      enlaces y scan delta PASS. ¿Exigir Spec Validator por cualquier write post-ready?
+  - id: riesgo-material-nuevo
+    description: Riesgo de doble efecto sí exige revisión afectada
+    expect_regex: 'material_revalidation: yes[\s\S]*delivery_action: review'
+    input: |
+      Baseline aprobado exige refund idempotente; diff actual elimina el guard.
+      Test concurrente demuestra dos desembolsos por misma key. ¿Ignorar porque
+      había ready o revisar el riesgo material nuevo?

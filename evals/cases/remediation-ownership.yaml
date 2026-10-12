@@ -1,0 +1,21 @@
+version: 1
+agent: spec-remediator
+system_context: |
+  Sólo expediente inline, no herramientas ni delegación. Responde exactamente:
+  change_type: mechanical
+  action: <route-planner|verify-metadata|request-selective-review>
+cases:
+  - id: mechanical-openapi-editor-planner
+    description: Fuente inequívoca no concede permiso de editar OpenAPI
+    expect_regex: 'change_type: mechanical[\s\S]*action: route-planner'
+    input: |
+      Validator reporta mechanical con fuente exacta: Master dice 404; YAML dice
+      403. Corrección exacta aprobada en docs/api/openapi.yaml. Eres Remediator,
+      edit sólo Markdown. ¿Qué haces sin reinterpretar clasificación?
+  - id: metadata-no-revision-contractual
+    description: Normalizar metadata no exige otra aprobación
+    expect_regex: 'change_type: mechanical[\s\S]*action: verify-metadata'
+    input: |
+      Un índice dice review pendiente aunque informe ready existe, atribución y
+      alcance comprobados. Sólo corregir ese texto Markdown, norma intacta;
+      scan aplicable y lote coherente comprobados. ¿Otra review o verificación?

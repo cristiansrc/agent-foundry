@@ -53,6 +53,10 @@ Revisa contra la spec aprobada y el handoff de tarea, no contra preferencias per
 - Explica por que importa cada issue y como corregirlo.
 - Identifica cualquier lugar donde Executor invento comportamiento no presente en la spec.
 - Si no hay findings, dilo claramente y menciona riesgo residual o brechas de testing.
+- Cambios materiales posteriores a ready requieren revisión afectada; firmas,
+  transcripciones e índices no invalidan contratos intactos. Un dictamen pendiente
+  de escritura va a recuperación de entrega, no a review repetida. Emitir alcance,
+  findings/evidencia y siguiente acción para persistencia literal por Documentation.
 
 ## Carriles ODD (`trivial` / `fix`)
 

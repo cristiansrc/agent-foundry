@@ -11,7 +11,8 @@ Esta skill define el estándar para la creación y evolución de especificacione
 - `requirements-analyst`: levanta requerimientos funcionales cuando la solicitud aun no está lista para SDD formal. No escribe OpenAPI, migraciones, specs incrementales formales, task boards ni código.
 - `planner`: dueño de specs, contratos OpenAPI, decisiones técnicas, restricciones de arquitectura y shared context durante planificación.
 - `spec-validator`: dueño del veredicto de readiness; entrega informe. Documentation persiste/transcribe sin cambiar el dictamen ni corregir decisiones técnicas por inferencia.
-- `spec-remediator`: corrige hallazgos mecánicos o drift con fuente autoritativa inequívoca. No invoca Task Decomposer ni Executor.
+- `spec-remediator`: corrige Markdown mecánico con fuente inequívoca. OpenAPI
+  sigue en Planner; migraciones/config en worker autorizado. No invoca otros roles.
 - `task-decomposer`: dueño exclusivo del task board después de `ready` vigente y Gate 1 humano del mismo alcance.
 - `executor`: implementa desde task board/spec aprobados; no toma decisiones de arquitectura ni reinterpreta contratos.
 - `final-validation`: valida cumplimiento final contra intención original, specs, contratos, seguridad, tests y documentación.
@@ -191,8 +192,17 @@ No eliminan gates ni permiten aprobar por agotamiento de intentos.
   sólo por regresión material o riesgo omitido demostrado, citando evidencia
   nueva; no cambiar ID para reiniciar contador.
 - Máximo **dos rondas de remediación + re-review por baseline**. Si no converge,
-  detener con `blocked`, informe de escape y arbitraje/recorte humano. No tercera
-  ronda automática, no `ready` forzado, no override silencioso.
+   detener con `blocked`, informe de escape y arbitraje/recorte humano. No tercera
+   ronda automática, no `ready` forzado, no override silencioso.
+- La revisión inicial usa `remediation_rounds: 0`; re-review normativa tras
+  remediación consume 1 o 2. Registrar antes de despachar para no perder conteo
+  si la sesión falla. Una repetición técnica por evidencia perdida respeta ese
+  presupuesto; recuperar/persistir/normalizar metadata no consume rondas.
+- Baseline identifica alcance/set normativo (release/hash si disponible), no
+  contador de pack ni hash de informe. Nuevo baseline sólo por delta material
+  explícito y revisado; registrar razón y enlace al anterior. Renombrar findings,
+  cambiar revisor/sesión o perder evidencia no resetea presupuesto. Si el contador
+  histórico es desconocido, recuperar registros o arbitrar; no asumir cero.
 - No preguntar nuevamente decisiones cerradas. Insumos humanos que bloquean el
   siguiente paso se piden entonces, agrupados, sin esperar un gate imposible.
 
@@ -207,4 +217,66 @@ No eliminan gates ni permiten aprobar por agotamiento de intentos.
   HPA; al persistirse la firma humana válida, reanudar sin otro “¿continúo?”.
 - No detener tareas del board por aprobaciones intermedias no definidas como gate.
   Preguntar sólo lo que cambia la decisión inmediata; agrupar por owner y dejar
-  seguimientos no bloqueantes en su backlog.
+   seguimientos no bloqueantes en su backlog.
+
+## 10.1 Entrega durable y recuperación de dictámenes
+
+Aplica a dictámenes de specs, alineación enterprise, API, review, seguridad y
+calidad. No cambia el enum de incremento ni añade gates humanos.
+
+1. En el handoff de revisión, identificar incremento, baseline/alcance, ronda y
+   ruta de informe separado dentro del repo (`docs/reviews/` o ruta del proyecto).
+   Registrar `Review delivery` junto al cambio de estado ya necesario; el informe
+   aún inexistente es salida esperada, no artefacto canónico faltante.
+2. El rol emite dictamen, findings/disposición, evidencia, limitaciones y siguiente
+   acción identificados por ese alcance. No modifica lo que certifica ni afirma
+   que su respuesta ya está persistida. Especialistas conservan sus veredictos.
+3. El orquestador entrega inmediatamente la salida original completa a
+   Documentation con su atribución disponible (agente/fecha/sesión si comprobables).
+   Un resumen conversacional sin original no es prueba de aprobación.
+4. Documentation escribe primero el informe literal durable, fuera del set que
+   certifica, y verifica contenido/ruta. Reutilizarlo si es idéntico; no sobrescribir
+   historia con otro dictamen. Si encuentra datos sensibles, detener/redactar con
+   limitación explícita, nunca persistir secretos por literalidad.
+5. Después completar en lote shared/gates/resúmenes autorizados desde el informe,
+   sin inferir cierres o firmas. Con proyecciones fallidas, conservar el informe y
+   `delivery_status: report-persisted`; enumerar pendientes en Next action. Sólo
+   `complete` tras comprobar lote/scan aplicable. La entrega no es transacción
+   filesystem multiarchivo: no declarar atomicidad física que no existe.
+6. El orquestador comprueba informe/alcance y recibo; sólo entonces continúa,
+   enruta remediación o pide HPA/QA. Un ready sólo en chat no habilita tareas.
+   No rotar voluntariamente con dictámenes pendientes de entrega.
+
+Registro compacto actual por shared (cada nueva entrega reemplaza el registro,
+historia queda en informes; el presupuesto del baseline se conserva):
+
+```markdown
+## Review delivery
+baseline_id: <identidad del alcance material>
+baseline_scope: <slice/set revisado>
+remediation_rounds: 0
+delivery_status: pending
+report_path: docs/reviews/<informe-de-esta-revision>.md
+```
+
+`delivery_status`: `pending` (sin informe verificado), `report-persisted`
+(informe verificado, proyecciones/scan pendientes), `complete` (entrega verificada).
+No son estados de incremento ni veredictos. En pending mantener estado de review;
+al completar transcribir la transición que el dictamen permite. Revisión técnica
+distinta dentro del baseline no borra rondas de remediación consumidas.
+
+**Recuperación idempotente tras interrupción:**
+- Informe existe y cubre baseline -> verificarlo y completar proyecciones; ninguna
+  review nueva por fallar una escritura. No sobreescribir correcciones posteriores.
+- Sólo salida original recuperable -> persistirla con atribución real y completar
+  lote; no convertir una memoria resumida en fuente primaria.
+- Ni informe ni salida recuperables -> declarar evidencia ausente y coordinar
+  review nueva acotada del alcance actual, sin fabricar el resultado perdido.
+  Respetar presupuesto/arbitraje. Evidencia temporal no es custodia durable.
+- Si cambió el set material desde el dictamen, recuperar historia pero no aplicar
+  esa aprobación al delta: revisión selectiva de cobertura afectada.
+
+**Migración:** contextos previos sin este bloque no se rechazan sólo por formato;
+comprobar el dictamen fuente vigente y adoptar registro en el siguiente handoff.
+Ausencia de fuente/autoridad real sí exige recuperación. `Review delivery` nunca
+pertenece al snapshot normativo ni dispara curación/revalidación por sí mismo.

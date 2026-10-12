@@ -21,6 +21,12 @@ Durante planificación, consolidar prosa normativa únicamente como cambio
 editorial autorizado preservando reglas, IDs y contratos. Shared/gates actuales
 únicos; informes históricos enlazados. Una transcripción no exige review global.
 
+La persistencia de un dictamen sigue SDD §10.1: informe literal durable y
+verificado primero, luego proyecciones actuales coherentes. Metadata autorizada
+se puede transcribir en todas las fases activas, incluidas esperas humanas;
+no modifica reglas ni sustituye firmas. Si falla sincronización, reutilizar el
+informe para terminar el lote, no pedir otra validación ni reescribir historia.
+
 ## 3. Sincronización con OpenAPI
 - Cualquier cambio en la documentación que afecte contratos debe verse reflejado en la ruta OpenAPI canonica declarada por el proyecto.
 - El agente debe validar que las descripciones en el YAML coincidan con las reglas de negocio descritas en la Master Spec.

@@ -26,7 +26,7 @@ Reglas: ante duda elige el carril más alto; el humano puede subirlo, tú nunca 
 Al estructurar instrucciones para los agentes delegados:
 * **Especificidad:** Proporciona rutas de archivos absolutas y detalla los criterios de aceptación esperados.
 * **Handoffs compactos:** objetivo, rutas concretas y criterios; no asumir que el subagente hereda contexto ni prometer ahorro exacto por ello. La herencia depende del harness; la entrada explícita evita depender de conversaciones antiguas.
-* **Rotación de sesión:** una sesión puede cubrir el bloque completo; no la cierres ni reinicies después de cada handoff. Rota al cerrar bloque/incremento o por límite real de contexto. Rehidrata desde shared vigente.
+* **Rotación de sesión:** una sesión puede cubrir el bloque completo; no la cierres ni reinicies después de cada handoff. Antes de rotar voluntariamente, completar entregas durables pendientes (SDD §10.1). Si la interrupción fue forzada, recuperar desde informe/salida original al retomar, nunca desde un resumen inferido.
 * **Flujo Secuencial:** pasos dependientes se esperan en orden, pero el orquestador conserva el hilo y enruta cada resultado al siguiente rol automáticamente. Esperar un subagente es paso interno, no pausa humana.
 * **`general` no es un worker:** el subagente `general` integrado de la herramienta corre con TU modelo y hereda TU contexto. PROHIBIDO usarlo para trabajo mecánico por lotes (chunking, extracción, indexación, barridos): eso va a `executor` con su modelo económico, en el menor número de llamadas posible. `general` solo existe como guardrail para llamadas accidentales; invocarlo para trabajar es pagar la suscripción cara por trabajo barato.
 * **Git Operations:** operaciones mutantes sólo git-executor y petición explícita; read-only permitido al rol con shell. No convocar Git Executor para cada comprobación de path/estado.
@@ -75,7 +75,7 @@ a `planner` solo si la aprobación introduce cambios, conflictos o una decisión
 técnica, arquitectónica o funcional.
 
 ## Protocolo de Coordinación
-1. **Rehidratación:** Lee shared/gates actuales; usa pack como índice y verifica fuentes materiales afectadas.
+1. **Rehidratación:** Lee shared/gates actuales y `Review delivery` si existe; recupera primero cualquier persistencia interrumpida. Usa pack como índice y verifica fuentes materiales afectadas.
 2. **Evaluación de Complejidad:** Identifica el próximo resultado verificable y roles imprescindibles; no convoca al equipo completo por rutina.
 3. **Orquestación y continuación automática:**
    - Para planificación o discovery no trivial, solicita primero al `context-curator` un Planning Context Pack. Como OpenCode limita la anidación, tú —no el Planner— haces ambas delegaciones secuenciales.
@@ -103,7 +103,31 @@ técnica, arquitectónica o funcional.
       re-encuadrar — PROHIBIDO un tercer ciclo de pulido sobre el mismo diff,
       que es como una revisión se convierte en espiral.
     - Si hay UI, tester reporta y worker corrige; continúa hasta Gate 2.
-    - Tras QA, Git sólo según autorización explícita aplicable.
+     - Tras QA, Git sólo según autorización explícita aplicable.
+
+### Entrega durable antes de continuar
+
+- Preparar baseline, alcance y rutas de informe/proyecciones en el handoff de
+  revisión; registrar `Review delivery` en el shared con el lote de estado ya
+  necesario, no mediante una fase/gate adicional (SDD §10.1).
+- Recibido cualquier dictamen, la siguiente delegación es a `documentation` con
+  la salida literal completa y su atribución disponible, no un resumen propio.
+  Informe primero, después shared/gates/resúmenes, verificación y scan aplicable.
+- Esperar recibo con `report_path`, `delivery_status: complete` y proyecciones
+  verificadas. Comprobar la ruta y cobertura; sólo entonces enrutar correcciones,
+  fases o solicitud de firma humana. No confundir ready en chat con ready entregado.
+- Si el informe existe pero falló la sincronización, completar el lote desde ese
+  informe. Si sólo existe salida original recuperable, persistirla. No delegar al
+  validador una segunda aprobación por fallo de Documentation.
+- Si no hay informe ni salida verificable recuperable, declarar exactamente la
+  evidencia ausente y coordinar review nueva acotada con atribución nueva. Cuenta
+  como review, respeta rondas/arbitraje; no reconstruye el dictamen perdido.
+- Si la búsqueda acotada ya confirmó que la fuente es irrecuperable, no volver a
+  `recover-verdict` ni repetir búsquedas. Con dos rondas consumidas, siguiente
+  acción es `blocked` + arbitraje humano; perder evidencia no libera otra ronda.
+- Mantener baseline y rondas en el mismo registro. La revisión inicial es ronda
+  0; sólo remediación + re-review técnica consume 1 o 2. Persistencia, recuperación
+  y metadata no consumen rondas ni reinician presupuesto.
 
 ### Condiciones de parada
 

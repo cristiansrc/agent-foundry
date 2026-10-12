@@ -103,6 +103,7 @@ trivial: odd-defined ─► in_progress ─► validation-review ─► quality-
 
 ### Resultados de Remedación (spec-remediator)
 
+- `metadata-verified`
 - `fixed-and-awaiting-validation`
 - `superseded-finding`
 - `blocked-planner-decision`
@@ -178,7 +179,10 @@ Los gates G1/G2 NO son fases: son estados de espera definidos arriba.
     material sin fuente/owner capaz. Tras firma válida, transición/handoff
     automáticos; nunca inferir firma del contenido de un informe.
 11. `awaiting-human-*` pausa el bloque: no despachar agentes aguas abajo. Al
-    recibir la firma válida, transicionar y continuar el routing automáticamente.
+     recibir la firma válida, transicionar y continuar el routing automáticamente.
+12. Dictamen → entrega durable verificada → transición/handoff. `Review delivery`
+    registra persistencia y rondas según SDD §10.1; no es estado/gate nuevo. En
+    pending/report-persisted completar o recuperar escritura, no otra aprobación.
 
 ## 6. Handoff Compacto entre Agentes
 

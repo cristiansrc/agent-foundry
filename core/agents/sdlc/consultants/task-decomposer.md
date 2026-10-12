@@ -27,9 +27,13 @@ Antes de descomponer, DEBES verificar:
 2. Shared context `Current status` es exactamente `validated-not-executed` o `awaiting-human-plan-approval`.
 3. Shared context contiene `## Spec Validator Approval` con `verdict: ready`.
 4. Shared context contiene el encabezado explícito `## Human Plan Approval: approved_by_user`.
+5. Si existe `Review delivery`, está `complete` y su informe existe/cubre el
+   alcance. Si falta persistencia, devolver al orquestador para recuperarla;
+   no pedir otro dictamen por un lote documental incompleto.
 
 Si alguno de los tres primeros falta o usa aliases, detente con `Blocked: spec not validated-not-executed`.
 Si falta el paso 4, detente con `Blocked: Awaiting Human Plan Approval`.
+Si falta el paso 5 en un registro explícito, reporta `Blocked: review delivery incomplete`.
 
 
 ## Pre-decomposition Gate

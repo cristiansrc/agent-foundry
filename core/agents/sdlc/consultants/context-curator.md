@@ -29,7 +29,9 @@ Tu propósito principal es evitar que modelos de ejecución reciban contexto rui
 
   1. Reemplazar findings viejos resueltos con un bullet: "N hallazgos resueltos".
   2. Mantener solo el último bloque `## Spec Validator Approval`.
-  3. Asegurar que solo los `Canonical artifacts` actuales están listados.
+   3. Asegurar que solo los `Canonical artifacts` actuales están listados.
+   4. Preservar `Review delivery`, baseline, rondas, informe y pendiente de
+      persistencia; no compactar la única salida no persistida ni inferir aprobación.
 
 ## Planning Context Pack
 
@@ -52,6 +54,9 @@ pueda verificar solo el fragmento necesario.
   Planning Context Pack y el shared context. No edites código, contratos
   canónicos, tests, configuración ni documentación final.
 - No incluyas discusión stale, archivos no relacionados, decisiones viejas o background amplio.
+- No refrescar por dictamen/firma/scan/transcripción si el objetivo material del
+  pack no cambió. Pendiente de persistencia se recupera desde fuente original;
+  no crear otro pack ni pedir review para resolver el handoff.
 - No ocultes blockers. Si falta contexto requerido, márcalo como `Blocked:`.
 - No pidas a Executor tomar decisiones arquitectónicas.
 - No enrutes trabajo a Executor salvo que las specs SDD y el task breakdown estén listos para implementación.

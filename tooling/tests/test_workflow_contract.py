@@ -82,6 +82,19 @@ class WorkflowContractTests(unittest.TestCase):
             if isinstance(pack["activa"], list):
                 self.assertFalse(set(pack["activa"]) & deprecated)
 
+    def test_graphify_overlay_preserves_upstream_and_is_idempotent(self):
+        generated = (ROOT / "core/skills/graphify/SKILL.md").read_text()
+        installed = "# /graphify\n\nUpstream cache fix and newer extraction API.\n"
+        result = sync_workflow.compose_graphify(generated, installed)
+        self.assertIn("Upstream cache fix and newer extraction API.", result)
+        self.assertIn("sin delegación anidada", result)
+        self.assertEqual(result, sync_workflow.compose_graphify(generated, result))
+
+    def test_graphify_malformed_overlay_rejected_before_writes(self):
+        generated = (ROOT / "core/skills/graphify/SKILL.md").read_text()
+        with self.assertRaises(ValueError):
+            sync_workflow.compose_graphify(generated, "# /graphify\n<!-- foundry-workflow:start -->")
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -2,6 +2,8 @@
 
 Este bloque se incorpora por build a todos los agentes SDLC. Rige el proceso;
 el cuerpo del rol concreta su especialidad, no amplía permisos ni cambia gates.
+Ante reglas de proceso incompatibles en un rol/skill, aplicar este protocolo y
+SDD §10; no ampliar permisos ni silenciar un riesgo material por esa precedencia.
 
 - **Continuación por defecto:** completar el objetivo solicitado y encadenar
   automáticamente el siguiente agente/fase autorizado por la matriz. Un handoff
@@ -24,7 +26,17 @@ el cuerpo del rol concreta su especialidad, no amplía permisos ni cambia gates.
 - Usar sólo estado/carril/dictamen ACTUAL del shared y alcance revisado. Historia,
   firmas de ejemplo y caches no autorizan ni bloquean por sí mismas.
 - Un bloque actual de cada tipo. Documentation persiste informes literales y
-  sincroniza proyecciones autorizadas en un lote; validadores no corrigen lo que certifican.
+   sincroniza proyecciones autorizadas en un lote; validadores no corrigen lo que certifican.
+- **Entrega durable:** un dictamen en chat aún no es handoff completado. Emitir
+  incremento, baseline/alcance, dictamen, disposición de findings, evidencia y
+  siguiente acción. El orquestador delega inmediatamente su persistencia literal
+  a Documentation: primero informe separado dentro del repo, luego proyecciones.
+  Sólo continuar tras verificar informe y lote coherente; no rotar voluntariamente
+  sesión con resultados pendientes. SDD §10.1 define recuperación y registro.
+- Tras interrupción, recuperar informe/salida original antes de repetir review.
+  Informe durable con proyecciones pendientes → completar transcripción. Salida
+  recuperable → persistir con atribución real. Sin fuente → bloqueo de evidencia
+  y review nueva acotada, sin reconstruir aprobación ni resetear rondas.
 - Priorizar negocio, contratos, integridad, seguridad y arquitectura del próximo
   trabajo. Trazabilidad bloquea sólo si falta contrato/autoridad/cobertura real.
   Contadores, formato de informe, líneas/nodos y cache stale son mantenimiento.
@@ -32,8 +44,9 @@ el cuerpo del rol concreta su especialidad, no amplía permisos ni cambia gates.
   normativo exige comprobación/scan del delta, no review global ni rerun de
   contratos con las mismas entradas/evidencia íntegra.
 - Correcciones mecánicas de una causa: completar proyecciones antes de UNA
-  re-review selectiva. Máximo dos rondas por baseline; después blocked con causa
-  concreta y arbitraje humano, nunca aprobación forzada.
+   re-review selectiva si cambia contenido normativo; metadata inequívoca sólo
+   requiere comprobación/scan aplicable. Máximo dos rondas de remediación por baseline; después blocked con causa
+   concreta y arbitraje humano, nunca aprobación forzada.
 - Gates por fase. Bootstrap aprobado produce evidencia disponible después de
   crear artefactos; no acredita compatibilidad/go-live por ello.
 - Ready actual + Gate 1 del mismo alcance antes de board/tests/producto SDD;
@@ -45,6 +58,12 @@ el cuerpo del rol concreta su especialidad, no amplía permisos ni cambia gates.
   o carpeta projects/ por ejemplos genéricos.
 - OpenAPI sólo Planner; producción/tests/infra sólo worker autorizado; Git mutante
   sólo Git Executor y petición explícita. Git read-only permitido si el perfil
-  habilita shell; secret scan filesystem no requiere Git.
+   habilita shell; secret scan filesystem no requiere Git.
+- `change_type` describe el cambio, no concede permisos: mechanical en Markdown
+  autorizado → Remediator; en OpenAPI → Planner; migración/config → worker
+  autorizado aplicando fuente exacta bajo gates vigentes. No inventar decisión.
+- Intención: spec/contratos canónicos aprobados. Realidad: código/config/tests.
+  Ante discrepancia registrar drift; no adaptar silenciosamente la norma al
+  código ni tratar una solicitud de cambio como aprobación del plan enmendado.
 - Veredictos: Spec Validator ready|revision-needed; reviewer approved|changes-requested;
   especialistas dictamen acotado, nunca ready global ni sustitución de gates humanos.

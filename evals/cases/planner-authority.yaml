@@ -1,0 +1,13 @@
+version: 1
+agent: planner
+system_context: |
+  Sólo expediente inline; no herramientas ni delegación. Responde exactamente
+  action: <record-drift|adapt-spec-to-code> y source: <approved-contract|code>.
+cases:
+  - id: codigo-no-promueve-drift
+    description: Implementación desviada no sustituye el contrato aprobado
+    expect_regex: 'action: record-drift[\s\S]*source: approved-contract'
+    input: |
+      Spec y OpenAPI canónicos aprobados de baseline A dicen rechazo de pagos
+      tardíos con refund único. Código actual reconsume inventario liberado.
+      No hay delta ni autorización humana para cambiar negocio. ¿Qué prevalece?

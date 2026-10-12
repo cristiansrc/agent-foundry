@@ -71,6 +71,48 @@ class StateGateTests(unittest.TestCase):
         template = Path(__file__).resolve().parents[2] / "templates/sdd-context.md"
         self.assertEqual([], self.validate(template.read_text(encoding="utf-8")))
 
+    def delivery(self, status="pending", rounds="1"):
+        return (
+            "## Review delivery\nbaseline_id: A\nbaseline_scope: contract A\n"
+            f"remediation_rounds: {rounds}\ndelivery_status: {status}\n"
+            "report_path: docs/reviews/validator-A.md\n"
+        )
+
+    def test_pending_delivery_cannot_request_human_gate(self):
+        errors = self.validate(self.context() + self.delivery())
+        self.assertTrue(any("delivery incomplete" in e for e in errors))
+
+    def test_recovery_pending_is_valid_in_review(self):
+        self.assertEqual([], self.validate(self.context(state="validator-review", verdict="pending-review") + self.delivery()))
+
+    def test_claimed_complete_without_report_fails(self):
+        errors = self.validate(self.context() + self.delivery("complete"))
+        self.assertTrue(any("informe durable" in e for e in errors))
+
+    def test_interrupted_projection_then_completed_delivery(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            path = root / "docs/specs/.working/sample-sdd-context.md"
+            path.parent.mkdir(parents=True)
+            report = root / "docs/reviews/validator-A.md"
+            report.parent.mkdir(parents=True)
+            report.write_text("verdict: ready\n", encoding="utf-8")
+            original = report.read_bytes()
+            path.write_text(self.context(state="validator-review") + self.delivery("report-persisted"), encoding="utf-8")
+            self.assertEqual([], MODULE.validate_file(path))
+            path.write_text(self.context() + self.delivery("complete"), encoding="utf-8")
+            self.assertEqual([], MODULE.validate_file(path))
+            self.assertEqual(original, report.read_bytes())
+
+    def test_third_round_and_duplicate_counter_fail(self):
+        for text in (self.delivery(rounds="3"), self.delivery() + "remediation_rounds: 0\n"):
+            with self.subTest(text=text):
+                self.assertTrue(self.validate(self.context(state="validator-review") + text))
+
+    def test_report_outside_repo_cannot_complete_delivery(self):
+        errors = self.validate(self.context() + self.delivery("complete").replace("docs/reviews/validator-A.md", "../elsewhere.md"))
+        self.assertTrue(any("informe durable" in e for e in errors))
+
 
 if __name__ == "__main__":
     unittest.main()

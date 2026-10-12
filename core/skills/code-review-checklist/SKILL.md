@@ -25,7 +25,9 @@ Esta lista de verificación define los estándares mínimos para revisar código
 - No rompe Master Spec, Delta Spec, shared context ni task board.
 - OpenAPI, handlers/controllers, clientes y tests usan los mismos paths, status codes, headers, schemas y error shape.
 - Migraciones, entidades, queries y repositorios coinciden en nombres, tipos, nullability, índices y constraints.
-- Si hay cambios posteriores a `verdict: ready`, deben volver a Spec Validator.
+- Cambios materiales posteriores a `verdict: ready` vuelven a revisión de su
+  cobertura afectada. Metadata/firmas/transcripciones con norma intacta sólo
+  requieren comprobación y scan aplicable, no otra validación contractual.
 - No hay `Known Technical Debt`, `fix later` o deferrals no aprobados para inconsistencias de contrato.
 
 ## Checklist Funcional

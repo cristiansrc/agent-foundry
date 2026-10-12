@@ -12,6 +12,10 @@ que acumuló revisiones, estados stale y re-curación tras cada transcripción.
 4. Hash normativo separado de metadata/índices/reportes; custodia durable.
 5. Gates por fase; spike acotado aprobado cuando hace falta producir evidencia.
 6. Dos rondas máximo por baseline, después informe de escape/arbitraje humano.
+7. Entrega durable SDD §10.1: dictamen → informe literal verificado → lote de
+   proyecciones/scan → recibo complete → siguiente rol/gate. Si se interrumpe,
+   recuperar informe/salida original antes de repetir review. Next action indica
+   persistencia pendiente, sin nuevo estado/gate ni pack obligatorio.
 
 No es permiso para omitir findings de integridad/seguridad ni aprobar un plan
 rechazado. La review selectiva sigue detectando riesgos nuevos demostrados.
@@ -58,4 +62,15 @@ Lint/matrix/build PASS; 29 tests deterministas PASS. Los seis casos reales de
 se repitió individualmente tras un timeout aislado45s y pasó a90s. No certifica
 todos los modelos/harnesses ni todos los roles; ampliar evals sólo ante cambios
 relevantes de comportamiento. Workflow-only instalado en OpenCode con backup;
-bindings preservados; reiniciar el proceso.
+ bindings preservados; reiniciar el proceso.
+
+### Cambios posteriores — entrega durable (2026-10-12)
+
+SDD §10.1 y `Review delivery` verificados e instalados mediante workflow-only.
+El bloqueo inicial por timeout queda histórico: recuperación filesystem PASS
+con timeout estándar 900s y metadata/HPA PASS, sin cambiar modelo/contratos.
+Evidencia, fallos anteriores y límites en
+`docs/investigations/2026-10-11-verdict-delivery/README.md`.
+Post-sync PASS: 23 agentes, 12 skills; checklist y sólo overlay Foundry de
+Graphify, preservando mejoras upstream y config/plugins/bindings/skills ajenas.
+Backup `opencode-workflow-pre-sync-20261012-003329.tar.gz`; reiniciar OpenCode.

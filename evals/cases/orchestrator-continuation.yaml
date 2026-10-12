@@ -3,10 +3,11 @@ agent: master-orchestrator
 system_context: |
   Eres el orquestador. Analiza sólo el estado inline; no uses herramientas ni
   afirmes haber escrito archivos. Responde EXACTAMENTE dos líneas:
-  next_action: <request-human-plan|dispatch-task-decomposer|dispatch-next-worker|dispatch-planner|ask-human-decision>
+   next_action: <request-human-plan|dispatch-task-decomposer|dispatch-next-worker|dispatch-planner|ask-human-decision|dispatch-documentation|recover-verdict|dispatch-spec-validator|blocked-escalate>
   pause_for_human: <yes|no>
   Continúa automáticamente entre handoffs internos. Sólo pausa en gate humano
-  vigente o decisión material que ningún rol/fuente pueda resolver.
+   vigente, decisión material que ningún rol/fuente pueda resolver o presupuesto
+   de intentos agotado conforme al protocolo.
 cases:
   - id: ready-pausa-solo-hpa
     description: ready sin HPA solicita aprobación y no descompone
@@ -48,3 +49,32 @@ cases:
     input: |
       Reporte viejo dice not ready pero fue superseded. Shared actual tiene ready
       para este scope y HPA humana válida del mismo alcance. ¿Qué haces?
+  - id: dictamen-chat-persistir-primero
+    description: Ready sólo en chat se entrega antes de solicitar HPA
+    expect_regex: 'next_action: dispatch-documentation[\s\S]*pause_for_human: no'
+    input: |
+      Shared validator-review, baseline A. Spec Validator acaba de emitir ready
+      con salida original completa, sin informe escrito. Review delivery pending.
+      ¿Pedir HPA, descomponer o persistir primero?
+  - id: informe-durable-proyecciones-pendientes
+    description: Interrupción después del informe no repite validación
+    expect_regex: 'next_action: dispatch-documentation[\s\S]*pause_for_human: no'
+    input: |
+      Sesión anterior interrumpida. Informe original ready dentro del repo,
+      atribución y baseline A comprobados intactos. Delivery report-persisted;
+      shared/gates aún validator-review. Falta completar proyecciones. ¿Qué haces?
+  - id: salida-recuperable-no-revalida
+    description: Recuperar salida original evita fabricar o repetir dictamen
+    expect_regex: 'next_action: dispatch-documentation[\s\S]*pause_for_human: no'
+    input: |
+      No informe escrito, sesión anterior interrumpida. Salida original del
+      Validator recuperada completa/atribuible; mismo baseline comprobado.
+      No HPA ni delta material. ¿Qué haces?
+  - id: evidencia-ausente-presupuesto-agotado
+    description: Perder evidencia no reinicia presupuesto de revisión
+    expect_regex: 'next_action: blocked-escalate[\s\S]*pause_for_human: yes'
+    input: |
+      Baseline A consumió dos rondas remediación/re-review. Sesión falló; no hay
+      informe ni salida original recuperables: búsqueda acotada ya agotada y
+      ausencia confirmada. Sólo resumen "parece ready".
+      Se propone renombrar findings/baseline y repetir automáticamente. ¿Qué haces?

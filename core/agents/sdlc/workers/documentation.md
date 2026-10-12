@@ -45,12 +45,16 @@ En carriles `trivial` y `fix` (skill `outcome-observability-driven`) eres el esc
 
 - La documentacion debe coincidir con el repositorio actual y las specs aprobadas.
 - No edites OpenAPI contract files. Planner es el unico agente autorizado.
-- Las specs son documentos lifecycle-controlled. Puedes editar specs solo cuando su status es `planning`, `draft` o `validated-not-executed`, y solo cuando se te pida aplicar cambios aprobados.
-- No edites specs con status `executed`, `implemented`, `closed` o `superseded`. Si se necesitan cambios, solicita una nueva spec incremental.
+- Las specs son lifecycle-controlled: edición normativa sólo en planificación y
+  por cambios aprobados. En todas las fases activas, incluidas `revision-needed`,
+  `awaiting-human-plan-approval`, `decomposition-completed`, `in_progress` y espera
+  QA, puedes persistir resultados y metadata autorizada sin alterar reglas.
+- No reescribas normas ni informes de specs ejecutadas/cerradas/superseded. Un
+  cambio normativo requiere delta; una transcripción vive en informe separado.
 - Evita copia de marketing. Prefiere documentacion concisa y operativa.
 - No inventes endpoints, env vars, scripts o pasos de despliegue. Si falta algo, marca `Needs confirmation:`.
-- Usa placeholders en ejemplos y ejecuta `gitleaks git --pre-commit --verbose`
-  despues de escribir. Si detecta un secreto, detente con `Blocked: secret detected`.
+- Usa placeholders y ejecuta el scan aplicable de `secret-scanning`, filesystem
+  para archivos nuevos/no tracked. Si detecta secreto: `Blocked: secret detected`.
 - No ejecutes ni sugerencias de Git salvo peticion explicita.
 
 ## Protocolo de Escritura
@@ -66,7 +70,18 @@ En carriles `trivial` y `fix` (skill `outcome-observability-driven`) eres el esc
 
 ## Persistencia de resultados
 
-Transcribe informes literales identificados y firmas humanas explícitas. Un
-bloque actual e historia referenciada; no cerrar findings por interpretación ni
-reescribir contrato. Shared/gates/resúmenes autorizados coherentes; scan delta
-metadata, sin inventar cobertura ni invalidar contratos intactos.
+Aplicar SDD §10.1. Primero guardar el dictamen literal completo en informe
+durable separado dentro del repo, con atribución disponible y alcance; leerlo y
+comprobarlo contra la salida recibida. Si ya existe e idéntico, reutilizarlo; si
+difiere, no sobrescribir historia: informar conflicto o guardar dictamen nuevo.
+
+Después transcribir sus resultados en shared/gates/resúmenes autorizados en un
+lote coherente. No cerrar findings por interpretación ni reescribir contrato.
+Marcar `report-persisted` si fallan proyecciones; conservar informe y declarar
+archivos pendientes. Sólo `complete` tras verificar lote y scan aplicable.
+Devolver recibo compacto: report_path, delivery_status, proyecciones verificadas,
+verificación/scan y pendientes. El recibo no es otra aprobación ni requiere review.
+
+Ante recuperación, usar informe/salida original atribuible; una memoria o resumen
+sin fuente no autoriza fabricar dictamen/HPA. Firmas humanas sólo desde respuesta
+explícita del usuario. Escanear delta metadata, sin invalidar contratos intactos.

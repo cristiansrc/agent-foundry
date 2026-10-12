@@ -21,6 +21,10 @@ verde no hay sync.
 | `quality-conditional.yaml` | master-orchestrator | Fase 6 condicional (reviewer siempre, security ante superficie sensible) |
 | `planning-convergence.yaml` | spec-validator | Metadata/cache sin rerun material, delta material, presupuesto y riesgo nuevo demostrado |
 | `orchestrator-continuation.yaml` | master-orchestrator | Sólo pausa en gate humano o decisión realmente no resoluble; continúa handoffs internos |
+| `documentation-delivery.yaml` | documentation | Recuperación filesystem: informe intacto, lote coherente, sin HPA inventada; metadata en espera HPA |
+| `remediation-ownership.yaml` | spec-remediator | Editor autorizado de OpenAPI y metadata sin re-review |
+| `planner-authority.yaml` | planner | Contrato aprobado no sustituido por código desviado |
+| `reviewer-materiality.yaml` | reviewer | Firma no invalida ready; riesgo material nuevo sí requiere revisión |
 
 ## Ejecución
 
@@ -34,6 +38,8 @@ python3 evals/run.py evals/cases/<suite>.yaml --executor opencode --model <id>
 python3 evals/run.py evals/cases/<suite>.yaml --executor opencode --repeat 2
 python3 evals/run.py evals/cases/<suite>.yaml --executor opencode --repeat 3 --threshold 0.66
 python3 evals/run.py evals/cases/<suite>.yaml --executor opencode --timeout 1200 --show-output
+# Candidato generado, sin instalar ni alterar bindings activos:
+python3 evals/run.py evals/cases/<suite>.yaml --executor opencode --candidate-dir adapters/opencode/out --report <ruta-existente>/eval.json
 ```
 
 - `--repeat N`: los LLM no son deterministas; por defecto gana la mayoría.
@@ -46,7 +52,17 @@ python3 evals/run.py evals/cases/<suite>.yaml --executor opencode --timeout 1200
   ante timeout/fallo del harness. Runner sólo evalúa eventos text de respuesta,
   no logs/tool outputs; exit no-cero o respuesta ausente nunca es PASS.
 - Cada caso corre en un **sandbox temporal** (`opencode run --dir`): las
-  evals nunca escriben artefactos en este repo.
+   evals nunca escriben artefactos en este repo.
+- `--candidate-dir` prepara sólo en el sandbox el agente nuevo y skills de las
+  salidas, preservando model/variant/temperature instalados como workflow-only.
+  Graphify usa overlay para preservar mejoras upstream. `--report` registra
+  respuestas/huellas por caso; su directorio padre debe existir. Sin candidato,
+  se prueba la configuración instalada, no se certifican fuentes nuevas.
+- El candidato también fija prompt y skills.paths en config local explícita
+  para no depender del descubrimiento concurrente de IDs duplicados del harness.
+- Casos `files` crean fixtures relativos en sandbox; `expected_files` comprueba
+  contenido real (equals/contains/not_contains) antes de eliminarlo. Un claim de
+  escritura sin archivo no aprueba. Dry-run sólo valida formato, nunca conducta.
 
 ## Cómo añadir un caso
 

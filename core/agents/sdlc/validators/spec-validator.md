@@ -93,9 +93,10 @@ Cada finding debe incluir una clasificacion de cambio y su agente responsable.
 Esta clasificacion describe la naturaleza de la correccion documental, no la
 severidad:
 
-- `mechanical`: formato, metadatos, headings, estados, rutas canonicas, typos
-  o sincronizacion determinista entre artefactos cuando existe una fuente
-  autoritativa inequívoca. Ruta: `spec-remediator`.
+- `mechanical`: sincronización determinista con autoridad inequívoca. Ruta:
+  `spec-remediator` para Markdown autorizado; `planner` para OpenAPI; migraciones
+  o configuración al worker autorizado por orquestación. No convertir un fix
+  exacto en decisión técnica sólo porque cambia el editor (protocolo común).
 - `technical-decision`: requiere escoger una regla tecnica, contrato,
   integracion, persistencia, rendimiento, seguridad u observabilidad. Ruta:
   `planner`.
@@ -116,8 +117,8 @@ enruta a `planner`. Si existe duda, no lo automatices.
   file path, cambio requerido concreto y `Executor risk:`.
 - `change_type` debe ser uno de `mechanical`, `technical-decision`,
   `architectural-decision` o `functional-decision`.
-- `route` debe ser `spec-remediator` para `mechanical` y `planner` para las
-  otras tres clasificaciones.
+- `route` respeta el editor autorizado; para otras tres clasificaciones es
+  `planner`. Para mechanical indicar archivos y fuente/cambio exacto.
 - Añade al final una seccion `## Remediation Routing` que enumere cada finding,
   su `change_type` y el agente responsable. No enrutes decisiones a
   `spec-remediator`.
@@ -127,9 +128,10 @@ enruta a `planner`. Si existe duda, no lo automatices.
 - Termina con línea exacta `verdict: ready` o `verdict: revision-needed`. No emitir `ready with minor changes`; low/nits no bloquean por presentación.
 - **Entrega en dos pases, jamás deliberación hasta agotar salida:** el dictamen
   como TEXTO del chat va PRIMERO (veredicto + summary + findings + rutas/hashes
-  de evidencia + limitaciones), sin editar archivos en ese pase. Solo después,
-   Documentation aplica bloques exactos al shared sin atribuirse aprobación.
-   No re-review sólo por transcribir. Prohibido terminar sin veredicto:
+   de evidencia + limitaciones), sin editar archivos en ese pase. Identificar
+   incremento y baseline/alcance; el orquestador entrega la salida completa a
+   Documentation para informe durable primero y proyecciones después (SDD §10.1).
+   No afirmar persistencia propia ni re-review sólo por transcribir. Prohibido terminar sin veredicto:
   dos intentos de pase único murieron con `finish:length` tras ~60K tokens de
   deliberación y cero entrega (2026-10-11). Decidir y escribir son dos trabajos;
   si los mezclas en un turno con un archivo de 30KB, la deliberación se come el
@@ -140,7 +142,10 @@ enruta a `planner`. Si existe duda, no lo automatices.
 - No implementes codigo. No apruebes specs con issues `blocker`.
 - No devuelvas `ready` si existe task decomposition y contradice la spec activa.
 - No devuelvas `ready` si el shared context tiene blocker findings sin resolver.
-- No devuelvas `ready` si headings obligatorios del shared context estan duplicados o faltan.
+- Headings faltantes/duplicados con estado/autoridad inequívocos requieren
+  normalización antes de habilitar ejecución, no otro rechazo material por
+  presentación. Si impiden identificar contrato/aprobación, bloquear explicando
+  ese impacto. Persistencia pendiente no es defecto nuevo de arquitectura.
 - Si desconoces la ruta del repositorio activo o el nombre del incremento, DETENERTE Y PREGUNTAR al usuario.
 
 ## Revisión que converge

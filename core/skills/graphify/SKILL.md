@@ -5,6 +5,30 @@ description: "Use for any question about a codebase, its architecture, file rela
 
 # /graphify
 
+<!-- foundry-workflow:start -->
+## Ejecución Graphify bajo Foundry
+
+Este bloque gobierna el routing de todos los procedimientos de esta skill,
+incluidas sus referencias. Sustituye instrucciones genéricas de dispatch:
+- Grafo existente: query y verificación de fuentes. Grafo ausente/stale: lectura
+  dirigida; no construir por una pregunta puntual ni convertir cache en gate.
+- Actualizar sólo por cambio estructural relevante o petición explícita, dentro
+  del scope permitido. Consultores sin shell piden ejecución al orquestador.
+- El orquestador delega el lote a `executor`; el worker realiza AST, cache,
+  extracción semántica, merge y escritura directamente, sin delegación anidada.
+  En Part B, procesa él mismo los chunks usando references/extraction-spec.md.
+  No usar `@agent`, Agent tool, general/explore ni un rol inexistente para chunks.
+- Backend semántico configurado puede usarse si autorizado; no pedir credenciales
+  por rutina ni bloquear por ausencia de key cuando el worker puede extraer.
+- Chunk ausente/inválido: conservar resultado parcial y señalar cobertura faltante;
+  no repetir equipo completo ni declararlo PASS. Costes sólo medidos, no inventados.
+- Fallo del índice se reporta como limitación; sólo bloquea el trabajo de producto
+  si falta evidencia material que no pueda comprobarse directamente.
+
+Las instrucciones de dispatch posteriores son recetas upstream para otros hosts;
+bajo Foundry se ejecutan localmente por el worker según estas reglas.
+<!-- foundry-workflow:end -->
+
 Turn any folder of files into a navigable knowledge graph with community detection, an honest audit trail, and three outputs: interactive HTML, GraphRAG-ready JSON, and a plain-language GRAPH_REPORT.md.
 
 ## Usage

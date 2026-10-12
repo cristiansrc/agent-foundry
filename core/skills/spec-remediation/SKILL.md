@@ -18,10 +18,12 @@ Guía para corregir de forma segura y granular los hallazgos reportados por el `
 1. **Rehidratación**:
     - Leer shared context activo, spec activa, OpenAPI, migraciones/config relevantes y último reporte de validación.
     - Verificar que los archivos citados por el hallazgo existen en disco.
-    - Si la evidencia del hallazgo no existe en los archivos actuales, marcarlo como `validator/process-bug` o `superseded` y pedir revalidación.
+     - Si ya no existe, reportar evidencia de `superseded` al orquestador; no
+       revalidar contratos por metadata ni cerrar un finding técnico por inferencia.
 2. **Clasificación de Hallazgos**: consumir la clasificación y ruta emitidas
    por `spec-validator`:
-     - `mechanical` -> `spec-remediator`.
+     - `mechanical` en Markdown autorizado -> `spec-remediator`; OpenAPI ->
+       `planner`; migraciones/config -> worker autorizado por orquestación.
      - `technical-decision`, `architectural-decision` o
        `functional-decision` -> `planner`.
      - Un `contract-drift` solo es mecánico si la fuente autoritativa y la
@@ -33,13 +35,16 @@ Guía para corregir de forma segura y granular los hallazgos reportados por el `
 5. **Registro**: actualizar progreso, IDs, archivos y siguiente validación. No
    escribir aprobación. Si scope/permisos impiden completar el lote, bloquear
    por proceso y pedir alcance completo, no validar la mitad sincronizada.
-6. **Re-Validación Selectiva**: solicitar una revisión del lote/diff afectado al
-   `spec-validator` oficial; no review entre cada cambio mecánico relacionado.
+6. **Verificación según impacto**: cambio normativo -> revisión selectiva del
+   lote/diff por Spec Validator. Metadata inequívoca -> comprobar proyecciones y
+   scan aplicable por worker autorizado, resultado `metadata-verified`, sin
+   re-review contractual. No review entre cada cambio mecánico relacionado.
 
 ## Correcciones Permitidas
 - Normalizar lifecycle/status cuando contradice el veredicto vigente y la evidencia es clara.
 - Corregir rutas canónicas erradas cuando el archivo real existe y la intención es inequívoca.
-- Sincronizar nombres de campos, endpoints, columnas o enums entre spec y OpenAPI/migraciones cuando una fuente autoritativa está explícitamente definida.
+- Sincronizar su representación en Markdown cuando la fuente es explícita.
+  No editar YAML/JSON/SQL/scripts/runtime: enviar cambio exacto al editor autorizado.
 - Eliminar o marcar como `superseded` findings antiguos que ya no existen en disco.
 - Corregir headings obligatorios duplicados o mal nombrados en shared context si no cambia decisiones técnicas.
 
@@ -53,10 +58,12 @@ Guía para corregir de forma segura y granular los hallazgos reportados por el `
 
 ## Reglas de Oro
 - **Unidad Coherente**: un lote de misma causa y autoridad; sin rediseño ni mezcla de decisiones independientes.
-- **Validación Específica**: Las validaciones deben pedirse exclusivamente al agente `spec-validator`, con el modelo asignado en el perfil de ejecución.
+- **Validación Específica**: re-review normativa sólo por Spec Validator;
+  comprobación de metadata/scan no es otra aprobación de readiness.
 - **Bloqueo por Modelo**: Si la validación se ejecuta con un modelo no autorizado, se debe detener el proceso con `Blocked: wrong validator model`.
 - **Límite de Intentos**: máximo dos rondas por baseline según SDD §10. Si persiste, escribir `<active-repo>/docs/specs/.working/<increment-name>-remediator-bug-report.md` y detener; IDs nuevos no reinician el contador.
-- **Alcance**: No puede crear ni llamar a `task-decomposer` ni `executor`. Solo trabaja sobre artefactos SDD (Specs, OpenAPI, Migraciones, Config).
+- **Alcance**: sólo Markdown documental autorizado; consultas van al orquestador,
+  sin delegación anidada ni ampliar permisos por ser mechanical.
 - **Decisiones de Diseño**: Si un hallazgo requiere una decisión de arquitectura profunda, debe enrutar al Planner o al Usuario.
 - **Routing Guard**: Si falta `change_type`, la ruta no coincide o el hallazgo
   no es `mechanical`, no editar; bloquear y enrutar a `planner`.
@@ -64,6 +71,8 @@ Guía para corregir de forma segura y granular los hallazgos reportados por el `
 
 ## Resultado Esperado Por Iteración
 Cada iteración debe terminar con uno de estos resultados:
+- `metadata-verified`: proyecciones metadata comprobadas; sin cambio normativo,
+  sin aprobación nueva ni disposición propia de findings técnicos.
 - `fixed-and-awaiting-validation`: se corrigió un hallazgo seguro y falta validación.
 - `superseded-finding`: el hallazgo ya no existe en disco y se pide revalidación.
 - `blocked-planner-decision`: requiere decisión técnica de Planner.

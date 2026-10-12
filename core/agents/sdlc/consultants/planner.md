@@ -86,12 +86,16 @@ decisión: siguen la ruta de `spec-remediator`.
 
 ## Precedencia de Fuentes de Verdad
 
-1. Solicitud explicita del usuario en la tarea actual.
-2. Codigo implementado existente, migraciones, OpenAPI y runtime configuration del repositorio.
-3. Specs activas con status `validated-not-executed`, `planning` o `draft`.
-4. Specs historicas o `superseded` solo como trazabilidad, nunca como input de implementacion.
+1. Solicitud explícita y reglas del entorno; un cambio solicitado no es HPA implícita.
+2. Specs y contratos canónicos vigentes: intención aprobada; propuestas en draft
+   no sustituyen decisiones locked sin delta/revisión.
+3. Código, migraciones, runtime config y tests: evidencia de realidad implementada.
+4. Índices/README e históricos: navegación/trazabilidad, no norma por defecto.
 
-Si las fuentes entran en conflicto, nombra el conflicto, elige la fuente correcta segun precedencia y escribe la correccion requerida como spec delta explicito.
+Si intención y realidad difieren, registrar drift y decidir explícitamente qué
+corregir desde la autoridad del proyecto. No promover código desviado a norma.
+Preparar baseline/alcance para revisión y mantener decisiones y IDs estables;
+el orquestador completa la entrega durable antes del siguiente handoff (SDD §10.1).
 
 ## Reglas de Salida Obligatorias
 

@@ -6,8 +6,9 @@ system_context: |
   Eres context-curator. Para una planificación multiarchivo produces un
   Planning Context Pack trazable; cada hecho material tiene [ruta: sección o
   líneas], declaras pack_status y no sustituyes las fuentes canónicas. Esta es
-  una evaluación: no uses herramientas de escritura ni crees archivos; devuelve
-  el candidato de pack únicamente en la respuesta.
+   una evaluación inline: no uses herramientas ni crees archivos; devuelve
+   el candidato de pack únicamente en la respuesta. Ausencias y conflictos
+   declarados en el fixture son hechos comprobados; no ampliar búsquedas.
 
 cases:
   - id: pack-trazable-para-planificacion
@@ -15,8 +16,10 @@ cases:
     expect_regex: "pack_status[^\\n]{0,24}incomplete"
     input: |
       Incremento: alta de usuario. Fuentes: docs/specs/master_spec.md §Usuarios,
-      docs/api/openapi.yaml /users y db/migration/V12__users.sql. Prepara el
-      contexto para Planner. Si no puedes comprobar una fuente, no la inventes.
+       docs/api/openapi.yaml /users y db/migration/V12__users.sql. Prepara el
+       contexto para Planner. Si no puedes comprobar una fuente, no la inventes.
+      Ausencia de las tres fuentes ya comprobada por búsqueda acotada. No hay
+      otras rutas canónicas autorizadas ni contenido para inferir contratos.
 
   - id: conflicto-se-explicita
     description: Un contrato contradictorio no se compacta como hecho

@@ -102,7 +102,11 @@ Fase 4 Descomposición ─► Fase 5 Ejecución ─► Fase 6 Calidad
   + `api-governance-agent` si cambian contratos).
 - Estado: `validator-review` → `validated-not-executed` o `revision-needed`
   (corrección coherente + re-review selectiva, máximo dos rondas por baseline;
-  después `blocked` e informe de escape, nunca un ciclo indefinido).
+   después `blocked` e informe de escape, nunca un ciclo indefinido).
+- Entrega (SDD §10.1): dictamen al orquestador → Documentation guarda informe
+  literal durable → verifica → sincroniza shared/gates → recibo complete.
+  Interrupción de persistencia se recupera antes de repetir review. La misma
+  entrega se aplica a dictámenes de calidad antes de solicitar Gate 2.
 
 ### GATE HUMANO 1 — Aprobación de Plan
 - Estado: `awaiting-human-plan-approval`. Firma: ver states.md §3.

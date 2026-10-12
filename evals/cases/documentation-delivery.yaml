@@ -1,0 +1,82 @@
+version: 1
+agent: documentation
+system_context: |
+  Caso de filesystem: el sandbox es el repo activo. Usa sus archivos, no Git
+  ni delegación. Tienes autorización para persistir el informe y completar
+  metadata shared/gates; no editar contratos ni aprobar por cuenta propia.
+  Emite al final delivery_status: complete si verificaste el lote y scan aplicable.
+cases:
+  - id: recuperar-informe-sin-reescribir
+    description: Informe durable sobrevive interrupción y se completan proyecciones
+    # El recibo puede usar Markdown; los artefactos reales se verifican abajo.
+    expect_regex: 'delivery_status[:*\s`]+complete'
+    files:
+      AGENTS.md: |
+        Sandbox de recuperación. Fuente de dictamen: docs/reviews/validator-A.md.
+        Baseline A: contrato docs/specs/contract.md intacto. Sólo metadata.
+      docs/specs/contract.md: |
+        Baseline A. Regla: release irreversible; nunca reconsumir inventario.
+      docs/reviews/validator-A.md: |
+        # Dictamen fuente — incremento sample, baseline A
+        validator_agent: spec-validator
+        reviewed_at: 2026-10-11
+        artifact_set_reviewed: docs/specs/contract.md
+        verdict: ready
+        summary: Diseño suficiente; F-01 cerrado; sin aprobación humana.
+        invalidated_by_changes_since: none
+        next_action: Awaiting Human Plan Approval
+      docs/specs/.working/sample-sdd-context.md: |
+        # Shared sample
+        ## Lane: feature
+        ## Current status
+        state: validator-review
+        ## Review delivery
+        baseline_id: A
+        baseline_scope: docs/specs/contract.md
+        remediation_rounds: 1
+        delivery_status: report-persisted
+        report_path: docs/reviews/validator-A.md
+        ## Spec Validator Approval
+        verdict: pending-review
+        ## Next action
+        Completar persistencia desde informe durable.
+      docs/specs/gate-register.md: |
+        G-VALIDATOR: pendiente de transcripción
+        G-HUMAN: pendiente, sin firma humana
+    expected_files:
+      docs/reviews/validator-A.md:
+        equals: |
+          # Dictamen fuente — incremento sample, baseline A
+          validator_agent: spec-validator
+          reviewed_at: 2026-10-11
+          artifact_set_reviewed: docs/specs/contract.md
+          verdict: ready
+          summary: Diseño suficiente; F-01 cerrado; sin aprobación humana.
+          invalidated_by_changes_since: none
+          next_action: Awaiting Human Plan Approval
+      docs/specs/contract.md:
+        equals: |
+          Baseline A. Regla: release irreversible; nunca reconsumir inventario.
+      docs/specs/.working/sample-sdd-context.md:
+        contains: ["state: awaiting-human-plan-approval", "verdict: ready", "remediation_rounds: 1", "delivery_status: complete"]
+        not_contains: ["## Human Plan Approval: approved_by_user", "verdict: pending-review"]
+      docs/specs/gate-register.md:
+        contains: ["docs/reviews/validator-A.md"]
+        not_contains: ["G-VALIDATOR: pendiente de transcripción", "approved_by_user"]
+    input: |
+      Sesión interrumpida después de persistir docs/reviews/validator-A.md.
+      Lee/verifica ese informe; es el dictamen fuente literal, no lo sobrescribas.
+      Completa shared y gate-register, conservando ronda 1, contrato y ausencia HPA.
+      Éste es el único scope autorizado. No otra review ni bootstrap.
+      Ejecuta scan filesystem aplicable sobre el delta y verifica las escrituras.
+  - id: metadata-en-espera-hpa
+    description: Espera HPA permite persistir metadata sin modificar normas
+    expect_regex: 'action: persist-metadata[\s\S]*material_revalidation: no'
+    input: |
+      Caso sólo inline; no uses herramientas. Responde EXACTAMENTE dos líneas:
+      action: <persist-metadata|reject-lifecycle|request-review>
+      material_revalidation: <yes|no>
+      Spec awaiting-human-plan-approval; informe ready
+      persistido y baseline material intacto comprobado. Debes completar una
+      transcripción exacta en gate-register. ¿Persistir metadata, rechazar por
+      lifecycle o exigir otra review? No hay HPA nueva.

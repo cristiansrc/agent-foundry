@@ -31,7 +31,8 @@ fi
 
 WORKFLOW_SKILLS=(context-pinning documentation-lifecycle enterprise-architecture-standard
   functional-testing-standard planning-context-pack pre-flight-check secret-scanning
-  spec-driven-development spec-remediation workspace-coordination)
+  spec-driven-development spec-remediation workspace-coordination code-review-checklist
+  graphify)
 if [ "$WORKFLOW_ONLY" -eq 1 ]; then
   for generated in "$OUT"/agents/*.md; do
     [ -f "$generated" ] || { echo "ERROR: salida de agentes incompleta" >&2; exit 1; }
@@ -43,7 +44,7 @@ if [ "$WORKFLOW_ONLY" -eq 1 ]; then
   for generated in "$OUT"/agents/*.md; do
     [ -f "$TARGET/agents/$(basename "$generated")" ] || { echo "ERROR: agente instalado inexistente: $(basename "$generated")" >&2; exit 1; }
   done
-  echo "Sync workflow acotado: prompts/permisos + ${#WORKFLOW_SKILLS[@]} skills; bindings de modelo/plugin/config/otras skills conservados"
+  echo "Sync workflow acotado: prompts/permisos + ${#WORKFLOW_SKILLS[@]} skills (Graphify sólo overlay de routing); bindings de modelo/plugin/config/otras skills conservados"
 fi
 
 if [ "$MODEL_ONLY" -eq 1 ]; then

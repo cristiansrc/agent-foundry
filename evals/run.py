@@ -10,8 +10,10 @@ Uso:
                       asignado en su perfil; grep del expect_contains.
 """
 import argparse
+import hashlib
 import json
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -19,15 +21,92 @@ from pathlib import Path
 
 import yaml
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tooling"))
+import sync_workflow
+
+
+def stage_candidate(candidate: Path, sandbox: Path, agent: str) -> dict:
+    """Evalúa salidas nuevas sin instalar; mismo binding que workflow-only."""
+    source = candidate / "agents" / f"{agent}.md"
+    installed = Path.home() / ".config/opencode"
+    content = sync_workflow.compose_agent(source.read_text(encoding="utf-8"),
+                                         (installed / "agents" / source.name).read_text(encoding="utf-8"))
+    target = sandbox / ".opencode"
+    (target / "agents").mkdir(parents=True)
+    (target / "agents" / source.name).write_text(content, encoding="utf-8")
+    shutil.copytree(candidate / "skills", target / "skills")
+    graphify = target / "skills/graphify/SKILL.md"
+    if graphify.is_file():
+        shutil.copytree(installed / "skills/graphify", graphify.parent, dirs_exist_ok=True)
+        graphify.write_text(sync_workflow.compose_graphify(
+            (candidate / "skills/graphify/SKILL.md").read_text(encoding="utf-8"),
+            (installed / "skills/graphify/SKILL.md").read_text(encoding="utf-8")), encoding="utf-8")
+    metadata, body = sync_workflow.split_agent(content)
+    # Config local explícita evita depender del orden de descubrimiento de IDs
+    # duplicados entre global/project en versiones anteriores del harness.
+    # El renderer histórico emite description plana con ':' (OpenCode la tolera);
+    # normalizar esa línea para el parser YAML estricto usado aquí.
+    metadata = re.sub(r"^description:[ \t]*(.*)$",
+                      lambda m: "description: " + json.dumps(m.group(1), ensure_ascii=False),
+                      metadata, flags=re.M)
+    agent_config = yaml.safe_load(metadata)
+    agent_config["prompt"] = body
+    (sandbox / "opencode.json").write_text(json.dumps({
+        "$schema": "https://opencode.ai/config.json",
+        "agent": {agent: agent_config},
+        "skills": {"paths": [str(target / "skills")]},
+    }, ensure_ascii=False), encoding="utf-8")
+    # Huellas de prompts/skills realmente staged; no provider config ni secretos.
+    return {str(path.relative_to(target)): hashlib.sha256(path.read_bytes()).hexdigest()
+            for path in sorted(target.rglob("*.md"))}
+
+
+def sandbox_path(root: Path, relative: str) -> Path:
+    path = (root / relative).resolve()
+    if not path.is_relative_to(root.resolve()) or Path(relative).is_absolute():
+        raise ValueError(f"ruta de fixture fuera del sandbox: {relative}")
+    return path
+
+
+def verify_files(root: Path, expected: dict) -> list[str]:
+    """Comprueba artefactos reales, no claims del modelo sobre sus escrituras."""
+    errors = []
+    for relative, checks in expected.items():
+        path = sandbox_path(root, relative)
+        if not path.is_file():
+            errors.append(f"{relative}: archivo ausente")
+            continue
+        text = path.read_text(encoding="utf-8")
+        if "equals" in checks and text != checks["equals"]:
+            errors.append(f"{relative}: contenido distinto")
+        for value in checks.get("contains", []):
+            if value not in text:
+                errors.append(f"{relative}: falta contenido esperado")
+        for value in checks.get("not_contains", []):
+            if value in text:
+                errors.append(f"{relative}: contenido prohibido")
+    return errors
+
 
 def run_case_opencode(agent: str, model: str | None, system: str, user_input: str,
-                      timeout: int) -> str:
+                      timeout: int, candidate: Path | None = None,
+                      evidence: dict | None = None, files: dict | None = None,
+                      expected_files: dict | None = None) -> str:
     """Ejecuta el caso en un sandbox temporal vacío.
 
     El cwd aislado evita que el agente explore/escriba en agent-foundry y
     fuerza a evaluar solo con el contexto inline del caso.
     """
-    with tempfile.TemporaryDirectory(prefix="foundry-eval-") as sandbox:
+    with tempfile.TemporaryDirectory(prefix="foundry-eval-", dir="/tmp/opencode") as sandbox:
+        root = Path(sandbox)
+        for relative, content in (files or {}).items():
+            path = sandbox_path(root, relative)
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(content, encoding="utf-8")
+        if candidate:
+            hashes = stage_candidate(candidate, Path(sandbox), agent)
+            if evidence is not None:
+                evidence["candidate_sha256"] = hashes
         cmd = ["opencode", "run", "--dir", sandbox, "--agent", agent, "--format", "json"]
         if model:
             cmd += ["--model", model]
@@ -36,10 +115,19 @@ def run_case_opencode(agent: str, model: str | None, system: str, user_input: st
             result = subprocess.run(cmd, capture_output=True, text=True,
                                     timeout=timeout, cwd=sandbox)
         except subprocess.TimeoutExpired as exc:
-            partial = exc.stderr or exc.stdout or ""
-            if isinstance(partial, bytes):
-                partial = partial.decode("utf-8", errors="replace")
-            return f"__TIMEOUT__ ({timeout}s)\n{partial}"
+            stdout, stderr = exc.stdout or "", exc.stderr or ""
+            if isinstance(stdout, bytes):
+                stdout = stdout.decode("utf-8", errors="replace")
+            if isinstance(stderr, bytes):
+                stderr = stderr.decode("utf-8", errors="replace")
+            # Conservar texto parcial emitido sin certificarlo ni evaluar tool logs.
+            return f"__TIMEOUT__ ({timeout}s)\n{response_text(stdout)}\n{stderr}"
+        if expected_files and result.returncode == 0:
+            errors = verify_files(root, expected_files)
+            if evidence is not None:
+                evidence["file_checks"] = {"pass": not errors, "errors": errors}
+            if errors:
+                return "__ARTIFACT_ERROR__\n" + "\n".join(errors) + "\n" + response_text(result.stdout)
     if result.returncode:
         return f"__EXECUTION_ERROR__ ({result.returncode})\n{result.stderr}"
     return response_text(result.stdout)
@@ -62,7 +150,7 @@ def response_text(events: str) -> str:
 
 def evaluate(out: str, expect: str | None, expect_regex: str | None,
              expect_not: str | None) -> tuple[bool, str]:
-    if out.startswith(("__TIMEOUT__", "__EXECUTION_ERROR__", "__NO_RESPONSE__")):
+    if out.startswith(("__TIMEOUT__", "__EXECUTION_ERROR__", "__NO_RESPONSE__", "__ARTIFACT_ERROR__")):
         return False, out
     if expect_regex:
         ok = re.search(expect_regex, out, flags=re.IGNORECASE) is not None
@@ -91,11 +179,16 @@ def main() -> int:
                         help="muestra la respuesta del agente para diagnosticar un caso")
     parser.add_argument("--case", dest="case_id", help="ejecutar sólo un caso identificado")
     parser.add_argument("--stop-on-error", action="store_true", help="no consumir llamadas después del primer fallo")
+    parser.add_argument("--candidate-dir", type=Path, help="salidas OpenCode nuevas a evaluar sin sync")
+    parser.add_argument("--report", type=Path, help="persistir evidencia JSON por caso (incluye respuesta)")
     args = parser.parse_args()
 
     suite = yaml.safe_load(Path(args.suite).read_text(encoding="utf-8"))
     agent = suite["agent"]
     passed = failed = 0
+    report = {"suite": args.suite, "agent": agent, "executor": args.executor,
+              "candidate_dir": str(args.candidate_dir) if args.candidate_dir else None,
+              "results": []}
 
     print(f"Suite: {args.suite} | agente: {agent} | executor: {args.executor}")
     if args.executor == "echo":
@@ -116,9 +209,13 @@ def main() -> int:
             out = ""
         else:
             runs = []
+            responses = []
+            evidence = {}
             for _ in range(max(1, args.repeat)):
                 out = run_case_opencode(agent, args.model, suite.get("system_context", ""),
-                                        case["input"], args.timeout)
+                                        case["input"], args.timeout, args.candidate_dir, evidence,
+                                        case.get("files"), case.get("expected_files"))
+                responses.append(out)
                 runs.append(evaluate(out, expect, expect_regex, case.get("expect_not_regex")))
             wins = sum(1 for r_ok, _ in runs if r_ok)
             need = args.threshold if args.threshold is not None else 0.5
@@ -133,6 +230,12 @@ def main() -> int:
                 print("[salida truncada a 8000 caracteres]")
             print("--- fin salida ---")
         passed, failed = passed + ok, failed + (not ok)
+        report["results"].append({"id": cid, "pass": ok, "detail": detail,
+                                  "responses": responses if args.executor == "opencode" else []})
+        if args.executor == "opencode":
+            report["results"][-1].update(evidence)
+        if args.report:
+            args.report.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
         if not ok and args.stop_on_error:
             break
 

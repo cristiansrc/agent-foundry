@@ -48,6 +48,19 @@ invalidated_by_changes_since: none
 ## Decisions locked
 - <!-- decisión durable + fecha + origen (humano/agente) -->
 
+<!-- Activar con el handoff de revisión, no durante discovery. SDD §10.1.
+     No es un gate nuevo; report_path aún inexistente es salida esperada.
+## Review delivery
+baseline_id: <identidad del alcance material>
+baseline_scope: <slice/set normativo, sin metadata>
+remediation_rounds: 0
+delivery_status: pending
+report_path: docs/reviews/<informe-de-esta-revision>.md
+     Inicial=0; dos re-reviews normativas máximo (1/2). Metadata no consume rondas.
+     report-persisted=informe comprobado, proyecciones/scan pendientes.
+     complete=entrega verificada. Conservar presupuesto al reemplazar el registro.
+     Next action refleja persistencia pendiente; no inventar otro lifecycle state. -->
+
 ## Validator findings
 - <!-- hallazgos abiertos: id, severidad, artefacto, acción requerida -->
 

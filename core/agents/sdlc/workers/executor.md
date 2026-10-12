@@ -35,6 +35,9 @@ Antes de implementar, DEBES verificar:
 2. Shared actual `decomposition-completed` o `in_progress`; reanudar desde blocked sólo tras resolver causa y registrar transición.
 3. Dictamen actual ready, no invalidado, para el alcance de la tarea.
 4. Gate 1 humano de ese alcance y dependencias de tarea satisfechas.
+5. Si existe `Review delivery`, está `complete` con informe comprobable;
+   pendiente de transcripción → devolver al orquestador para completar entrega,
+   no solicitar otra validación ni reconstruir ready desde memoria.
 
 Si falta validación/board/dependencia, detente con `Blocked: implementation prerequisites missing` y causa concreta.
 Si falta el punto 4, detente con `Blocked: Awaiting Human Plan Approval`.
@@ -65,10 +68,10 @@ detente con `Blocked: secret detected` sin copiar el valor en la respuesta.
 
 ## Precedencia de Fuentes de Verdad
 
-1. Solicitud explicita del usuario en la tarea actual.
-2. Artefactos implementados existentes: OpenAPI, migraciones, runtime config, patronos de codigo establecidos.
-3. Specs validadas y task breakdowns.
-4. Specs historicas solo como contexto, nunca como input de implementacion.
+1. Solicitud explícita y reglas del entorno, dentro de gates y scope aprobados.
+2. Specs y contratos canónicos aprobados; board derivado del mismo alcance.
+3. Código, migraciones, runtime config y tests como evidencia de lo implementado.
+4. Índices e históricos como navegación/contexto, nunca autorización nueva.
 
 Si un task breakdown contradice OpenAPI, migraciones, spec validada o codigo existente, detente con `Blocked: artifact mismatch`.
 

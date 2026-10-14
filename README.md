@@ -36,7 +36,7 @@ core/  ──►  profiles/  ──►  adapters/  ──►  configs instaladas
 ```
 
 1. **`core/`**: agentes (`sdlc/workers|consultants|validators|guardrails`,
-   `personal/`), skills y workflow (ciclo de vida SDLC-IA con gates humanos).
+   `personal/`, `installer/`), skills y workflow (ciclo de vida SDLC-IA con gates humanos).
    Aquí NO viven bindings: ningún archivo nombra modelos ni proveedores
    concretos ni rutas de herramientas. Las referencias a modelos son genéricas
    («el modelo asignado en el perfil de ejecución»); los valores reales
@@ -47,6 +47,45 @@ core/  ──►  profiles/  ──►  adapters/  ──►  configs instaladas
 3. **`adapters/`**: generan la configuración nativa de cada herramienta a
    partir de core + profiles. Una sola lógica de render en `shared/`.
 4. **`tooling/build.sh`**: reconstruye todas las salidas.
+
+## Arquitectura de instalación
+
+Los agentes y skills **viven dentro de cada proyecto**, no en `~/.config/opencode` global.
+Esto permite que cada proyecto tenga su propio conjunto de agentes y skills sin
+interferir con otros proyectos.
+
+### Estructura en el proyecto destino
+
+```
+<proyecto>/
+├── .opencode/
+│   ├── agents/           # Agentes del flujo (ej. master-orchestrator.md)
+│   ├── skills/           # Skills del flujo (ej. spec-driven-development/SKILL.md)
+│   └── opencode.json     # Configuración específica del proyecto
+├── core/                 # (opcional) Fuente de verdad si el proyecto es un flujo
+├── profiles/             # (opcional) Bindings de modelo y permisos
+└── ...
+```
+
+### Agente Instalador
+
+El agente `installer` (en `core/agents/installer/`) instala flujos completos
+en proyectos destino:
+
+1. Recibe la ruta de un flujo (ej. `/mnt/data/Shares/Projects/specForce-alfa`)
+2. Lee el manifiesto de instalación (`install-manifest.yaml`)
+3. Copia agentes a `.opencode/agents/` del proyecto destino
+4. Copia skills a `.opencode/skills/` del proyecto destino
+5. Crea la estructura de carpetas adicional si el manifiesto lo indica
+6. Actualiza el `opencode.json` del proyecto destino si es necesario
+
+### Manifiesto de instalación
+
+Cada flujo debe tener un `install-manifest.yaml` en su raíz que define:
+- Qué agentes instalar (nombre, fuente, modelo, modo)
+- Qué skills instalar (nombre, fuente, descripción)
+- Qué estructura de carpetas crear
+- Qué configuración adicional necesita el proyecto destino
 
 ### OpenCode como harness
 

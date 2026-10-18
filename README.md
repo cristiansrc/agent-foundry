@@ -203,7 +203,8 @@ se encarga del transport y proxy; no necesitas instalar librerías adicionales.
 
 Retirado el MCP `foundry-vision` (2026-09-27): todos los agentes que necesitan
 ver imágenes usan modelos con visión nativa — `ui-designer` (Claude Sonnet
-5.5), `ui-executor` y `functional-tester-agent` (DeepSeek Vision Exp).
+5.5), `ui-executor` y `functional-tester-agent` (MiMo-V2.6 Flash desde
+2026-10-18; DeepSeek Vision Exp retirado del catálogo Go).
 `reviewer` (GLM-5.3) no tiene visión: si necesita capturas, delega en
 `functional-tester-agent`. Sin costo extra de infraestructura ni VRAM local.
 
@@ -213,7 +214,7 @@ ver imágenes usan modelos con visión nativa — `ui-designer` (Claude Sonnet
 
 ## Agentes
 
-### Ciclo de desarrollo de software (27)
+### Ciclo de desarrollo de software (28)
 
 | Agente | Rol | Descripción |
 |--------|-----|-------------|
@@ -228,6 +229,7 @@ ver imágenes usan modelos con visión nativa — `ui-designer` (Claude Sonnet
 | `ui-executor` | Worker (obrero) | Implementa la dirección de diseño UI aprobada como componentes reales del stack destino con verificación visual — traduce el artboard elegido 1:1 sin reinterpretarlo y lo valida con gauntlet visual antes de reportar done. |
 | `context-curator` | Consultant (consultor) | Filtra y prepara el contexto de alta señal para evitar ruido a los Obreros y gestionar el ciclo de vida del SDD context. |
 | `enterprise-architect` | Consultant (consultor) | Define el System Landscape, fronteras de microservicios y flujos globales siguiendo `enterprise-architecture-standard`. |
+| `installer` | Consultant (consultor) | Instala flujos de agentes y skills en proyectos destino. Recibe la ruta de un flujo, lee su manifiesto, y crea la estructura necesaria en el proyecto. |
 | `master-orchestrator` | Consultant (consultor) | Agente Maestro y Orquestador Contextual. Mantiene el contexto de todo el proyecto y delega tareas específicas a subagentes especializados. No realiza modificaciones ni ejecuciones de código directas. |
 | `planner` | Consultant (consultor) | Planifica proyectos web con Spec Driven Development, decisiones de arquitectura, contratos API, restricciones tecnicas y documentacion base del proyecto. |
 | `requirements-analyst` | Consultant (consultor) | Realiza el levantamiento de requerimientos funcionales siguiendo `requirements-gathering`. |
@@ -396,8 +398,8 @@ La skill `agent-foundry-reader` se instala mediante
 | `enterprise-spec-validator` | opencode-go/longcat-2.0 |
 | `executor` | opencode-go/deepseek-v4.1-flash |
 | `final-validation` | opencode-go/longcat-2.0 |
-| `functional-tester-agent` | opencode-go/deepseek-v4-flash-vision-exp |
-| `git-executor` | opencode-go/mimo-v2.6-flash |
+| `functional-tester-agent` | opencode-go/mimo-v2.6-flash |
+| `git-executor` | opencode-go/deepseek-v4.1-flash |
 | `master-orchestrator` | openai/gpt-6-luna |
 | `planner` | openai/gpt-6.1-sol |
 | `reviewer` | opencode-go/longcat-2.0 |
@@ -408,7 +410,7 @@ La skill `agent-foundry-reader` se instala mediante
 | `task-decomposer` | opencode-go/mimo-v2.6-pro |
 | `test-architect` | opencode-go/claude-haiku-5-5 |
 | `ui-designer` | openai/gpt-6-luna |
-| `ui-executor` | opencode-go/deepseek-v4-flash-vision-exp |
+| `ui-executor` | opencode-go/mimo-v2.6-flash |
 
 ### ChatGPT (Codex CLI) — bindings recomendados (sin evals en este harness)
 

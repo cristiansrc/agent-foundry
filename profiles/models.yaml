@@ -60,7 +60,10 @@ agent_tiers:
   executor:               {tier: code_heavy}
   test-architect:         {tier: code_volume, slot: haiku55}
   devops-architect:       {tier: code_volume}
-  git-executor:           {tier: sdd_validation}
+  # Piloto 2026-10-18: git-executor a DeepSeek V4.1 Flash (latencia 4.8s vs
+  # 6.7s de MiMo, cupo Go Plus $160 vs $120). documentation/context-curator
+  # se quedan en MiMo (visión + diversidad de familia vs executor).
+  git-executor:           {tier: sdd_validation, slot: deepseek_v41_flash}
   refactor:               {tier: code_heavy, slot: deepseek_v4_pro}
   database-architect:     {tier: code_heavy, slot: deepseek_v4_pro}
   bug-diagnostician:      {tier: code_heavy, harness_provider: harness_chatgpt}
@@ -102,7 +105,7 @@ providers:
         context: 1M
         vision: false
         cost: 0.15/0.60 off-peak, 0.30/1.20 peak
-        cap: 120
+        cap: 160
         notes: "Código de volumen. Pico L-V 01-04 y 06-10 UTC (x2). ZDR renovado mensualmente — vigente hasta 2026-10-31, re-verificar."
       deepseek_v4_pro:
         id: opencode-go/deepseek-v4-pro
@@ -112,14 +115,9 @@ providers:
         cost: 0.66/1.98 off-peak, 1.32/3.96 peak
         cap: 60
         notes: "Desbloqueado 2026-09-30. Refactor y DB — código delicado. ZDR vigente hasta 2026-10-31."
-      deepseek_flash_vision:
-        id: opencode-go/deepseek-v4-flash-vision-exp
-        status: active
-        context: 1M
-        vision: true
-        cost: 0.15/0.60 off-peak, 0.30/1.20 peak
-        cap: 60
-        notes: "EXCEPCIÓN DOCUMENTADA a la regla 'nada en pruebas' (sufijo Exp), aprobada 2026-09-30 para UI/E2E. Fallback estable: mimo_v26_flash."
+      # deepseek_flash_vision RETIRADO 2026-10-18: ausente del catálogo Go
+      # (opencode.ai/docs/go) y UnknownError en test-latencia. ui_e2e pasa a
+      # mimo_v26_flash. Ver blocked:.
       longcat:
         id: opencode-go/longcat-2.0
         status: active
@@ -135,7 +133,7 @@ providers:
         vision: true
         cost: 0.14/0.28
         cap: 120
-        notes: El más barato estable. Docs, git, fallback con visión.
+        notes: El más barato estable, con visión. Docs, context y UI/E2E (desde 2026-10-18, retirado Vision Exp).
       mimo_v26_pro:
         id: opencode-go/mimo-v2.6-pro
         status: active
@@ -195,11 +193,10 @@ providers:
       sdd_validation:      [mimo_v26_flash]
       code_volume:         [deepseek_v41_flash]
       code_heavy:          [deepseek_v41_flash]
-      ui_e2e:              [deepseek_flash_vision, mimo_v26_flash]
+      ui_e2e:              [mimo_v26_flash]
     fallbacks:
       deepseek_v41_flash: [kimi_k27_code]
       deepseek_v4_pro:    [deepseek_v41_flash, kimi_k27_code]
-      deepseek_flash_vision: [mimo_v26_flash]
       hy3:           [mimo_v26_flash]
       mimo_v26_flash: [glm_flash]
       mimo_v26_pro:  [qwen38_max, mimo_v26_flash]
@@ -442,6 +439,7 @@ blocked:
   - {id: opencode/mimo-v2.5-free, reason: Reemplazado por opencode-go/mimo-v2.5 (paid, 0.14/0.28, 1M ctx) 2026-08-29.}
   - {id: opencode-go/minimax-m3, reason: Reemplazado por longcat-2.0 (0.30) + glm-5.3-flash (0.075) — mejor coste/calidad 2026-08-29. Mantener como rollback manual si longcat falla.}
   - {id: opencode-go/omen-alpha, reason: Excluido por política de privacidad hasta verificar retención y entrenamiento.}
+  - {id: opencode-go/deepseek-v4-flash-vision-exp, reason: "Retirado del catálogo Go 2026-10-18: ausente en opencode.ai/docs/go y UnknownError en test-latencia. ui_e2e (functional-tester-agent, ui-executor) pasa a mimo_v26_flash, con visión y estable."}
   - {id: opencode-go/deepseek-v4-flash, reason: "Superseded por DeepSeek V4.1 Flash; DeepSeek retiró V4 Flash y enruta la ID antigua a V4.1. 2026-09-10."}
   - {id: opencode/deepseek-v4-flash-free, reason: 503, respuestas vacías, bucles de compactación.}
   - {id: opencode-go/qwen3.7-plus, reason: Inestabilidad ~70%, timeouts Cloudflare 524.}

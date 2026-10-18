@@ -43,10 +43,10 @@ modelo**, así que cada familia tiene contador propio y no compite con Plus.
 | Validación enterprise | OpenCode Go | LongCat-2.0 | enterprise-spec-validator (misma independencia triple; Kimi K3 como rollback manual) |
 | Plan estructurado / remediación | OpenCode Go | MiMo-V2.6 Pro | task-decomposer, api-governance-agent, spec-remediator |
 | Código delicado | OpenCode Go | DeepSeek V4 Pro | refactor, database-architect |
-| Código | OpenCode Go | DeepSeek V4.1 Flash | executor, architect-executor, devops-architect |
+| Código | OpenCode Go | DeepSeek V4.1 Flash | executor, architect-executor, devops-architect, git-executor (piloto 2026-10-18) |
 | Tests | OpenCode Go | Claude Haiku 5.5 | test-architect (familia Anthropic, independiente del executor; Kimi K2.7 como rollback manual) |
-| Trabajo mecánico | OpenCode Go | MiMo-V2.6 Flash | git-executor, documentation, context-curator |
-| UI/E2E | OpenCode Go | DeepSeek V4 Flash Vision Exp (excepción documentada) | functional-tester-agent, ui-executor |
+| Trabajo mecánico | OpenCode Go | MiMo-V2.6 Flash | documentation, context-curator |
+| UI/E2E | OpenCode Go | MiMo-V2.6 Flash | functional-tester-agent, ui-executor |
 
 GLM-5.3 normal está pausado por petición humana2026-10-11 debido al consumo.
 Sus dos agentes pasan a Sol6.1; Planner/Spec Validator comparten familia/modelo

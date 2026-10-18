@@ -19,3 +19,6 @@ logs/
 
 # Sistema
 .DS_Store
+
+# Capturas temporales de Playwright MCP
+.playwright-mcp/

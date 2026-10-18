@@ -1,0 +1,28 @@
+# Manifiesto consumido por el agente installer. Las rutas son relativas a
+# la raíz del repositorio del flujo; copiar archivos preservando subdirectorios.
+manifest_version: 1
+name: agent-foundry-sdlc
+description: Agentes y skills del flujo de desarrollo de software de agent-foundry.
+harness: opencode
+
+agents:
+  - source: adapters/opencode/out/agents/
+    destination: .opencode/agents/
+    include: "**/*.md"
+  - source: core/agents/installer/installer.md
+    destination: .opencode/agents/installer.md
+
+skills:
+  - source: adapters/opencode/out/skills/
+    destination: .opencode/skills/
+    include: "**/*"
+
+directories:
+  - .opencode/agents/
+  - .opencode/skills/
+
+configuration:
+  file: .opencode/opencode.json
+  merge_json:
+    default_agent: master-orchestrator
+  conflict_policy: ask_before_overwrite

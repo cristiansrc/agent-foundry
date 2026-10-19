@@ -56,19 +56,22 @@ agent_tiers:
   security-reviewer:      {tier: sdd_validation, slot: longcat}
   requirements-analyst:   {tier: sdd_validation, harness_provider: harness_chatgpt, slot: sol}
   final-validation:       {tier: sdd_validation, slot: longcat}
-  documentation:          {tier: sdd_validation}
+  documentation:          {tier: sdd_validation, slot: deepseek_v41_flash}
   executor:               {tier: code_heavy}
   test-architect:         {tier: code_volume, slot: haiku55}
   devops-architect:       {tier: code_volume}
-  # Piloto 2026-10-18: git-executor a DeepSeek V4.1 Flash (latencia 4.8s vs
-  # 6.7s de MiMo, cupo Go Plus $160 vs $120). documentation/context-curator
-  # se quedan en MiMo (visión + diversidad de familia vs executor).
+  # Piloto 2026-10-18/19: git-executor y documentation a DeepSeek V4.1 Flash
+  # (latencia 4.8s vs 6.7s de MiMo, cupo Go Plus $160 vs $120; ambos pasan
+  # documentation-delivery 2/2 casos con repeat 3 y router aislado).
+  # context-curator se queda en MiMo (visión + diversidad de familia vs executor).
   git-executor:           {tier: sdd_validation, slot: deepseek_v41_flash}
   refactor:               {tier: code_heavy, slot: deepseek_v4_pro}
   database-architect:     {tier: code_heavy, slot: deepseek_v4_pro}
   bug-diagnostician:      {tier: code_heavy, harness_provider: harness_chatgpt}
   architect-executor:     {tier: code_heavy}
-  functional-tester-agent: {tier: ui_e2e}
+  # Luna conserva el gate visual: pasa las evals funcionales; GLM no alcanza
+  # mayoría en límites de scope/no ejecución. ui-executor conserva MiMo.
+  functional-tester-agent: {tier: ui_e2e, harness_provider: harness_chatgpt, slot: luna}
   ui-executor:            {tier: ui_e2e}
 
 # ── 3. Bindings por proveedor/herramienta ──────────────────────────────────

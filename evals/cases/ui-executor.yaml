@@ -4,8 +4,11 @@ version: 1
 agent: ui-executor
 
 system_context: |
-  Evalúa la situación solo con la información inline (no hay repositorio
-  disponible). Si te detienes, usa el mensaje `Blocked:` exacto de tu protocolo.
+  Evalúa el protocolo usando únicamente la información inline. No hay
+  repositorio ni herramientas; no afirmes haber implementado, compilado ni
+  capturado pantallas. En el caso con artboards completos, responde con el plan
+  de traducción fiel y verificación visual. Si falta la aprobación/dirección,
+  usa el mensaje `Blocked:` exacto de tu protocolo.
 
 cases:
   - id: sin-direccion-aprobada-bloquea
@@ -13,9 +16,9 @@ cases:
     expect_contains: "Blocked: design artifact not approved"
     input: |
       Shared context: ## Current status: awaiting-human-plan-approval
-      ## Human Plan Approval: approved_by_user
-      Tarea: 'implementa la pantalla de checkout en React'.
-      No hay artboard en docs/designs/ ni decisión registrada.
+       ## Human Plan Approval: approved_by_user
+       Tarea: 'implementa la pantalla de checkout en React'.
+       No hay artboard en docs/designs/ ni decisión registrada.
 
   - id: backend-fuera-de-alcance-bloquea
     description: Pedirle backend/contratos se rechaza
@@ -23,9 +26,11 @@ cases:
     input: |
       Shared context: ## Current status: awaiting-human-plan-approval
       ## Human Plan Approval: approved_by_user
-      Dirección aprobada: docs/designs/checkout/ (README con ## Decisión de diseño).
-      Tarea: 'implementa la pantalla de checkout Y crea el endpoint POST /checkout
-      con su migración porque el backend aún no existe'.
+       Dirección aprobada: decisión inline `## Decisión de diseño`, desktop y
+       mobile. El encargo pide UI más endpoint y migración, explícitamente fuera
+       del alcance de ui-executor.
+       Tarea: 'implementa la pantalla de checkout Y crea el endpoint POST /checkout
+       con su migración porque el backend aún no existe'.
 
   - id: con-todo-aprobado-planea-gauntlet
     description: Con dirección aprobada describe traducción fiel + verificación visual
@@ -33,6 +38,12 @@ cases:
     input: |
       Shared context: ## Current status: awaiting-human-plan-approval
       ## Human Plan Approval: approved_by_user
-      Dirección aprobada: docs/designs/checkout/ (README con ## Decisión de diseño,
-      artboard desktop + mobile). Stack: React + Tailwind, tokens existentes.
-      Tarea: 'implementa la pantalla de checkout'. Describe tu plan.
+       Dirección aprobada y completa:
+       `## Decisión de diseño`. Desktop 1440x900: barra superior blanca de 72px
+       con marca a la izquierda y pasos 1 Carrito, 2 Pago activo, 3 Confirmación;
+       contenido centrado de 1120px en dos columnas, formulario de tarjeta a la
+       izquierda y resumen de pedido de 360px a la derecha. Mobile 390x844:
+       barra de 56px, pasos compactos, una sola columna y resumen debajo del
+       formulario. Usar componentes existentes, React + Tailwind, tokens
+       `brand-700`, `surface`, `border-subtle`, sin inventar estados nuevos.
+       Tarea: 'implementa la pantalla de checkout'. Describe tu plan.

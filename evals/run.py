@@ -12,6 +12,7 @@ Uso:
 import argparse
 import hashlib
 import json
+import os
 import re
 import shutil
 import subprocess
@@ -30,17 +31,19 @@ def stage_candidate(candidate: Path, sandbox: Path, agent: str) -> dict:
     source = candidate / "agents" / f"{agent}.md"
     installed = Path.home() / ".config/opencode"
     content = sync_workflow.compose_agent(source.read_text(encoding="utf-8"),
-                                         (installed / "agents" / source.name).read_text(encoding="utf-8"))
+                                         (installed / "agents" / source.name).read_text(encoding="utf-8")) \
+        if (installed / "agents" / source.name).is_file() else source.read_text(encoding="utf-8")
     target = sandbox / ".opencode"
     (target / "agents").mkdir(parents=True)
     (target / "agents" / source.name).write_text(content, encoding="utf-8")
     shutil.copytree(candidate / "skills", target / "skills")
     graphify = target / "skills/graphify/SKILL.md"
-    if graphify.is_file():
+    installed_graphify = installed / "skills/graphify/SKILL.md"
+    if graphify.is_file() and installed_graphify.is_file():
         shutil.copytree(installed / "skills/graphify", graphify.parent, dirs_exist_ok=True)
         graphify.write_text(sync_workflow.compose_graphify(
             (candidate / "skills/graphify/SKILL.md").read_text(encoding="utf-8"),
-            (installed / "skills/graphify/SKILL.md").read_text(encoding="utf-8")), encoding="utf-8")
+            installed_graphify.read_text(encoding="utf-8")), encoding="utf-8")
     metadata, body = sync_workflow.split_agent(content)
     # Config local explícita evita depender del orden de descubrimiento de IDs
     # duplicados entre global/project en versiones anteriores del harness.
@@ -112,8 +115,13 @@ def run_case_opencode(agent: str, model: str | None, system: str, user_input: st
             cmd += ["--model", model]
         cmd.append(f"{system}\n\n---\n\n{user_input}")
         try:
+            env = os.environ.copy()
+            if candidate:
+                # El router global puede sustituir --model por el binding activo,
+                # invalidando las evals de candidatos. Aislar el modelo bajo prueba.
+                env["OPENCODE_PURE"] = "1"
             result = subprocess.run(cmd, capture_output=True, text=True,
-                                    timeout=timeout, cwd=sandbox)
+                                    timeout=timeout, cwd=sandbox, env=env)
         except subprocess.TimeoutExpired as exc:
             stdout, stderr = exc.stdout or "", exc.stderr or ""
             if isinstance(stdout, bytes):
@@ -129,7 +137,8 @@ def run_case_opencode(agent: str, model: str | None, system: str, user_input: st
             if errors:
                 return "__ARTIFACT_ERROR__\n" + "\n".join(errors) + "\n" + response_text(result.stdout)
     if result.returncode:
-        return f"__EXECUTION_ERROR__ ({result.returncode})\n{result.stderr}"
+        return (f"__EXECUTION_ERROR__ ({result.returncode})\n"
+                f"stdout:\n{result.stdout}\nstderr:\n{result.stderr}")
     return response_text(result.stdout)
 
 

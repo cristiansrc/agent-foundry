@@ -14,6 +14,7 @@ verde no hay sync.
 | `planner.yaml` | planner | No entrega a ejecución sin spec aprobada |
 | `master-orchestrator.yaml` | master-orchestrator | Cura contexto antes de planificar amplio |
 | `context-curator.yaml` | context-curator | Declara fuentes incompletas/conflictivas, no inventa |
+| `functional-tester-agent.yaml` | functional-tester-agent | No corrige producción, no afirma ejecución sin evidencia, reporta severidad y repro |
 | `security-reviewer.yaml` | security-reviewer | Severidades: secreto→critical, SQLi→high+, PII en logs→medium+ |
 | `ui-executor.yaml` | ui-executor | Bloquea sin dirección aprobada o ante backend; planea gauntlet |
 | `final-validation.yaml` | final-validation | `not ready` ante secretos o cobertura <85%; `ready` con cadena en verde |

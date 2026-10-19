@@ -393,12 +393,12 @@ La skill `agent-foundry-reader` se instala mediante
 | `context-curator` | opencode-go/mimo-v2.6-flash |
 | `database-architect` | opencode-go/deepseek-v4-pro |
 | `devops-architect` | opencode-go/deepseek-v4.1-flash |
-| `documentation` | opencode-go/mimo-v2.6-flash |
+| `documentation` | opencode-go/deepseek-v4.1-flash |
 | `enterprise-architect` | openai/gpt-6.1-sol |
 | `enterprise-spec-validator` | opencode-go/longcat-2.0 |
 | `executor` | opencode-go/deepseek-v4.1-flash |
 | `final-validation` | opencode-go/longcat-2.0 |
-| `functional-tester-agent` | opencode-go/mimo-v2.6-flash |
+| `functional-tester-agent` | openai/gpt-6-luna |
 | `git-executor` | opencode-go/deepseek-v4.1-flash |
 | `master-orchestrator` | openai/gpt-6-luna |
 | `planner` | openai/gpt-6.1-sol |

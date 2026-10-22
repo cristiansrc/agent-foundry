@@ -3,7 +3,7 @@
 # Los agentes viven en core/ agnósticos; este archivo los une a un modelo real.
 # Cambiar de modelo/proveedor = editar aquí + tooling/build.sh.
 schema: foundry/profiles/models/v2
-updated: 2026-10-11
+updated: 2026-10-22
 
 # ── 1. Tiers abstractos (capacidad requerida, sin marcas) ──────────────────
 tiers:
@@ -34,7 +34,6 @@ agent_tiers:
   # Excepción humana temporal 2026-10-11: enterprise-architect y spec-validator
   # pasan de GLM-5.3 a Sol6.1 por consumo de la cuenta. Planner/validator
   # comparten familia/modelo temporalmente; mantienen roles/gates independientes.
-  # Revisar alternativas más adelante, sin fallback automático al modelo pausado.
   master-orchestrator:    {tier: orchestration, harness_provider: harness_chatgpt}
   general:                {tier: orchestration, harness_provider: harness_chatgpt}
   enterprise-architect:   {tier: macro_architecture, harness_provider: harness_chatgpt, slot: sol}
@@ -47,15 +46,14 @@ agent_tiers:
   task-decomposer:        {tier: planning_governance, slot: mimo_v26_pro}
   # Excepción de familia aprobada: mismo modelo que Planner, revisión por otro rol.
   spec-validator:         {tier: spec_validation_critical, harness_provider: harness_chatgpt, slot: sol, locked: true}
-  # Verificador enterprise conserva LongCat, familia distinta a OpenAI.
-  enterprise-spec-validator: {tier: spec_validation_critical, slot: longcat}
+  # GLM-5.3 reactivado tras corregir el ciclo de revalidación repetitiva.
+  enterprise-spec-validator: {tier: spec_validation_critical, slot: glm_reasoning}
   spec-remediator:        {tier: sdd_validation, slot: mimo_v26_pro}
   context-curator:        {tier: sdd_validation}
-  reviewer:               {tier: sdd_validation, slot: longcat}
-  # Puertas quality/seguridad conservan LongCat; no se cambian por esta petición.
-  security-reviewer:      {tier: sdd_validation, slot: longcat}
+  reviewer:               {tier: sdd_validation, slot: glm_reasoning}
+  security-reviewer:      {tier: sdd_validation, slot: glm_reasoning}
   requirements-analyst:   {tier: sdd_validation, harness_provider: harness_chatgpt, slot: sol}
-  final-validation:       {tier: sdd_validation, slot: longcat}
+  final-validation:       {tier: sdd_validation, slot: glm_reasoning}
   documentation:          {tier: sdd_validation, slot: deepseek_v41_flash}
   executor:               {tier: code_heavy}
   test-architect:         {tier: code_volume, slot: haiku55}
@@ -96,12 +94,12 @@ providers:
         notes: Curación de contexto y respaldo barato. Sin entrenamiento, retención 0.
       glm_reasoning:
         id: opencode-go/glm-5.3
-        status: blocked
+        status: active
         context: 1M
         vision: false
         cost: 1.40/4.40
         cap: 120
-        notes: "Pausado por decisión humana2026-10-11: consumo de cuenta elevado. enterprise-architect/spec-validator pasan a openai/gpt-6.1-sol. Mantener referencia histórica, no primario ni fallback automático hasta decisión nueva."
+        notes: "Reactivado 2026-10-22 para enterprise-spec-validator, reviewer, security-reviewer y final-validation tras confirmación del usuario de que el ciclo repetitivo de validación fue corregido; disponibilidad probada y evals iniciales 9/9 (Enterprise: probe acotado). Vigilar consumo; enterprise-architect/spec-validator conservan Sol."
       deepseek_v41_flash:
         id: opencode-go/deepseek-v4.1-flash
         status: active

@@ -44,21 +44,9 @@ def stage_candidate(candidate: Path, sandbox: Path, agent: str) -> dict:
         graphify.write_text(sync_workflow.compose_graphify(
             (candidate / "skills/graphify/SKILL.md").read_text(encoding="utf-8"),
             installed_graphify.read_text(encoding="utf-8")), encoding="utf-8")
-    metadata, body = sync_workflow.split_agent(content)
-    # Config local explícita evita depender del orden de descubrimiento de IDs
-    # duplicados entre global/project en versiones anteriores del harness.
-    # El renderer histórico emite description plana con ':' (OpenCode la tolera);
-    # normalizar esa línea para el parser YAML estricto usado aquí.
-    metadata = re.sub(r"^description:[ \t]*(.*)$",
-                      lambda m: "description: " + json.dumps(m.group(1), ensure_ascii=False),
-                      metadata, flags=re.M)
-    agent_config = yaml.safe_load(metadata)
-    agent_config["prompt"] = body
-    (sandbox / "opencode.json").write_text(json.dumps({
-        "$schema": "https://opencode.ai/config.json",
-        "agent": {agent: agent_config},
-        "skills": {"paths": [str(target / "skills")]},
-    }, ensure_ascii=False), encoding="utf-8")
+    # Markdown agents and skills are discovered natively from .opencode.
+    # Generating a parallel config entry here used legacy config keys and
+    # prevented OpenCode V2 from resolving the staged agent by ID.
     # Huellas de prompts/skills realmente staged; no provider config ni secretos.
     return {str(path.relative_to(target)): hashlib.sha256(path.read_bytes()).hexdigest()
             for path in sorted(target.rglob("*.md"))}
@@ -110,7 +98,7 @@ def run_case_opencode(agent: str, model: str | None, system: str, user_input: st
             hashes = stage_candidate(candidate, Path(sandbox), agent)
             if evidence is not None:
                 evidence["candidate_sha256"] = hashes
-        cmd = ["opencode", "run", "--dir", sandbox, "--agent", agent, "--format", "json"]
+        cmd = ["opencode", "run", "--agent", agent, "--format", "json"]
         if model:
             cmd += ["--model", model]
         cmd.append(f"{system}\n\n---\n\n{user_input}")

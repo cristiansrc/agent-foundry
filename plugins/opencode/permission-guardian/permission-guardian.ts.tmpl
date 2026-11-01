@@ -1,0 +1,36 @@
+import type { Plugin } from "@opencode-ai/plugin"
+
+// Generated from the deployed agent list. This hook is defense in depth;
+// OpenCode's native permissions remain the authority for shell and paths.
+const AGENTS = new Set<string>(__ALLOWED_AGENTS_JSON__);
+
+export const FoundryPermissionGuardian = (async ({ client }) => {
+  // Opt-in is fixed at process startup, outside agent-editable project files.
+  const externalTools = new Set((process.env.FOUNDRY_EXTERNAL_TOOLS ?? "")
+    .split(",").map((name) => name.trim()).filter(Boolean));
+  return {
+    "tool.execute.before": async (input, output) => {
+      const tool = (input as { tool?: string }).tool ?? "";
+      const args = (output as { args?: Record<string, unknown> }).args ?? {};
+      if (tool === "task") {
+        const name = args.subagent_type;
+        if (typeof name !== "string" || !AGENTS.has(name)) {
+          throw new Error("Permission Guardian: subagente no autorizado en este bundle");
+        }
+      }
+      if (tool === "webfetch" || tool === "websearch" || tool.startsWith("mcp_")) {
+        if (!externalTools.has(tool)) {
+          try {
+            await client.app.log({ body: {
+              service: "foundry-permission-guardian", level: "warn",
+              message: "external tool denied", extra: { tool },
+            } });
+          } catch {
+            // Denial still applies if logging fails.
+          }
+          throw new Error("Permission Guardian: herramienta externa no habilitada en el proyecto");
+        }
+      }
+    },
+  };
+}) as Plugin;

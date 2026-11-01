@@ -16,8 +16,8 @@ core/ (fuente de verdad) -> profiles/ (bindings modelo+permisos)
 1. **Nunca editar `adapters/*/out/` a mano**: se regenera con `tooling/build.sh`.
 2. **Instalación por proyecto**: los agentes y skills viven en el proyecto destino
    (`.opencode/agents/`, `.opencode/skills/`), NO en `~/.config/opencode` global.
-   El agente `installer` (en `core/agents/installer/`) lee el manifiesto del flujo
-   (`install-manifest.yaml`) y crea la estructura necesaria en el proyecto.
+   `tooling/install-project.py --project <ruta> --apply` aplica el manifiesto
+   y guarda un recibo con hashes de los archivos gestionados.
 3. **Anti-drift**: `core/` jamás menciona modelos concretos (`model:`, IDs de
    proveedor) ni rutas absolutas `/home/`. El lint lo bloquea.
 4. **Fuente única**: temperatura y permisos viven SOLO en
@@ -25,8 +25,8 @@ core/ (fuente de verdad) -> profiles/ (bindings modelo+permisos)
    El `ROUTING` del plugin `model-router` deriva de ahí en el build; jamás se
    hardcodea un modelo en `plugins/` ni en `core/`.
 5. **Cambios de agentes o skills**: editar `core/` → lint/tests/evals aplicables →
-   `build.sh` → sync completo o `sync.sh --workflow-only` acotado sólo con verificación satisfactoria. Commit únicamente
-   cuando el usuario lo solicite. Si eval/instalación bloqueada, declarar fuentes
+   `build.sh` → instalación en un proyecto destino sólo con verificación satisfactoria.
+   Commit únicamente cuando el usuario lo solicite. Si eval/instalación bloqueada, declarar fuentes
    y salidas preparadas sin presentar configuración activa como actualizada.
 6. **Cambios de perfil** siguen `docs/runbooks/model-change.md` (incluye evals).
 7. **Pre-commit activo**: lint + auditoría de matriz corren antes de cada
@@ -36,14 +36,14 @@ core/ (fuente de verdad) -> profiles/ (bindings modelo+permisos)
 
 | Ruta | Contenido |
 |------|-----------|
-| `core/agents/{sdlc,personal,installer}/` | Prompts agnósticos por rol + agente instalador |
+| `core/agents/{sdlc,personal}/` | Prompts agnósticos por rol |
 | `core/skills/<nombre>/SKILL.md` | Conocimiento técnico reutilizable |
 | `core/workflow/` | lifecycle, states (enum canónico), matrix, graphify-governance |
 | `profiles/*.yaml` | Bindings de ejecución (lo único tool-específico) |
-| `plugins/opencode/model-router/` | Template del plugin de routing (placeholder `__ROUTING_JSON__`, sin IDs) |
+| `plugins/opencode/` | Router estático, Permission Guardian y observador local |
 | `adapters/*/render.py` | Generadores nativos por herramienta (opencode también renderiza `out/plugin/`) |
 | `evals/cases/*.yaml` | Suites de regresión de comportamiento (ver `docs/runbooks/evals.md`) |
-| `docs/runbooks/` | Procedimientos operativos (model-change, evals, harness, MCPs, Jev) |
+| `docs/runbooks/` | Procedimientos operativos (model-change, evals, harness, MCPs) |
 | `docs/investigations/` | Investigaciones previas a implementar (no son runbooks) |
 
 ## Arquitectura de instalación
@@ -65,17 +65,12 @@ interferir con otros proyectos.
 └── ...
 ```
 
-### Agente Instalador
+### Instalación determinista
 
-El agente `installer` (en `core/agents/installer/`) instala flujos completos
-en proyectos destino:
-
-1. Recibe la ruta de un flujo (ej. `/mnt/data/Shares/Projects/specForce-alfa`)
-2. Lee el manifiesto de instalación (`install-manifest.yaml`)
-3. Copia agentes a `.opencode/agents/` del proyecto destino
-4. Copia skills a `.opencode/skills/` del proyecto destino
-5. Crea la estructura de carpetas adicional si el manifiesto lo indica
-6. Actualiza el `opencode.json` del proyecto destino si es necesario
+`tooling/install-project.py --project <ruta>` muestra cambios y conflictos.
+`--apply` instala agentes, skills y plugin en `.opencode/`, preserva otras
+claves de `opencode.json`, guarda backup y recibo de archivos gestionados.
+No modifica la configuración global.
 
 ### Manifiesto de instalación
 

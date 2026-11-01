@@ -15,6 +15,13 @@ harness, no modifica proyectos y no debe instalarse en OpenCode.
 
 - `agent-foundry-reader`: interpreta estructura, agentes, skills, workflow SDD,
   gates, handoffs, perfiles y drift de repositorios Agent Foundry.
+- `opencode-control`: consulta local de metadatos de sesiones y eventos.
+- `agent-foundry-knowledge`: fuentes y límites del flujo SDD.
+- `execution-auditor`: correlación de evidencia y límites de observabilidad.
+- `permission-guardian`: clasificación de permisos en simulación.
+
+La conexión y el alcance de las cuatro skills nuevas están en
+[chatgpt-opencode-phase1.md](chatgpt-opencode-phase1.md).
 
 Las skills generales `project-context-navigation` y
 `documentation-reconciliation` siguen viviendo en `core/skills/` porque también

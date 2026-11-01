@@ -23,16 +23,28 @@ defaults:
   edit: deny
   bash: deny
   task: deny
+  external_directory: ask
+  webfetch: ask
+  websearch: ask
+
+# Permission Guardian: shell de lectura preautorizado; cualquier otro comando
+# requiere la pregunta nativa de OpenCode. Su scanner evalúa subcomandos.
+safe_shell: &safe_shell
+  "*": ask
+  "git status*": allow
+  "git diff*": allow
+  "git log*": allow
+  "rg *": allow
 
 agents:
   # ── Workers ──────────────────────────────────────────────────────────────
-  executor:               {edit: allow, bash: allow, temp: "0.15"}
-  ui-executor:            {edit: allow, bash: allow, temp: "0.15"}
+  executor:               {edit: allow, bash: *safe_shell, temp: "0.15"}
+  ui-executor:            {edit: allow, bash: *safe_shell, temp: "0.15"}
   architect-executor:     {edit: deny, bash: deny, temp: "0.15"}
-  database-architect:     {edit: allow, bash: allow, temp: "0.10"}
-  devops-architect:       {edit: allow, bash: allow, temp: "0.2"}
+  database-architect:     {edit: allow, bash: *safe_shell, temp: "0.10"}
+  devops-architect:       {edit: allow, bash: *safe_shell, temp: "0.2"}
   refactor:               {edit: deny, bash: deny, temp: "0.2"}
-  documentation:          {edit: allow, bash: allow, temp: "0.25"}
+  documentation:          {edit: allow, bash: *safe_shell, temp: "0.25"}
   spec-remediator:
     edit: {"*": deny, "docs/**/*.md": allow, "**/docs/**/*.md": allow}
     bash: deny
@@ -40,9 +52,9 @@ agents:
   functional-tester-agent:
     mode: subagent
     edit: {"*": deny, "docs/functional-testing/**": allow, "**/docs/functional-testing/**": allow}
-    bash: allow
+    bash: *safe_shell
     temp: "0.2"
-  git-executor:           {edit: allow, bash: allow, temp: "0.1"}
+  git-executor:           {edit: allow, bash: *safe_shell, temp: "0.1"}
 
   # ── Consultants ──────────────────────────────────────────────────────────
   requirements-analyst:   {edit: allow, bash: deny, temp: "0.3"}
@@ -50,7 +62,7 @@ agents:
   solution-architect:     {edit: allow, bash: deny, temp: "0.2"}
   ui-designer:            {edit: allow, bash: deny, temp: "0.4"}
   enterprise-architect:   {edit: allow, bash: deny, temp: "0.2"}
-  test-architect:         {edit: allow, bash: allow, temp: "0.2"}
+  test-architect:         {edit: allow, bash: *safe_shell, temp: "0.2"}
   task-decomposer:        {edit: allow, bash: deny, temp: "0.2"}
   context-curator:
     # Gemelas obligatorias: OpenCode evalúa contra la ruta relativa al worktree
@@ -94,11 +106,11 @@ agents:
   # ── Validators ───────────────────────────────────────────────────────────
   spec-validator:         {mode: subagent, edit: deny, bash: deny, temp: "0.1"}
   enterprise-spec-validator: {mode: subagent, edit: deny, bash: deny, temp: "0.1"}
-  api-governance-agent:   {mode: subagent, edit: deny, bash: allow, temp: "0.10"}
-  bug-diagnostician:      {mode: subagent, edit: deny, bash: allow, temp: "0.10"}
-  reviewer:               {mode: subagent, edit: deny, bash: allow, temp: "0.1"}
-  security-reviewer:      {mode: subagent, edit: deny, bash: allow, temp: "0.1"}
-  final-validation:       {mode: subagent, edit: deny, bash: allow, temp: "0.1"}
+  api-governance-agent:   {mode: subagent, edit: deny, bash: *safe_shell, temp: "0.10"}
+  bug-diagnostician:      {mode: subagent, edit: deny, bash: *safe_shell, temp: "0.10"}
+  reviewer:               {mode: subagent, edit: deny, bash: *safe_shell, temp: "0.1"}
+  security-reviewer:      {mode: subagent, edit: deny, bash: *safe_shell, temp: "0.1"}
+  final-validation:       {mode: subagent, edit: deny, bash: *safe_shell, temp: "0.1"}
 
   # ── Guardrails ─────────────────────────────────────────────────────────
   general:                {mode: subagent, edit: deny, bash: deny, temp: "0.1"}

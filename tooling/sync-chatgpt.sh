@@ -5,13 +5,16 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 OUT="$ROOT/adapters/chatgpt/out/skills"
 TARGET="${CODEX_SKILLS_DIR:-$HOME/.codex/skills}"
 
-if [ ! -d "$OUT/project-context-navigation" ] || [ ! -d "$OUT/documentation-reconciliation" ] || [ ! -d "$OUT/agent-foundry-reader" ]; then
-  echo "ERROR: ejecuta tooling/build.sh primero." >&2
-  exit 1
-fi
+SKILLS=(project-context-navigation documentation-reconciliation agent-foundry-reader opencode-control agent-foundry-knowledge execution-auditor permission-guardian)
+for skill in "${SKILLS[@]}"; do
+  if [ ! -f "$OUT/$skill/SKILL.md" ]; then
+    echo "ERROR: falta $skill; ejecuta tooling/build.sh primero." >&2
+    exit 1
+  fi
+done
 
 mkdir -p "$TARGET"
-for skill in project-context-navigation documentation-reconciliation agent-foundry-reader; do
+for skill in "${SKILLS[@]}"; do
   rm -rf "$TARGET/$skill"
   cp -a "$OUT/$skill" "$TARGET/$skill"
   echo "Instalada: $TARGET/$skill"

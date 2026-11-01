@@ -36,7 +36,7 @@ core/  ──►  profiles/  ──►  adapters/  ──►  configs instaladas
 ```
 
 1. **`core/`**: agentes (`sdlc/workers|consultants|validators|guardrails`,
-   `personal/`, `installer/`), skills y workflow (ciclo de vida SDLC-IA con gates humanos).
+   `personal/`), skills y workflow (ciclo de vida SDLC-IA con gates humanos).
    Aquí NO viven bindings: ningún archivo nombra modelos ni proveedores
    concretos ni rutas de herramientas. Las referencias a modelos son genéricas
    («el modelo asignado en el perfil de ejecución»); los valores reales
@@ -67,17 +67,12 @@ interferir con otros proyectos.
 └── ...
 ```
 
-### Agente Instalador
+### Instalación determinista
 
-El agente `installer` (en `core/agents/installer/`) instala flujos completos
-en proyectos destino:
-
-1. Recibe la ruta de un flujo (ej. `/mnt/data/Shares/Projects/specForce-alfa`)
-2. Lee el manifiesto de instalación (`install-manifest.yaml`)
-3. Copia agentes a `.opencode/agents/` del proyecto destino
-4. Copia skills a `.opencode/skills/` del proyecto destino
-5. Crea la estructura de carpetas adicional si el manifiesto lo indica
-6. Actualiza el `opencode.json` del proyecto destino si es necesario
+`tooling/install-project.py --project <ruta>` muestra cambios y conflictos.
+`--apply` instala agentes, skills y plugin en `.opencode/`, preserva otras
+claves de `opencode.json`, guarda backup y recibo de archivos gestionados.
+No modifica la configuración global.
 
 ### Manifiesto de instalación
 
@@ -98,11 +93,10 @@ entre dos suscripciones, elegidas por **forma de facturar**:
   Sol es el recurso escaso (15-160 mensajes por 5h), Luna el abundante
   (350-3.000) — por eso el volumen nunca toca Sol.
 - **OpenCode Go Plus** (topes de uso por modelo, $40/mes): volumen, código y
-   las puertas de calidad. DeepSeek para código, LongCat para varias revisiones
-   y MiMo para trabajo mecánico. **Cambio humano2026-10-11:** GLM-5.3 pausado;
-   enterprise-architect y spec-validator pasan a GPT-6.1 Sol. Planner/validator
-   comparten modelo temporalmente por decisión de consumo; roles y gates siguen
-   independientes. Alternativas de otra familia se revisarán más adelante.
+   las puertas de calidad. DeepSeek para código, GLM-5.3 para varias revisiones
+   y MiMo para trabajo mecánico. Enterprise Architect y Spec Validator usan
+   GPT-6.1 Sol por excepción humana; Planner y Spec Validator comparten modelo,
+   con roles, informes y gates separados.
 
 Cada suscripción lleva sus propios contadores, así que agotar una no afecta a
 la otra. El detalle, la política de privacidad, el reparto por proveedor y los
@@ -154,8 +148,8 @@ reinician validación contractual. Gates por fase y evidencia durable:
 ```bash
 tooling/build.sh          # lint + render de adapters + tablas del README
 tooling/lint.sh           # valida anti-drift y consistencia
-tooling/sync.sh           # instala las salidas generadas (~/.config/opencode, etc.)
-tooling/status.sh         # compara instalado vs generado
+tooling/sync.sh --project <ruta> --apply   # instala en un proyecto
+tooling/status.sh --project <ruta>         # vista previa de diferencias
 python3 evals/run.py evals/cases/<suite>.yaml --executor opencode   # evals con modelos reales
 python3 tooling/audit_matrix.py   # coherencia agente-fase-skill (debe dar 0)
 python3 tooling/validate-states.py [repo]  # estados y gates de shared contexts
@@ -164,10 +158,13 @@ Ver [`docs/runbooks/evals.md`](docs/runbooks/evals.md) para el flujo de
 evaluaciones y [`docs/runbooks/model-change.md`](docs/runbooks/model-change.md)
 para cambios de modelo.
 
+Los controles locales y el registro de eventos de agentes están en
+[`docs/runbooks/agent-operations.md`](docs/runbooks/agent-operations.md).
+
 ## MCPs (Model Context Protocol) en OpenCode
 
-Cinco MCPs extienden las capacidades de los agentes. Se configuran en
-`~/.config/opencode/opencode.json` y se instalan con `tooling/sync.sh`.
+Cuatro MCPs están documentados para los agentes. Su configuración se
+gestiona por separado; `tooling/sync.sh` no instala ni autentica MCPs.
 
 | MCP | Tipo | Propósito |
 |-----|------|-----------|
@@ -175,10 +172,6 @@ Cinco MCPs extienden las capacidades de los agentes. Se configuran en
 | **playwright** | Local | Control de navegador headless — testing E2E, scraping web, screenshots para `ui-designer` y `functional-tester-agent`. |
 | **context7** | Remoto | Documentación actualizada de frameworks/librerías en tiempo real (override de conocimiento interno stale). |
 | **github** | Remoto + OAuth | Issues, PRs, repos, search y releases. Requiere autorización OAuth (un solo splash screen). |
-| **foundry-jev** | Local | Selector tipado de agente, nivel de razonamiento y aclaración humana mediante Jev. Vercel es el proveedor inicial; Jev oficial queda como alternativa. |
-
-La arquitectura, configuración, umbrales de confianza y procedimiento de
-activación están documentados en [`docs/runbooks/jev-routing.md`](docs/runbooks/jev-routing.md).
 
 ### Configuración de AWS
 
@@ -214,7 +207,7 @@ ver imágenes usan modelos con visión nativa — `ui-designer` (Claude Sonnet
 
 ## Agentes
 
-### Ciclo de desarrollo de software (28)
+### Ciclo de desarrollo de software (27)
 
 | Agente | Rol | Descripción |
 |--------|-----|-------------|
@@ -229,7 +222,6 @@ ver imágenes usan modelos con visión nativa — `ui-designer` (Claude Sonnet
 | `ui-executor` | Worker (obrero) | Implementa la dirección de diseño UI aprobada como componentes reales del stack destino con verificación visual — traduce el artboard elegido 1:1 sin reinterpretarlo y lo valida con gauntlet visual antes de reportar done. |
 | `context-curator` | Consultant (consultor) | Filtra y prepara el contexto de alta señal para evitar ruido a los Obreros y gestionar el ciclo de vida del SDD context. |
 | `enterprise-architect` | Consultant (consultor) | Define el System Landscape, fronteras de microservicios y flujos globales siguiendo `enterprise-architecture-standard`. |
-| `installer` | Consultant (consultor) | Instala flujos de agentes y skills en proyectos destino. Recibe la ruta de un flujo, lee su manifiesto, y crea la estructura necesaria en el proyecto. |
 | `master-orchestrator` | Consultant (consultor) | Agente Maestro y Orquestador Contextual. Mantiene el contexto de todo el proyecto y delega tareas específicas a subagentes especializados. No realiza modificaciones ni ejecuciones de código directas. |
 | `planner` | Consultant (consultor) | Planifica proyectos web con Spec Driven Development, decisiones de arquitectura, contratos API, restricciones tecnicas y documentacion base del proyecto. |
 | `requirements-analyst` | Consultant (consultor) | Realiza el levantamiento de requerimientos funcionales siguiendo `requirements-gathering`. |
@@ -247,7 +239,7 @@ ver imágenes usan modelos con visión nativa — `ui-designer` (Claude Sonnet
 | `spec-validator` | Validator (validador) | Valida specs SDD contra ambiguedad, inconsistencia, riesgo arquitectonico, restricciones faltantes y readiness de implementacion. |
 | `general` | Guardrail | Guardrail para llamadas accidentales al subagente general integrado de la herramienta anfitriona. Bloquea validaciones SDD ejecutadas por el agente equivocado. |
 
-## Skills (76)
+## Skills (75)
 
 ### Arquitectura y Metodología
 
@@ -359,7 +351,6 @@ ver imágenes usan modelos con visión nativa — `ui-designer` (Claude Sonnet
 | Skill | Descripción |
 |-------|-------------|
 | `documentation-reconciliation` | "Interpretar documentación de proyectos, distinguir estado actual de planes e histórico y resolver contradicciones entre README, specs, código y tests con evidencia." |
-| `jev-routing` | Enrutamiento tipado mediante Jev para seleccionar agente, nivel de razonamiento y necesidad de intervención humana sin delegar permisos ni ejecución a Jev. |
 | `n8n-stack` |  |
 | `planning-context-pack` | Prepara un contexto de planificación persistente, mínimo y trazable desde specs y código para que un modelo de razonamiento no relea el repositorio completo. |
 | `project-context-navigation` | "Orientarse rápidamente en un proyecto desconocido para ubicar su estructura, fuentes de verdad, flujo de trabajo y archivos relevantes antes de responder o editar." |
@@ -374,8 +365,12 @@ evitar que el adapter de OpenCode las copie a su configuración.
 
 | Skill | Descripción |
 |-------|-------------|
+| `agent-foundry-knowledge` | Orienta decisiones de integración ChatGPT–OpenCode según arquitectura, fuentes canónicas y flujo SDD de Agent Foundry; úsala antes de proponer cambios en sus agentes o gates. |
 | `agent-foundry-reader` | Analiza repositorios construidos con la filosofía Agent Foundry y explica su arquitectura, agentes, skills, workflow SDD, gates, handoffs y drift en modo estrictamente solo lectura. Exclusiva para ChatGPT Desktop; no usar para OpenCode ni para modificar proyectos. |
 | `documentation-reconciliation` | "Interpretar documentación de proyectos, distinguir estado actual de planes e histórico y resolver contradicciones entre README, specs, código y tests con evidencia." |
+| `execution-auditor` | Audita la ejecución de agentes OpenCode con metadatos de sesiones y eventos de Agent Foundry; úsala para detectar lagunas de observabilidad y contrastar evidencias sin leer contenido sensible por defecto. |
+| `opencode-control` | Consulta sesiones y eventos de OpenCode desde ChatGPT Desktop mediante el puente local de Agent Foundry; úsala para observar un flujo sin ejecutarlo ni responder permisos. |
+| `permission-guardian` | Evalúa en simulación solicitudes de permisos de OpenCode para orientar revisión humana; úsala cuando se quiera clasificar una acción sin concederla ni modificar políticas reales. |
 | `project-context-navigation` | "Orientarse rápidamente en un proyecto desconocido para ubicar su estructura, fuentes de verdad, flujo de trabajo y archivos relevantes antes de responder o editar." |
 
 La skill `agent-foundry-reader` se instala mediante
@@ -407,7 +402,7 @@ La skill `agent-foundry-reader` se instala mediante
 | `solution-architect` | openai/gpt-6.1-sol |
 | `spec-remediator` | opencode-go/mimo-v2.6-pro |
 | `spec-validator` | openai/gpt-6.1-sol |
-| `task-decomposer` | opencode-go/mimo-v2.6-pro |
+| `task-decomposer` | opencode-go/deepseek-v4-pro |
 | `test-architect` | opencode-go/claude-haiku-5-5 |
 | `ui-designer` | openai/gpt-6-luna |
 | `ui-executor` | opencode-go/mimo-v2.6-flash |

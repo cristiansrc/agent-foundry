@@ -23,7 +23,7 @@ else
 fi
 
 echo "== Anti-drift: model:/temperature:/permission: en frontmatter de agentes"
-VIOLATIONS=$(awk '/^---$/{c++; next} c==1 && /^(model|temperature|permission):/ {print FILENAME": "$0}' \
+VIOLATIONS=$(awk 'FNR==1{c=0} /^---$/{c++; next} c==1 && /^(model|temperature|permission):/ {print FILENAME": "$0}' \
   $(find "$CORE/agents" -name '*.md'))
 if [ -n "$VIOLATIONS" ]; then
   echo "$VIOLATIONS"
@@ -37,7 +37,7 @@ echo "== Frontmatter OpenCode generado: campos válidos"
 # options del modelo, no aplica denies y rompe proveedores estrictos (GLM).
 OUT_AGENTS="$ROOT/adapters/opencode/out/agents"
 if [ -d "$OUT_AGENTS" ]; then
-  BAD=$(awk '/^---$/{c++; next} c==1 && /^permissions:/ {print FILENAME}' "$OUT_AGENTS"/*.md)
+  BAD=$(awk 'FNR==1{c=0} /^---$/{c++; next} c==1 && /^permissions:/ {print FILENAME}' "$OUT_AGENTS"/*.md)
   if [ -n "$BAD" ]; then
     echo "$BAD"
     fail "frontmatter generado con 'permissions:' (usar 'permission:')"

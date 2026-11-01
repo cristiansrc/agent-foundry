@@ -36,7 +36,7 @@ Solo este archivo. Opciones:
 
 ```bash
 ./tooling/build.sh    # lint previo incluido
-./tooling/status.sh   # ver qué va a cambiar en la instalación
+./tooling/status.sh --project <ruta>   # ver qué cambiaría en el proyecto
 ```
 
 ### 4. Evals del agente(s) afectado(s) — NO opcional
@@ -62,16 +62,14 @@ commit del cambio de perfil.
 ### 5. Instalar y verificar
 
 ```bash
-echo y | ./tooling/sync.sh     # backup automático previo
-./tooling/status.sh            # debe reportar SINCRONIZADO
+./tooling/sync.sh --project <ruta> --apply   # backup automático previo
+./tooling/status.sh --project <ruta>         # debe reportar 0 diferencias
 ```
 
 Reinicia sesiones abiertas de OpenCode.
 
-Si hay cambios de prompts/permisos aún pendientes de certificación, aplicar
-sólo bindings ya verificados mediante `tooling/sync.sh --models-only <agentes>`.
-Este modo conserva cuerpos/permisos/skills/config y sólo sincroniza model y
-las rutas correspondientes del plugin, con backup. No equivale a full sync.
+La instalación siempre aplica un bundle completo y versionado. Si hay
+prompts o permisos pendientes de certificación, no instalar hasta evaluarlos.
 
 ### 6. Documentar
 
@@ -84,7 +82,7 @@ chore(profiles): <qué cambió> — <razón> — <resultado de evals>
 ## Rollback
 
 1. `git revert` del commit de profiles → build → sync.
-2. O restaura backup: `tar -xzf ~/.local/share/agent-foundry/backups/<ultimo>.tar.gz -C ~/.config/opencode`.
+2. O restaura los archivos desde `<proyecto>/.opencode/backups/<fecha>/`.
 
 ## Checklist rápido
 

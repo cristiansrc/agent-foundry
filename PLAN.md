@@ -45,7 +45,7 @@ python3 evals/run.py evals/cases/spec-validator.yaml --executor opencode  # eval
 Notas:
 - Fase 6: se eliminó el concepto de staging `docs/skills-src` — las skills
   nuevas viven directamente en `core/skills/` (fuente única).
-- Fase 9 (cutover): ejecutar `tooling/sync.sh` para instalar la salida
+- Fase 9 (cutover): ejecutar `tooling/sync.sh --project <ruta> --apply` para instalar la salida
   generada y congelar config-ai después.
 
 Ver `docs/migration-notes.md` para decisiones detalladas de migración.
@@ -56,7 +56,7 @@ Ver `docs/migration-notes.md` para decisiones detalladas de migración.
 - **Adapters primera iteración**: opencode, chatgpt (Codex), kiro. Gemini queda fuera.
 - **Migración**: solo agentes y skills; la documentación se escribe desde cero.
 - **Skills duplicadas anidadas** (`python-stack/python-stack/`, etc.): la versión
-  canónica es la anidada con frontmatter YAML (es la instalada en ~/.config/opencode).
+  canónica es la anidada con frontmatter YAML (era la instalada en la configuración global anterior).
 - **config-ai**: se congela como histórico al completar el cutover.
 - **Herencia DAE/swarm-forge (R.C. Martin), 2026-08-24**: sin agentes ni skills
   nuevos (anti-solape): política de mutación diferencial + módulos testeables +
@@ -77,7 +77,6 @@ Ver `docs/migration-notes.md` para decisiones detalladas de migración.
   `docs/templates/` del repo activo. Fuente de formato: las skills dueñas de
   cada documento, no invención nueva.
 - **Stack Shell/QML (ambxst) en calidad/testing, 2026-08-24**: filas qmltestrunner+bats+kcov+qmllint/shellcheck en tablas de testing-strategy y code-quality; mutación y CRAP declarados NO disponibles para QML (fallback: gauntlet visual + Gate 2; prohibidos proxies caseros); variante Quickshell de verify-code.sh vive en code-quality §4 con referencia cruzada desde ambxst-packaging (fuente única del script).
-- **Routing dinámico con Jev, 2026-09-22**: `master-orchestrator` queda fijo en Luna; Jev selecciona agente y nivel de razonamiento únicamente para Planner, arquitectos, diagnóstico, seguridad y validación final. El MCP `foundry-jev` usa Vercel AI Gateway como proveedor inicial y conserva Jev oficial como alternativa. El plugin traduce `low/medium/high/critical` a Luna/Terra/Sol, aplica umbrales de confianza y mantiene fallback estático. El Gate 1 evita reactivar Planner cuando solo corresponde descomponer tareas.
 - **ChatGPT Plus en vez de Copilot Pro+, 2026-10-03**: la decisión se toma por
   **forma de facturar**, no por calidad de modelo. Copilot Pro+ cobra por token
   en AI Credits (7000/mes) y se consumió el 90% en una semana; ChatGPT Plus da

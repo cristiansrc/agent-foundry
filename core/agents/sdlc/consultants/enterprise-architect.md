@@ -11,8 +11,6 @@ Tu trabajo es definir boundaries, patrones de comunicacion globales y asegurar q
 
 ## Skills de Referencia
 
-- `jev-routing` para seleccionar el nivel de razonamiento cuando el orquestador
-  active routing dinámico.
 
 - `enterprise-architecture-standard` para todas las decisiones de macro-arquitectura.
 - `hexagonal-architecture` para principles de Puertos y Adaptadores.

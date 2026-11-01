@@ -33,7 +33,7 @@ verde no hay sync.
 # Formato (sin modelo: no llama a ningún LLM)
 python3 evals/run.py evals/cases/<suite>.yaml
 
-# Con modelos reales (usa el binding del perfil salvo --model)
+# Con modelos reales (usa el agente generado y el binding del perfil salvo --model)
 python3 evals/run.py evals/cases/<suite>.yaml --executor opencode
 python3 evals/run.py evals/cases/<suite>.yaml --executor opencode --model <id>
 python3 evals/run.py evals/cases/<suite>.yaml --executor opencode --repeat 2
@@ -54,13 +54,13 @@ python3 evals/run.py evals/cases/<suite>.yaml --executor opencode --candidate-di
   no logs/tool outputs; exit no-cero o respuesta ausente nunca es PASS.
 - Cada caso corre en un **sandbox temporal** (`opencode run --dir`): las
    evals nunca escriben artefactos en este repo.
-- `--candidate-dir` prepara sólo en el sandbox el agente nuevo y skills de las
-  salidas, preservando model/variant/temperature instalados como workflow-only.
-  Graphify usa overlay para preservar mejoras upstream. `--report` registra
-  respuestas/huellas por caso; su directorio padre debe existir. Sin candidato,
-  se prueba la configuración instalada, no se certifican fuentes nuevas.
-- El candidato también fija prompt y skills.paths en config local explícita
-  para no depender del descubrimiento concurrente de IDs duplicados del harness.
+- Cada ejecución real prepara el agente y skills generados en un sandbox;
+  `--candidate-dir` cambia la fuente del candidato. `OPENCODE_PURE=1`
+  evita que plugins globales sustituyan `--model`. El runner evalúa el
+  comportamiento del agente, no el router integrado ni una instalación.
+  `--report` registra respuestas y huellas; su directorio padre debe existir.
+- Los casos son autocontenidos: el sandbox no equivale a aislamiento del sistema
+  operativo ni garantiza que un modelo no invoque herramientas externas.
 - Casos `files` crean fixtures relativos en sandbox; `expected_files` comprueba
   contenido real (equals/contains/not_contains) antes de eliminarlo. Un claim de
   escritura sin archivo no aprueba. Dry-run sólo valida formato, nunca conducta.

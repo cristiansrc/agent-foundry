@@ -1,8 +1,7 @@
 # Runbook: Plugin `model-router` (OpenCode)
 
-Enforcement en runtime del routing `agente → modelo`. Incluye routing estático
-y selección dinámica opcional mediante Jev. Compensa dos límites
-de OpenCode sin romper la arquitectura agnóstica de la foundry.
+Enforcement en runtime del routing estático `agente → modelo`. Compensa dos
+límites de OpenCode sin romper la arquitectura agnóstica de la foundry.
 
 ## Por qué existe
 
@@ -23,20 +22,20 @@ Eso hace este plugin con una tabla `ROUTING` renderizada desde
 
 | Ruta | Rol |
 |------|-----|
-| `plugins/opencode/model-router/model-router.ts.tmpl` | Template versionado con placeholders de routing estático y configuración Jev; los IDs se incrustan únicamente en la salida generada. |
+| `plugins/opencode/model-router/model-router.ts.tmpl` | Template versionado con placeholder de routing estático; los IDs se incrustan únicamente en la salida generada. |
 | `plugins/opencode/model-router/README.md` | Documentación del plugin. |
 | `adapters/opencode/out/plugin/foundry-model-router.ts` | Generado por `adapters/shared/render.py::render_plugin()`. No editar a mano. |
-| `~/.config/opencode/plugins/foundry-model-router.ts` | Instalado por `tooling/sync.sh`. OpenCode lo autocarga al arrancar (plugins locales). |
+| `<proyecto>/.opencode/plugins/foundry-model-router.ts` | Instalado por `tooling/sync.sh --project <ruta> --apply`. OpenCode lo autocarga al arrancar (plugins locales). |
 
 Flujo: `profiles/models.yaml` → `build.sh` → `out/plugin/` → `sync.sh` →
-`~/.config/opencode/plugins/`. `core/` sigue agnóstico.
+`<proyecto>/.opencode/plugins/`. `core/` sigue agnóstico.
 
 ## Hooks del plugin
 
 | Hook | Comportamiento |
 |------|----------------|
-| `chat.message` | Aplica el modelo estático o la decisión Jev pendiente a la sesión hija antes de guardar el mensaje. Nunca lanza. |
-| `tool.execute.before` (tool `task`) | Para los agentes dinámicos consulta Jev con el prompt compacto, valida confianza y puede cambiar `subagent_type`; la selección de modelo se aplica en `chat.message`. Si Jev falla, conserva el routing estático. |
+| `chat.message` | Aplica el modelo estático a cada sesión y registra modelo solicitado y asignado. |
+| `tool.execute.before` (tool `task`) | Registra la delegación y el modelo esperado sin leer ni transmitir el prompt. |
 
 ## Cambiar un modelo
 
@@ -49,8 +48,8 @@ Es el runbook `model-change.md` estándar; el plugin se regenera solo:
 # 3. Evals del agente afectado (NO opcional)
 python3 evals/run.py evals/cases/spec-validator.yaml --executor opencode --model <nuevo-modelo>
 # 4. Sync (backup automático de agents/ skills/ plugins/)
-echo y | ./tooling/sync.sh
-./tooling/status.sh
+./tooling/sync.sh --project <ruta> --apply
+./tooling/status.sh --project <ruta>
 ```
 
 Reinicia OpenCode: config y plugins cargan una sola vez al arrancar.
@@ -61,7 +60,7 @@ Reinicia OpenCode: config y plugins cargan una sola vez al arrancar.
 # Generado al día y sin placeholder
 grep -c '__ROUTING_JSON__' adapters/opencode/out/plugin/foundry-model-router.ts  # 0
 # Instalado == generado
-diff adapters/opencode/out/plugin/foundry-model-router.ts ~/.config/opencode/plugins/foundry-model-router.ts
+diff adapters/opencode/out/plugin/foundry-model-router.ts <proyecto>/.opencode/plugins/foundry-model-router.ts
 # En OpenCode: delega una tarea y busca en logs el servicio foundry-model-router
 # (routing <agente>: <antes> -> <después> / task -> <agente> should run <modelo>)
 ```
@@ -69,9 +68,8 @@ diff adapters/opencode/out/plugin/foundry-model-router.ts ~/.config/opencode/plu
 ## Rollback
 
 1. `git revert` del commit de `profiles/` → `build.sh` → `sync.sh`.
-2. O restaura el backup del sync (incluye `plugins/`):
-   `tar -xzf ~/.local/share/agent-foundry/backups/<ultimo>.tar.gz -C ~/.config/opencode`,
-   luego reinicia OpenCode.
+2. O restaura los archivos desde `<proyecto>/.opencode/backups/<fecha>/`
+   y vuelve a ejecutar el instalador; luego reinicia OpenCode.
 
 ## Límites conocidos
 
@@ -81,9 +79,3 @@ diff adapters/opencode/out/plugin/foundry-model-router.ts ~/.config/opencode/plu
 - El plugin no gestiona `variant`: la deja intacta.
 - `chatgpt`/`kiro` no usan este plugin: su routing vive en sus propios
   adapters.
-- La selección dinámica requiere `AI_GATEWAY_API_KEY` para Vercel o `JEV_API_KEY`
-  para el proveedor oficial. Sin credencial solo funciona el routing estático.
-- El contexto disponible en `tool.execute.before` es el prompt de la tarea; el
-  contexto autoritativo completo debe haber sido reducido por el orquestador.
-- Las decisiones pendientes viven en memoria del plugin y se descartan al
-  reiniciar OpenCode.

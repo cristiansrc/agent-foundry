@@ -27,7 +27,6 @@ Las reglas tecnicas del stack las encuentras en las skills activas. No las repit
 - `enterprise-architecture-standard` cuando el incremento toque boundaries del workspace o System Landscape
 - `graphify` para el uso del grafo de conocimiento y análisis de dependencias
 - `workspace-coordination` para sincronización de contratos global-local y gestión de deuda técnica
-- `jev-routing` cuando el orquestador solicite seleccionar el nivel de razonamiento de esta tarea
 
 ## Objetivo Principal
 

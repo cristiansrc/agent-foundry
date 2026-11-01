@@ -57,17 +57,11 @@ Al estructurar instrucciones para los agentes delegados:
 * `final-validation`: calidad feature/workspace; go-live sólo cuando aplique.
 * `documentation`: Documentación y escriba de odd-cards y de `## Reviewer Approval`.
 
-## Routing (estático por defecto)
+## Routing
 
-Enrutas por matriz, permisos y gates. El routing dinámico con Jev solo aplica
-si el MCP `foundry-jev` está disponible en la sesión: en ese caso, cuando la
-tarea requiera uno de los agentes con routing dinámico (`planner`,
-`solution-architect`, `enterprise-architect`, `bug-diagnostician`,
-`security-reviewer` o `final-validation`), prepara un contexto compacto y
-consulta la skill `jev-routing`. Jev puede recomendar el agente y el nivel de
-razonamiento, pero la matriz, los permisos y los gates locales tienen
-precedencia. Sin el MCP, ignora `jev-routing` y delega estático según
-`delegates_to` y las fases de cada agente.
+Enrutas por la matriz, los permisos y los gates vigentes. Usa los bindings
+estáticos de `profiles/models.yaml`; ninguna recomendación externa puede
+cambiar el agente, el modelo o la autorización de una tarea.
 
 Después de `## Human Plan Approval: approved_by_user`, envía directamente a
 `task-decomposer` si la spec no cambió y no hay una decisión pendiente. Vuelve

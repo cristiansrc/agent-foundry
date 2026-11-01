@@ -2,7 +2,7 @@
 """Renderizador del adapter OpenCode para agent-foundry.
 
 Lee core/agents/** (agnóstico) + profiles/*.yaml (bindings) y produce en
-adapters/opencode/out/ la configuración nativa de OpenCode con paridad 1:1:
+adapters/opencode/out/ la configuración nativa de OpenCode:
 
     out/agents/<nombre>.md   frontmatter final: description, mode, model,
                              temperature, permission (orden idéntico al legacy)
@@ -33,7 +33,6 @@ CORE = ROOT / "core"
 PROFILES = ROOT / "profiles"
 OUT = ROOT / "adapters" / "opencode" / "out"
 PLUGIN_TMPL = ROOT / "plugins" / "opencode" / "model-router" / "model-router.ts.tmpl"
-INSTALLED_AGENTS = Path.home() / ".config" / "opencode" / "agents"
 
 DEFAULT_PROVIDER = "opencode"
 
@@ -95,7 +94,7 @@ def resolve_binding(agent: str, profiles: dict) -> dict:
     # propagaba como modelID). Verificado con OpenCode 1.18.31 el 2026-09-30.
     variant = info.get("variant")
     p = {**pcfg.get("defaults", {}), **pcfg["agents"].get(agent, {})}
-    perm_keys = [k for k in ("edit", "bash", "execute", "task") if k in p]
+    perm_keys = [k for k in ("edit", "bash", "execute", "task", "external_directory", "webfetch", "websearch") if k in p]
     return {
         "model": primary_id,
         "variant": variant,
@@ -144,27 +143,7 @@ def render_plugin(manifest: list[dict], profiles: dict) -> Path:
     if "__ROUTING_JSON__" not in tmpl:
         sys.exit("FAIL: template del plugin sin placeholder __ROUTING_JSON__")
     routing = {entry["agent"]: entry["model"] for entry in manifest}
-    jev_cfg = yaml.safe_load((PROFILES / "jev.yaml").read_text(encoding="utf-8")) \
-        if (PROFILES / "jev.yaml").exists() else {}
-    reasoning = {}
-    for prov_name, levels in jev_cfg.get("reasoning_bindings", {}).items():
-        prov = profiles["models"]["providers"].get(prov_name, {})
-        if not prov.get("active"):
-            continue
-        harness_models = prov.get("models", {})
-        for level, slot in levels.items():
-            if slot in harness_models:
-                reasoning[level] = harness_models[slot]["id"]
-    jev_payload = {
-        "provider": jev_cfg.get("active_provider", "vercel"),
-        "providers": jev_cfg.get("providers", {}),
-        "model": jev_cfg.get("model", "typesafe-ai/jev"),
-        "confidence": jev_cfg.get("confidence", {"auto_route": 0.80, "confirm": 0.60}),
-        "dynamic_agents": jev_cfg.get("dynamic_agents", []),
-        "reasoning_models": reasoning,
-    }
     content = tmpl.replace("__ROUTING_JSON__", json.dumps(routing, indent=2, sort_keys=True))
-    content = content.replace("__JEV_CONFIG_JSON__", json.dumps(jev_payload, indent=2, sort_keys=True))
     plugin_out = OUT / "plugin"
     plugin_out.mkdir(parents=True, exist_ok=True)
     dest = plugin_out / "foundry-model-router.ts"
@@ -174,21 +153,16 @@ def render_plugin(manifest: list[dict], profiles: dict) -> Path:
     return dest
 
 
-def parity_report(outdir: Path) -> list[str]:
-    diffs = []
-    if not INSTALLED_AGENTS.exists():
-        return ["(sin instalación previa en ~/.config/opencode/agents; se omite paridad)"]
-    for gen in sorted(outdir.glob("*.md")):
-        inst = INSTALLED_AGENTS / gen.name
-        if not inst.exists():
-            diffs.append(f"NUEVO: {gen.name}")
-            continue
-        if gen.read_text() != inst.read_text():
-            diffs.append(f"DIFIERE: {gen.name}")
-    for inst in sorted(INSTALLED_AGENTS.glob("*.md")):
-        if not (outdir / inst.name).exists():
-            diffs.append(f"SIN GENERAR (existe instalado): {inst.name}")
-    return diffs
+def render_guardian(manifest: list[dict]) -> Path:
+    template = ROOT / "plugins/opencode/permission-guardian/permission-guardian.ts.tmpl"
+    content = template.read_text(encoding="utf-8")
+    marker = "__ALLOWED_AGENTS_JSON__"
+    if content.count(marker) != 1:
+        sys.exit("FAIL: placeholder del Permission Guardian ausente/ambiguo")
+    content = content.replace(marker, json.dumps(sorted(entry["agent"] for entry in manifest)))
+    dest = OUT / "plugin/foundry-permission-guardian.ts"
+    dest.write_text(content, encoding="utf-8")
+    return dest
 
 
 def main() -> int:
@@ -215,9 +189,8 @@ def main() -> int:
         if name not in deployed:
             continue
         b = resolve_binding(name, profiles)
-        # El harness tiene un principal recomendado, pero deja los especialistas
-        # en `all` para que también aparezcan en el selector manual de OpenCode.
-        b["mode"] = "primary" if name in set(harness.get("primary", [])) else "all"
+        # Un único principal visible; especialistas sólo por delegación.
+        b["mode"] = "primary" if name in set(harness.get("primary", [])) else "subagent"
         content = render_agent(src, b)
         (agents_out / f"{name}.md").write_text(content, encoding="utf-8")
         manifest.append({"agent": name, "tier": b["tier"], "provider": b["provider"], "model": b["model"]})
@@ -232,22 +205,15 @@ def main() -> int:
     # Plugin model-router (ROUTING embebido desde el manifest)
     plugin_dest = render_plugin(manifest, profiles)
     print(f"== Plugin: {plugin_dest.name} con {len(manifest)} rutas ==")
+    render_guardian(manifest)
 
-    # Manifest + paridad
+    # Manifest del bundle generado.
     (OUT / "manifest.yaml").write_text(
         yaml.safe_dump({"provider": "opencode-harness", "agents": manifest}, sort_keys=False,
                        allow_unicode=True), encoding="utf-8")
     (OUT / "config.patch.json").write_text(
         '{\n  "default_agent": "master-orchestrator"\n}\n', encoding="utf-8")
-    print("== Paridad contra ~/.config/opencode/agents ==")
-    diffs = parity_report(agents_out)
-    changed = len([d for d in diffs if not d.startswith("(sin")])
-    identical = max(0, count - changed)
-    for d in diffs:
-        print(f"  {d}")
     print(f"\nGenerados: {count} agentes, {n_skills} skills")
-    print(f"Iguales a lo instalado: {identical} | Diferencias: {len(diffs)}"
-          if diffs and not diffs[0].startswith("(") else f"Generados: {count}")
     return 0
 
 

@@ -25,7 +25,7 @@ does, using a `ROUTING` table rendered at build time from `profiles/`.
 profiles/models.yaml (tiers + tier_bindings, única fuente)
   -> adapters/shared/render.py::render_plugin() (resuelve binding por agente)
   -> adapters/opencode/out/plugin/foundry-model-router.ts (ROUTING embebido)
-  -> tooling/sync.sh (~/.config/opencode/plugins/foundry-model-router.ts)
+  -> tooling/sync.sh --project <ruta> --apply (<proyecto>/.opencode/plugins/)
 ```
 
 `core/` stays model-agnostic. The template contains only the
@@ -36,12 +36,12 @@ profiles/models.yaml (tiers + tier_bindings, única fuente)
 
 | Hook | What it does |
 |------|--------------|
-| `chat.message` | If `input.agent` is in `ROUTING`, splits `provider/model` and overwrites `output.message.model` when it differs. Never throws; logs via `client.app.log`. |
+| `chat.message` | If `input.agent` is in `ROUTING`, splits `provider/model` and overwrites `output.message.model` when it differs. Logs requested and assigned model via `client.app.log`. |
 | `tool.execute.before` (tool `task`) | Observability only: logs which model the named `subagent_type` *should* get per `ROUTING`. Does not mutate args (schema has no `model`). |
 
 ## Change a model
 
 1. Edit only `profiles/models.yaml` (see `docs/runbooks/model-change.md`).
 2. `./tooling/build.sh` (regenerates agents + plugin).
-3. `echo y | ./tooling/sync.sh` (installs agents + skills + plugin).
+3. `./tooling/sync.sh --project <ruta> --apply` (installs agents + skills + plugin).
 4. Restart OpenCode (config + plugins load once at startup).

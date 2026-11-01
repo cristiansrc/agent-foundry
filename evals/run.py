@@ -22,28 +22,16 @@ from pathlib import Path
 
 import yaml
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tooling"))
-import sync_workflow
+ROOT = Path(__file__).resolve().parents[1]
 
 
 def stage_candidate(candidate: Path, sandbox: Path, agent: str) -> dict:
-    """Evalúa salidas nuevas sin instalar; mismo binding que workflow-only."""
+    """Evalúa el bundle generado sin heredar bindings globales instalados."""
     source = candidate / "agents" / f"{agent}.md"
-    installed = Path.home() / ".config/opencode"
-    content = sync_workflow.compose_agent(source.read_text(encoding="utf-8"),
-                                         (installed / "agents" / source.name).read_text(encoding="utf-8")) \
-        if (installed / "agents" / source.name).is_file() else source.read_text(encoding="utf-8")
     target = sandbox / ".opencode"
     (target / "agents").mkdir(parents=True)
-    (target / "agents" / source.name).write_text(content, encoding="utf-8")
+    (target / "agents" / source.name).write_text(source.read_text(encoding="utf-8"), encoding="utf-8")
     shutil.copytree(candidate / "skills", target / "skills")
-    graphify = target / "skills/graphify/SKILL.md"
-    installed_graphify = installed / "skills/graphify/SKILL.md"
-    if graphify.is_file() and installed_graphify.is_file():
-        shutil.copytree(installed / "skills/graphify", graphify.parent, dirs_exist_ok=True)
-        graphify.write_text(sync_workflow.compose_graphify(
-            (candidate / "skills/graphify/SKILL.md").read_text(encoding="utf-8"),
-            installed_graphify.read_text(encoding="utf-8")), encoding="utf-8")
     # Markdown agents and skills are discovered natively from .opencode.
     # Generating a parallel config entry here used legacy config keys and
     # prevented OpenCode V2 from resolving the staged agent by ID.
@@ -104,10 +92,9 @@ def run_case_opencode(agent: str, model: str | None, system: str, user_input: st
         cmd.append(f"{system}\n\n---\n\n{user_input}")
         try:
             env = os.environ.copy()
-            if candidate:
-                # El router global puede sustituir --model por el binding activo,
-                # invalidando las evals de candidatos. Aislar el modelo bajo prueba.
-                env["OPENCODE_PURE"] = "1"
+            # El router global puede sustituir --model y falsear una eval.
+            # El sandbox prueba el agente/modelo solicitado sin plugins globales.
+            env["OPENCODE_PURE"] = "1"
             result = subprocess.run(cmd, capture_output=True, text=True,
                                     timeout=timeout, cwd=sandbox, env=env)
         except subprocess.TimeoutExpired as exc:
@@ -183,8 +170,11 @@ def main() -> int:
     suite = yaml.safe_load(Path(args.suite).read_text(encoding="utf-8"))
     agent = suite["agent"]
     passed = failed = 0
+    candidate_dir = args.candidate_dir or ROOT / "adapters/opencode/out"
+    if args.executor == "opencode" and not (candidate_dir / "agents" / f"{agent}.md").is_file():
+        parser.error(f"agente generado ausente: {candidate_dir}; ejecuta build primero")
     report = {"suite": args.suite, "agent": agent, "executor": args.executor,
-              "candidate_dir": str(args.candidate_dir) if args.candidate_dir else None,
+              "candidate_dir": str(candidate_dir),
               "results": []}
 
     print(f"Suite: {args.suite} | agente: {agent} | executor: {args.executor}")
@@ -210,7 +200,7 @@ def main() -> int:
             evidence = {}
             for _ in range(max(1, args.repeat)):
                 out = run_case_opencode(agent, args.model, suite.get("system_context", ""),
-                                        case["input"], args.timeout, args.candidate_dir, evidence,
+                                        case["input"], args.timeout, candidate_dir, evidence,
                                         case.get("files"), case.get("expected_files"))
                 responses.append(out)
                 runs.append(evaluate(out, expect, expect_regex, case.get("expect_not_regex")))

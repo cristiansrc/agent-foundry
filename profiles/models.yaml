@@ -43,7 +43,9 @@ agent_tiers:
   ui-designer:            {tier: patterns_logic, harness_provider: harness_chatgpt, slot: luna}
   planner:                {tier: planning_governance, harness_provider: harness_chatgpt, variant: high}
   api-governance-agent:   {tier: planning_governance, slot: mimo_v26_pro}
-  task-decomposer:        {tier: planning_governance, slot: mimo_v26_pro}
+  # Para descomposición prioriza razonamiento/1M de contexto sobre latencia;
+  # DeepSeek V4 Pro pasó task-decomposer 4/4 casos en repeat 3.
+  task-decomposer:        {tier: planning_governance, slot: deepseek_v4_pro}
   # Excepción de familia aprobada: mismo modelo que Planner, revisión por otro rol.
   spec-validator:         {tier: spec_validation_critical, harness_provider: harness_chatgpt, slot: sol, locked: true}
   # GLM-5.3 reactivado tras corregir el ciclo de revalidación repetitiva.

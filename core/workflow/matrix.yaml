@@ -30,7 +30,7 @@ agents:
     writes_states: [planning]
     reads_states: [requirements-discovery, validated-not-executed, revision-needed,
                    awaiting-human-plan-approval]
-    skills: [spec-driven-development, jev-routing, openapi-first, openapi-standard, restful-standard,
+    skills: [spec-driven-development, openapi-first, openapi-standard, restful-standard,
              hexagonal-architecture, enterprise-architecture-standard, design-patterns-standard, planning-context-pack,
              frontend-architecture, context-pinning, workspace-coordination, documentation-lifecycle, graphify,
              springboot-stack, python-stack, fastapi-stack, react-stack, angular-stack,
@@ -43,7 +43,7 @@ agents:
     role: consultant
     phases: [planning]
     consults_for: [planner]
-    skills: [jev-routing, design-patterns-standard, hexagonal-architecture,
+    skills: [design-patterns-standard, hexagonal-architecture,
              springboot-stack, fastapi-stack, repository-dto-patterns]
 
   ui-designer:
@@ -60,7 +60,7 @@ agents:
     role: consultant
     phases: [init, planning]
     consults_for: [planner]
-    skills: [jev-routing, enterprise-architecture-standard, workspace-coordination, hexagonal-architecture,
+    skills: [enterprise-architecture-standard, workspace-coordination, hexagonal-architecture,
              graphify, security-standards, keycloak-standard, observability-standard,
              spring-cloud-gateway, kafka-standard, rabbitmq-standard, amazon-sqs-standard]
 
@@ -198,7 +198,7 @@ agents:
     phases: [diagnosis]
     triggers: [any-failure]
     writes_states: [diagnosis, escalated-to-sdd]
-    skills: [outcome-observability-driven, jev-routing, root-cause-analysis, bug-fixing-workflow, observability-standard,
+    skills: [outcome-observability-driven, root-cause-analysis, bug-fixing-workflow, observability-standard,
              context-pinning, graphify]
 
   spec-remediator:
@@ -223,7 +223,7 @@ agents:
     phases: [quality]
     conditional_on: [auth, entradas-usuario, secretos-config, dependencias,
                      infraestructura, pii]
-    skills: [jev-routing, security-standards, keycloak-standard, docker-standard,
+    skills: [security-standards, keycloak-standard, docker-standard,
              observability-standard, spring-cloud-gateway, springboot-stack, fastapi-stack]
 
   final-validation:
@@ -231,7 +231,7 @@ agents:
     phases: [quality]
     lanes: [feature, workspace]
     gate_produces: G2-input
-    skills: [jev-routing, pre-flight-check, testing-strategy, code-quality-and-sonarqube,
+    skills: [pre-flight-check, testing-strategy, code-quality-and-sonarqube,
              security-standards, keycloak-standard, docker-standard,
              observability-standard, documentation-lifecycle, documentation-standards,
              context-pinning, secret-scanning]
@@ -266,13 +266,7 @@ agents:
                    api-governance-agent, security-reviewer, spec-remediator, ui-designer, ui-executor]
     classifies: lane
     continuation_policy: core/workflow/agent-protocol.md
-    skills: [outcome-observability-driven, jev-routing, spec-driven-development]   # contexto, routing y convergencia; Jev sólo si el MCP existe
-
-  installer:
-    role: consultant
-    phases: [transversal]
-    purpose: instala flujos de agentes y skills en proyectos destino leyendo el manifiesto del flujo
-    skills: []
+    skills: [outcome-observability-driven, spec-driven-development]
 
   general:
     role: guardrail

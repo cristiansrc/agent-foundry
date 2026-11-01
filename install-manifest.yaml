@@ -1,4 +1,4 @@
-# Manifiesto consumido por el agente installer. Las rutas son relativas a
+# Manifiesto consumido por tooling/install-project.py. Las rutas son relativas a
 # la raíz del repositorio del flujo; copiar archivos preservando subdirectorios.
 manifest_version: 1
 name: agent-foundry-sdlc
@@ -9,17 +9,24 @@ agents:
   - source: adapters/opencode/out/agents/
     destination: .opencode/agents/
     include: "**/*.md"
-  - source: core/agents/installer/installer.md
-    destination: .opencode/agents/installer.md
 
 skills:
   - source: adapters/opencode/out/skills/
     destination: .opencode/skills/
     include: "**/*"
 
+plugins:
+  - source: adapters/opencode/out/plugin/foundry-model-router.ts
+    destination: .opencode/plugins/foundry-model-router.ts
+  - source: adapters/opencode/out/plugin/foundry-permission-guardian.ts
+    destination: .opencode/plugins/foundry-permission-guardian.ts
+  - source: plugins/opencode/agent-observer/agent-observer.ts
+    destination: .opencode/plugins/foundry-agent-observer.ts
+
 directories:
   - .opencode/agents/
   - .opencode/skills/
+  - .opencode/plugins/
 
 configuration:
   file: .opencode/opencode.json

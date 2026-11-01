@@ -39,7 +39,7 @@ class EvalEvidenceTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 runner.sandbox_path(Path(directory), "../outside.md")
 
-    def test_candidate_stages_new_prompt_preserving_installed_binding(self):
+    def test_candidate_stages_exact_generated_binding_without_global_config(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             candidate, home, sandbox = root / "candidate", root / "home", root / "sandbox"
@@ -54,14 +54,12 @@ class EvalEvidenceTests(unittest.TestCase):
                 hashes = runner.stage_candidate(candidate, sandbox, "spec-validator")
             staged = (sandbox / ".opencode/agents/spec-validator.md").read_text()
             self.assertIn("New durable delivery policy", staged)
-            self.assertIn("provider/installed", staged)
+            self.assertIn("provider/new", staged)
+            self.assertNotIn("provider/installed", staged)
             self.assertIn("edit: deny", staged)
             self.assertEqual(installed, (home / ".config/opencode/agents/spec-validator.md").read_text())
             self.assertIn("agents/spec-validator.md", hashes)
-            config = json.loads((sandbox / "opencode.json").read_text())
-            self.assertIn("New durable delivery policy", config["agent"]["spec-validator"]["prompt"])
-            self.assertEqual([str(sandbox / ".opencode/skills")], config["skills"]["paths"])
-            self.assertEqual("(IDIOMA: ESPAÑOL) Validador", config["agent"]["spec-validator"]["description"])
+            self.assertFalse((sandbox / "opencode.json").exists())
 
 
 if __name__ == "__main__":

@@ -7,6 +7,7 @@ herramienta: **opencode**, **chatgpt** (Codex CLI) y **kiro**.
 ### Índice
 
 - [Cómo funciona](#cómo-funciona)
+- [Arquitectura y roadmap](#arquitectura-y-roadmap)
 - [Roles de agentes](#roles-de-agentes)
 - [Reglas operativas críticas](#reglas-operativas-críticas)
 - [Comandos](#comandos)
@@ -14,7 +15,7 @@ herramienta: **opencode**, **chatgpt** (Codex CLI) y **kiro**.
   - [Configuración de AWS](#configuración-de-aws)
 - [Agentes](#agentes)
   - [Ciclo de desarrollo de software (27)](#ciclo-de-desarrollo-de-software-27)
-- [Skills](#skills-76)
+- [Skills](#skills-75)
   - [Arquitectura y Metodología](#arquitectura-y-metodología)
   - [Backend y Lenguajes](#backend-y-lenguajes)
   - [Datos y Mensajería](#datos-y-mensajería)
@@ -25,8 +26,8 @@ herramienta: **opencode**, **chatgpt** (Codex CLI) y **kiro**.
   - [Otras](#otras)
 - [Modelos por herramienta](#modelos-por-herramienta)
   - [OpenCode](#opencode--bindings-activos)
-  - [ChatGPT (Codex CLI)](#chatgpt-codex-cli--bindings-activos)
-- [Kiro](#kiro--bindings-activos)
+  - [ChatGPT (Codex CLI)](#chatgpt-codex-cli--bindings-recomendados-sin-evals-en-este-harness)
+- [Kiro](#kiro--bindings-recomendados-sin-evals-en-este-harness)
 - [Skills para ChatGPT Desktop](#skills-para-chatgpt-desktop)
 
 ## Cómo funciona
@@ -35,8 +36,8 @@ herramienta: **opencode**, **chatgpt** (Codex CLI) y **kiro**.
 core/  ──►  profiles/  ──►  adapters/  ──►  configs instaladas por herramienta
 ```
 
-1. **`core/`**: agentes (`sdlc/workers|consultants|validators|guardrails`,
-   `personal/`), skills y workflow (ciclo de vida SDLC-IA con gates humanos).
+1. **`core/`**: agentes (`sdlc/workers|consultants|validators|guardrails`),
+   skills y workflow (ciclo de vida SDLC-IA con gates humanos).
    Aquí NO viven bindings: ningún archivo nombra modelos ni proveedores
    concretos ni rutas de herramientas. Las referencias a modelos son genéricas
    («el modelo asignado en el perfil de ejecución»); los valores reales
@@ -47,6 +48,27 @@ core/  ──►  profiles/  ──►  adapters/  ──►  configs instaladas
 3. **`adapters/`**: generan la configuración nativa de cada herramienta a
    partir de core + profiles. Una sola lógica de render en `shared/`.
 4. **`tooling/build.sh`**: reconstruye todas las salidas.
+
+## Arquitectura y roadmap
+
+La arquitectura canónica —as-built, integración ChatGPT Desktop/Codex–OpenCode
+por fases, MCP local de lectura, control plane propuesto y roadmap— vive en
+[`docs/architecture.md`](docs/architecture.md). Este README resume el flujo
+`core/ → profiles/ → adapters/ → out/`; no duplica el detalle.
+
+- **Estado actual:** harness OpenCode por proyecto, con `master-orchestrator`
+  como orquestador; ChatGPT Desktop y Codex CLI son clientes externos
+  separados. La integración local está verificada en la fase 1.5; la conexión
+  real desde esos clientes no está acreditada en este repositorio.
+- **Integración local:** puente HTTP de solo lectura, MCP stdio multiproyecto
+  (cinco herramientas), launcher con Secret Service y respaldo SQLite de
+  metadatos. El launcher y el respaldo están implementados localmente en el
+  working tree, pendientes de integración/revisión.
+- **Propuesta:** supervisión estratégica externa de ChatGPT Desktop y roadmap
+  de telemetría/evolución; no implementados. Ver
+  [`docs/architecture.md`](docs/architecture.md) §5–§7.
+- **Operación:** [`docs/runbooks/chatgpt-opencode-troubleshooting.md`](docs/runbooks/chatgpt-opencode-troubleshooting.md)
+  para fallos de MCP/Desktop, D-Bus y ventana de sesiones de OpenCode 1.18.31.
 
 ## Arquitectura de instalación
 
@@ -104,7 +126,7 @@ modelos bloqueados están en
 [`docs/runbooks/opencode-harness.md`](docs/runbooks/opencode-harness.md).
 
 > **Harness recomendado: OpenCode.** Es el único harness con evals ejecutadas
-> (12 suites en `evals/cases/`) y el único donde se combinan suscripciones:
+> (23 suites en `evals/cases/`) y el único donde se combinan suscripciones:
 > una paga el razonamiento y otra el volumen. Los bindings de ChatGPT y Kiro
 > son recomendaciones sin certificar en esos harnesses — si los usas, corre
 > primero las evals allí siguiendo
@@ -173,6 +195,14 @@ gestiona por separado; `tooling/sync.sh` no instala ni autentica MCPs.
 | **context7** | Remoto | Documentación actualizada de frameworks/librerías en tiempo real (override de conocimiento interno stale). |
 | **github** | Remoto + OAuth | Issues, PRs, repos, search y releases. Requiere autorización OAuth (un solo splash screen). |
 
+Además de estos cuatro MCPs de agentes, Foundry documenta un **MCP local de
+solo lectura** pensado para clientes externos como ChatGPT Desktop y Codex CLI
+(clientes separados): cinco herramientas de metadatos, alcance por proyecto y
+sin operaciones de escritura ni respuesta de permisos. La conexión real desde
+esos clientes no está acreditada. No sustituye a `master-orchestrator`. Ver
+[`docs/architecture.md`](docs/architecture.md) §4 y
+[`docs/runbooks/chatgpt-opencode-phase2.md`](docs/runbooks/chatgpt-opencode-phase2.md).
+
 ### Configuración de AWS
 
 Para que un agente IA configure `aws-mcp` en un entorno nuevo:
@@ -195,8 +225,8 @@ se encarga del transport y proxy; no necesitas instalar librerías adicionales.
 ### Visión: modelos con visión nativa (sin MCP local)
 
 Retirado el MCP `foundry-vision` (2026-09-27): todos los agentes que necesitan
-ver imágenes usan modelos con visión nativa — `ui-designer` (Claude Sonnet
-5.5), `ui-executor` y `functional-tester-agent` (MiMo-V2.6 Flash desde
+ver imágenes usan modelos con visión nativa — `ui-designer` y
+`functional-tester-agent` (GPT-6 Luna), `ui-executor` (MiMo-V2.6 Flash desde
 2026-10-18; DeepSeek Vision Exp retirado del catálogo Go).
 `reviewer` (GLM-5.3) no tiene visión: si necesita capturas, delega en
 `functional-tester-agent`. Sin costo extra de infraestructura ni VRAM local.

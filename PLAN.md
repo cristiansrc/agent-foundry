@@ -50,6 +50,33 @@ Notas:
 
 Ver `docs/migration-notes.md` para decisiones detalladas de migración.
 
+### Arquitectura y documentación de integración
+
+La arquitectura canónica, la reconstrucción de fases, el MCP local de lectura,
+el control plane propuesto y el roadmap están en
+[`docs/architecture.md`](docs/architecture.md). README y este PLAN solo resumen
+y enlazan; no duplican el diseño.
+
+### Estado de la integración ChatGPT–OpenCode (2026-11-01)
+
+| Fase | Estado | Evidencia / límite |
+|---|---|---|
+| 1 — observación | Implementada y verificada en prueba local | Puente loopback, observer y simulación; no acredita Desktop real. |
+| 1.5 — prueba local | Histórico | Registro fechado 2026-11-01; no re-ejecutado en esta tarea. |
+| 2 — MCP base multiproyecto | Implementada en `a865eb0` | Cinco herramientas read-only; conexión real Desktop no acreditada. |
+| 2.1 — launcher Secret Service | Implementada local, pendiente de integración/revisión | `tooling/opencode_mcp_launch.py` sin trackear; D-Bus requerido. |
+| 2.2 — SQLite/ventana truncada | Implementada local, pendiente de integración/revisión | Diff en bridge/mcp/tests/runbook; `complete`/`source`; tests no ejecutados aquí. |
+| Control plane / fases 3+ | Propuesto | `docs/architecture.md` §5–§7; sin implementación. |
+
+### Nota de vigencia de fases (2026-11-01)
+
+- La fase 4 figura ⬜, pero el adapter OpenCode está operativo según
+  README/AGENTS y los artefactos generados; la paridad 1:1 formal no se
+  re-auditó en esta tarea documental.
+- De las mejoras de Fase 7, el enum centralizado (`core/workflow/states.md`) y
+  la regla anti-drift (`tooling/lint.sh`, `AGENTS.md`) ya existen. `MEMORY.md`
+  raíz sigue ausente: solo hay `templates/MEMORY.md`.
+
 ## Decisiones tomadas
 
 - **Nombre**: agent-foundry.
